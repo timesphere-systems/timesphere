@@ -56,15 +56,22 @@ Github actions will be used to run integrated tests/checks.
 Git is a **version control** system. It helps us keep track of changes, work in parallel, and review code. Git is an industry standard tool that almost everyone in the software engineering world uses. Github helps us manage our git repositories.
 
 - First pull the repository
-  - SSH key (easiest method of authentication)
-    - On Linux/Mac this is very simple, on [windows](https://github.com/git-guides/install-git) it may require a little more [finess](https://stackoverflow.com/questions/51023197/how-to-configure-git-with-ssh-keys-on-windows-10).
-    - [Generate](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) an ssh key.
-    - Add to [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account).
-  - Personal access token
-    - More fiddly (not recommended).
-    - Might be already done for you with the windows Git implementation.
-    - [Generate](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) a token.
-    - Sign in with the token as your password.
+  - Sort out your authentication
+    - SSH key (easiest method of authentication)
+      - On Linux/Mac this is very simple, on [windows](https://github.com/git-guides/install-git) it may require a little more [finess](https://stackoverflow.com/questions/51023197/how-to-configure-git-with-ssh-keys-on-windows-10).
+      - [Generate](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) an ssh key.
+      - Add to [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account).
+    - Personal access token
+      - More fiddly (not recommended).
+      - Might be already done for you with the windows Git implementation.
+      - [Generate](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) a token.
+      - Sign in with the token as your password.
+  - `git clone git@github.com:the-Jamz/timesphere.git` if authenticating with SSH or `git clone https://github.com/the-Jamz/timesphere.git` otherwise.
+  - Later on to get changes from the repository simply `git pull`
+- Branch off to make changes
+- Make reasonably sized commits with helpful messages
+- Push the branch when done
+- Make a pull request to merge the changes into `main`
 
 ### Code Review
 
