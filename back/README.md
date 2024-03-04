@@ -12,6 +12,9 @@ To create a local environment and run the backend (within the `back` directory):
 After the initial setup you'll just need to activate the virtual environment and run the server in future:
 `source venv/bin/activate`
 
+To exit the virtual environment:
+`deactivate`
+
 ## Container
 
 To build:
