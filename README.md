@@ -14,6 +14,10 @@ If you need help ask me (James).
 
 Source in `/front`
 
+To install all necessary dependencies run `npm install`
+
+To run the app, make sure you are in the `/front` directory, then run the `npm start` command.
+
 ## Backend
 
 Source in `/back`
