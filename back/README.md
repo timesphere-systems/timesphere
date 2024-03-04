@@ -9,6 +9,9 @@ To create a local environment and run the backend (within the `back` directory):
 - `pip install -r requirements.txt`
 - `uvicorn app.api.server:app --reload`
 
+After the initial setup you'll just need to activate the virtual environment and run the server in future:
+`source venv/bin/activate`
+
 ## Container
 
 To build:
