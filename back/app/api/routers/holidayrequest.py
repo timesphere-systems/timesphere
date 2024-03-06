@@ -9,7 +9,7 @@ router = APIRouter(
 
 
 # create holiday to store into the database
-@router.post("/create", status_code=status.HTTP_201_CREATED)
+@router.post("/create", status_code=status.HTTP_200_OK)
 def create_holiday(request: JSONModels.RequestHoliday):
     return
 
