@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from fastapi import status
-from .. import schemas
+from .. import JSONModels
 
 router = APIRouter(
     prefix="/holiday",
@@ -10,17 +10,17 @@ router = APIRouter(
 
 # create holiday to store into the database
 @router.post("/create", status_code=status.HTTP_201_CREATED)
-def create_holiday(request: schemas.RequestHoliday):
+def create_holiday(request: JSONModels.RequestHoliday):
     return
 
 # update holiday to store into the database
 @router.put("/update", status_code=status.HTTP_200_OK)
-def update_holiday(request: schemas.RequestHoliday):
+def update_holiday(request: JSONModels.RequestHoliday):
     return
 
 # change approval status of holiday stored in database
 @router.put("/approve/{id}/{status}", status_code=status.HTTP_200_OK)
-def update_holiday_status(id: int, status: schemas.Status):
+def update_holiday_status(id: int, status: JSONModels.Status):
     return
 
 # delete holiday from database
