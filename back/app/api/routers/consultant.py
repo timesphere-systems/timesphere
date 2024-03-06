@@ -24,7 +24,7 @@ def get_consultant_timesheets(id: int, status: JSONModels.Status = JSONModels.St
     return
 
 # create consultant to store into the database
-@router.post("/create", status_code=status.HTTP_201_CREATED)
+@router.post("/create", status_code=status.HTTP_200_OK)
 def create_consultant(request: JSONModels.RequestConsultant):
     return
 

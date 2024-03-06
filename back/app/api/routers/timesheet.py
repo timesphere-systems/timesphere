@@ -8,7 +8,7 @@ router = APIRouter(
 
 
 # create timesheet to store into the database
-@router.post("/create", status_code=status.HTTP_201_CREATED)
+@router.post("/create", status_code=status.HTTP_200_OK)
 def create_timesheet(request: JSONModels.RequestTimeSheet):
     return
 
