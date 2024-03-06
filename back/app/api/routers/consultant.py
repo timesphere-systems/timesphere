@@ -7,20 +7,20 @@ router = APIRouter(
     tags=['Consultants']
 )
 
-# get consultant details from database by email
-@router.get("/{email}/details", status_code=status.HTTP_200_OK, response_model=JSONModels.ResponseConsultant)
-def get_consultant_details(email):
+# get consultant details from database
+@router.get("/{id}/details", status_code=status.HTTP_200_OK, response_model=JSONModels.ResponseConsultant)
+def get_consultant_details(id: int):
     # need this line to match response model for now
     return JSONModels.ResponseConsultant(name="name", email="email", AssignedManager="AssignedManager")
 
 # get consultants holiday from database by email
-@router.get("/{email}/holidayrequest", status_code=status.HTTP_200_OK)
-def get_consultant_holiday_requests(email, status: JSONModels.Status = JSONModels.Status.WaitingApproval):
+@router.get("/{id}/holidayrequest", status_code=status.HTTP_200_OK)
+def get_consultant_holiday_requests(id: int, status: JSONModels.Status = JSONModels.Status.WaitingApproval):
     return
 
 # get consultants timesheets from database by email
-@router.get("/{email}/timesheet", status_code=status.HTTP_200_OK)
-def get_consultant_timesheets(email, status: JSONModels.Status = JSONModels.Status.WaitingApproval):
+@router.get("/{id}/timesheet", status_code=status.HTTP_200_OK)
+def get_consultant_timesheets(id: int, status: JSONModels.Status = JSONModels.Status.WaitingApproval):
     return
 
 # create consultant to store into the database
