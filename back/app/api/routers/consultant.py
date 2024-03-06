@@ -13,12 +13,12 @@ def get_consultant_details(id: int):
     # need this line to match response model for now
     return JSONModels.ResponseConsultant(name="name", email="email", AssignedManager="AssignedManager")
 
-# get consultants holiday from database by email
+# get consultants holiday from database
 @router.get("/{id}/holidayrequest", status_code=status.HTTP_200_OK)
 def get_consultant_holiday_requests(id: int, status: JSONModels.Status = JSONModels.Status.WaitingApproval):
     return
 
-# get consultants timesheets from database by email
+# get consultants timesheets from database
 @router.get("/{id}/timesheet", status_code=status.HTTP_200_OK)
 def get_consultant_timesheets(id: int, status: JSONModels.Status = JSONModels.Status.WaitingApproval):
     return
