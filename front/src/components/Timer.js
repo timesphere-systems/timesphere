@@ -2,10 +2,6 @@ import React from 'react'
 import styled from 'styled-components';
 import TimerIcon from '../assets/icons/TimerIcon.svg';
 
-
-
-
-
 const TIMER = styled.div `
     display: flex;
     width: 13rem;
@@ -14,10 +10,8 @@ const TIMER = styled.div `
     justify-content: center;
     align-items: center;
     gap: 1.25rem;
-
     border-radius: 1rem;
     background: #9DA1AD;
-
 `
 
 const TIMEREADING = styled.p `
@@ -29,7 +23,6 @@ const TIMEREADING = styled.p `
     font-weight: 700;
     line-height: normal;
 `
-
 
 function zeroPad(num) {
     return String(num).padStart(2, "0");
@@ -50,7 +43,6 @@ const getTimePassed = (start_time, setHours, setMinutes, setSeconds) =>{
     setMinutes(twodigit_format(Math.floor((time / 1000 / 60) % 60)));
     setSeconds(twodigit_format(Math.floor((time / 1000) % 60)));
 }
-
 
 const Timer = ({start_time}) => {
     const [hours, setHours] = React.useState("");
