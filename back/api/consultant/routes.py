@@ -1,15 +1,35 @@
 from fastapi import APIRouter
-from . import details, holiday, timesheet
+from fastapi import status
+from . import models
+from ..holiday.models import Holiday
+from ..timesheet.models import Timesheet
 
-router = APIRouter()
-router.include_router(details.router)
-router.include_router(
-    holiday.router,
-    prefix="/{consultant_id}",
-    tags=["Consultant Holiday"]
+# /consultant
+router = APIRouter(
+    prefix="/consultant",
+    tags=["consultant"],
 )
-router.include_router(
-    timesheet.router,
-    prefix="/{consultant_id}",
-    tags=["Consultant Timesheet"]
-)
+
+@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=models.ConsultantDetails)
+def get_consultant_details(id: int):
+    return models.ConsultantDetails(name="name", email="email", assigned_manager="AssignedManager")
+
+@router.put("/{id}", status_code=status.HTTP_200_OK)
+def update_consultant(id: int, request: models.ConsultantDetails):
+    return
+
+@router.delete("/{id}", status_code=status.HTTP_200_OK)
+def delete_consultant(id: int):
+    return
+
+@router.post("/", status_code=status.HTTP_200_OK)
+def create_consultant(request: models.ConsultantDetails):
+    return
+
+@router.post("/{id}/holiday", status_code=status.HTTP_200_OK)
+def create_holiday_request(id: int, request: Holiday):
+    return
+
+@router.post("/{id}/timesheet", status_code=status.HTTP_200_OK)
+def create_timesheet(id: int, request: Timesheet):
+    return
