@@ -3,60 +3,63 @@
 --CREATE DATABASE Timesphere_DB
 
 --Status for both TimeSheets and HolidayRequests
-CREATE TABLE  Status (
-  ID  SERIAL PRIMARY KEY,
-  STATUS_TYPE TEXT NOT NULL
+CREATE TABLE  status (
+  status_id  SERIAL PRIMARY KEY,
+  status_type TEXT NOT NULL
 );
-CREATE TABLE  TimeEntryType (
-  ID  SERIAL PRIMARY KEY,
-  ENTRY_TYPE TEXT NOT NULL
+CREATE TABLE  time_entry_type (
+  time_entry_type_id  SERIAL PRIMARY KEY,
+  entry_type TEXT NOT NULL
 );
 --Role will define the type of User stored in db
-CREATE TABLE  Role (
-  ID  SERIAL PRIMARY KEY,
-  ROLE_TYPE TEXT NOT NULL
+CREATE TABLE  role (
+  role_id  SERIAL PRIMARY KEY,
+  role_type TEXT NOT NULL
 );
 
-CREATE TABLE Users (
-   ID  SERIAL PRIMARY KEY,
-   FIRSTNAME TEXT NOT NULL,
-   LASTNAME TEXT NOT NULL,
-   EMAIL TEXT NOT NULL
+CREATE TABLE users (
+   user_id  SERIAL PRIMARY KEY,
+   firstname TEXT NOT NULL,
+   lastname TEXT NOT NULL,
+   email TEXT NOT NULL,
+   role int NOT NULL,
+   FOREIGN KEY (role) REFERENCES role(role_id)
 );
 -- Table storing Consultant Specific Details
-CREATE TABLE  Consultants (
-     ID INT PRIMARY KEY,
-     CONTRACTED_HOURS DECIMAL NOT NULL,
-     MANAGER INT NOT NULL,
-     FOREIGN KEY (ID) REFERENCES Users(ID),
-     FOREIGN KEY (MANAGER) REFERENCES Users(ID)
+CREATE TABLE  consultants (
+     consultant_id INT PRIMARY KEY,
+     contracted_hours DECIMAL NOT NULL,
+     manager INT NOT NULL,
+     FOREIGN KEY (consultant_id) REFERENCES users(user_id),
+     FOREIGN KEY (manager) REFERENCES users(user_id)
 );
 
 -- Weekly Timesheets
-CREATE TABLE  Timesheets (
-  ID SERIAL PRIMARY KEY,
-  WEEK_COMMENCING date NOT NULL,
-  CONSULTANT INT NOT NULL,
-  STATUS INT NOT NULL,
-  FOREIGN KEY (CONSULTANT) REFERENCES Consultants(ID),
-  FOREIGN KEY (STATUS) REFERENCES Status(ID)
+CREATE TABLE  timesheets (
+  timesheet_id SERIAL PRIMARY KEY,
+  week_commencing date NOT NULL,
+  consultant INT NOT NULL,
+  status INT NOT NULL,
+  FOREIGN KEY (consultant) REFERENCES consultants(consultant_id),
+  FOREIGN KEY (status) REFERENCES Status(status_id)
 );
-CREATE TABLE  TimeEntries (
-  START_TIME TIMESTAMP NOT NULL,
-  END_TIME TIMESTAMP NOT NULL,
-  TIMESHEET INT NOT NULL,
-  ENTRY_TYPE INT NOT NULL,
-  PRIMARY KEY (TIMESHEET, START_TIME),
-  FOREIGN KEY (TIMESHEET) REFERENCES Timesheets(ID),
-  FOREIGN KEY (ENTRY_TYPE) REFERENCES TimeEntryType(ID)
+CREATE TABLE  time_entries (
+  start_time TIMESTAMP NOT NULL,
+  end_time TIMESTAMP NOT NULL,
+  timesheet INT NOT NULL,
+  entry_type INT NOT NULL,
+  PRIMARY KEY (timesheet, start_time),
+  FOREIGN KEY (timesheet) REFERENCES timesheets(timesheet_id),
+  FOREIGN KEY (entry_type) REFERENCES time_entry_type(time_entry_type_id)
 );
-CREATE TABLE  Holidays(
-  ID SERIAL PRIMARY KEY,
-  START_DATE date NOT NULL,
-  END_DATE date NOT NULL,
-  CONSULTANT INT NOT NULL,
-  STATUS INT NOT NULL,
-  FOREIGN KEY (CONSULTANT) REFERENCES Consultants(ID),
-  FOREIGN KEY (STATUS) REFERENCES Status(ID)
+CREATE TABLE  holidays(
+  holiday_id SERIAL PRIMARY KEY,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  consultant INT NOT NULL,
+  status INT NOT NULL,
+  FOREIGN KEY (consultant) REFERENCES consultants(consultant_id),
+  FOREIGN KEY (status) REFERENCES status(status_id)
 );
+
 
