@@ -58,7 +58,7 @@ const Timer = ({start_time}) => {
 
     return(
         <TIMER>
-            <img src={TimerIcon}></img>
+            <img src={TimerIcon} alt='Timer Icon'></img>
             <TIMEREADING>{hours}:{minutes}:{seconds}</TIMEREADING>
         </TIMER>
     );
