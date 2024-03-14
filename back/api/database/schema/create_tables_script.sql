@@ -22,7 +22,7 @@ CREATE TABLE users (
    firstname TEXT NOT NULL,
    lastname TEXT NOT NULL,
    email TEXT NOT NULL,
-   role int NOT NULL,
+   role INT NOT NULL,
    FOREIGN KEY (role) REFERENCES role(role_id)
 );
 -- Table storing Consultant Specific Details
@@ -37,7 +37,7 @@ CREATE TABLE  consultants (
 -- Weekly Timesheets
 CREATE TABLE  timesheets (
   timesheet_id SERIAL PRIMARY KEY,
-  week_commencing date NOT NULL,
+  week_commencing DATE NOT NULL,
   consultant INT NOT NULL,
   status INT NOT NULL,
   FOREIGN KEY (consultant) REFERENCES consultants(consultant_id),
