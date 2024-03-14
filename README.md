@@ -1,5 +1,36 @@
 # Timesphere
 
+## Running and Testing
+
+Useful info:
+
+- [What is a docker container](https://docs.docker.com/guides/walkthroughs/what-is-a-container/)
+- [What is docker-compose](https://docs.docker.com/compose/)
+- [Python virtual environments](https://docs.python.org/3/library/venv.html)
+
+Our `docker-compose.yml` file starts four containers:
+
+- PostgreSQL database
+- Backend API
+- Frontend React app
+- Nginx reverse proxy
+
+To run the app, you need to have [Docker](https://docs.docker.com/get-docker/) and have it running on your main system (Windows if using WSL). Then, in a terminal, in the root of the project run:
+
+`cp example.env .env`
+
+The .env file will store environment variables for the project. You can change your .env as necessary but leave the example such that it can be copied and the app will work by default.
+
+`./build.sh`
+
+This will build the containers in `/back` and `/front`.
+
+`docker-compose up`
+
+This starts the container stack, and by default you should be able to access the app at [localhost](http://localhost). Press Ctrl+C to stop the containers, and `docker-compose down` to remove them.
+
+If you need to reset the database, run `docker-compose down` and then `rm -rf database/data`. This will remove the database and all data.
+
 ## General
 
 Really recommend you use a Linux/Mac machine or if on Windows set up [WSL](https://learn.microsoft.com/en-us/windows/wsl/install).
@@ -16,11 +47,13 @@ Source in `/front`
 
 To install all necessary dependencies run `npm install`
 
-To run the app, make sure you are in the `/front` directory, then run the `npm start` command.
+To run the app, make sure you are in the `/front` directory, then run the `npm run start` command.
 
 ## Backend
 
 Source in `/back`
+
+To run the backend, follow the instructions in `/back/README.md`
 
 API surface written in Python using [FastAPI](https://fastapi.tiangolo.com/).
 
@@ -33,15 +66,6 @@ The system will have three components:
 - React JS front-end
 - Python back-end
 - [PostgreSQL](https://www.postgresql.org/) database (mostly the same as MySQL)
-
-## Running and Testing
-
-Instructions to test and run the app will appear here after we have a basis for the program. We'll be using docker containers and a docker-compose system.
-Useful info:
-
-- [What is a docker container](https://docs.docker.com/guides/walkthroughs/what-is-a-container/)
-- [What is docker-compose](https://docs.docker.com/compose/)
-- [Python virtual environments](https://docs.python.org/3/library/venv.html)
 
 ## Integration and Deployments
 

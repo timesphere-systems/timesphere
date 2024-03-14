@@ -7,14 +7,17 @@ VALUES
   ('WAITING'),
   ('APPROVED'),
   ('DENIED');
+
 INSERT INTO time_entry_type (entry_type)
 VALUES
   ('WORK'),
   ('SICK'),
   ('HOLIDAY');
+
 INSERT INTO Role (role_type)
 VALUES
   ('CONSULTANT'),
   ('MANAGER'),
   ('FINANCE'),
   ('ADMIN');
+  

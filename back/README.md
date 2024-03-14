@@ -21,4 +21,7 @@ To build:
 `docker build -t timesphere-backend:latest .`
 
 To run:
-`docker run -d -p 8000:80 timesphere-backend:latest`
+`docker run -d -p 8080:8080 timesphere-backend:latest`
+
+or
+`./build.sh`
