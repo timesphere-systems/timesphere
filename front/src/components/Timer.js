@@ -45,16 +45,18 @@ const getTimePassed = (start_time, setHours, setMinutes, setSeconds) =>{
 }
 
 const Timer = ({start_time}) => {
-    const [hours, setHours] = React.useState("");
-    const [minutes, setMinutes] = React.useState("");
-    const [seconds, setSeconds] = React.useState("");
+    const [hours, setHours] = React.useState("00");
+    const [minutes, setMinutes] = React.useState("00");
+    const [seconds, setSeconds] = React.useState("00");
 
     React.useEffect(() => {
-        //repeats getTimePassed method call every second
-        const interval = setInterval(() => getTimePassed(start_time, setHours, setMinutes, setSeconds), 1000);
-    
-        return () => clearInterval(interval);
+        if(start_time !== undefined){
+            //repeats getTimePassed method call every second
+            const interval = setInterval(() => getTimePassed(start_time, setHours, setMinutes, setSeconds), 1000);
+            return () => clearInterval(interval);
+        }
       }, [start_time]);
+        
 
     return(
         <TIMER>
