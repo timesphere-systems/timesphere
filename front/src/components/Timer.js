@@ -32,7 +32,7 @@ let formatTwoDigits = (num) => {
     return String(num).padStart(2, "0");
 }
 
-const getTimePassed = (start_time, setHours, setMinutes, setSeconds) =>{
+let getTimePassed = (start_time, setHours, setMinutes, setSeconds) =>{
     let time = Date.now() - Date.parse(start_time);
 
     //bellow converts the time from milliseconds to hours and minutes
