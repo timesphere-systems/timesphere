@@ -23,18 +23,30 @@ function getDate() {
     return fulldate
 }
 
-function getGreeting() {
+function getTiming() {
     const date = new Date();
     const hour = date.getHours();
     if (hour < 5 || hour > 21) {
-        return "Good Night";
+        return "Night";
     } else if (5 <= hour < 12) {
-        return "Good Morning";
+        return "Morning";
     } else if (12 <= hour < 18) {
-        return "Good Afternoon";
+        return "Afternoon";
     } else if (18 <= 21) {
-        return "Good Evening";
+        return "Evening";
     } else {
-        return "Greetings"
+        return "";
     }
 }
+
+function getGreeting() {
+    const greet = getTiming();
+    if (greet == "") {
+        return "Greetings, ";
+    } else {
+        stringy = "Good ";
+        stringy.concat(greet, ", ");
+        return stringy;
+    }
+}
+
