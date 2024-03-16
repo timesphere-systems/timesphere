@@ -32,8 +32,8 @@ let formatTwoDigits = (num) => {
     return String(num).padStart(2, "0");
 }
 
-let getTimePassed = (start_time, setHours, setMinutes, setSeconds) =>{
-    let time = Date.now() - Date.parse(start_time);
+let getTimePassed = (startTime, setHours, setMinutes, setSeconds) =>{
+    let time = Date.now() - Date.parse(startTime);
 
     //bellow converts the time from milliseconds to hours and minutes
     setHours(formatTwoDigits(Math.floor(time / (1000 * 60 * 60)) % 24));
@@ -41,18 +41,18 @@ let getTimePassed = (start_time, setHours, setMinutes, setSeconds) =>{
     setSeconds(formatTwoDigits(Math.floor((time / 1000) % 60)));
 }
 
-const Timer = ({start_time}) => {
+const Timer = ({startTime}) => {
     const [hours, setHours] = React.useState("00");
     const [minutes, setMinutes] = React.useState("00");
     const [seconds, setSeconds] = React.useState("00");
 
     React.useEffect(() => {
-        if(start_time !== undefined){
+        if(startTime !== undefined){
             //repeats getTimePassed method call every second
-            const interval = setInterval(() => getTimePassed(start_time, setHours, setMinutes, setSeconds), 1000);
+            const interval = setInterval(() => getTimePassed(startTime, setHours, setMinutes, setSeconds), 1000);
             return () => clearInterval(interval);
         }
-      }, [start_time]);
+      }, [startTime]);
         
 
     return(
