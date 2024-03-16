@@ -1,4 +1,4 @@
-# Timesphere Bakend
+# Timesphere Backend
 
 ## Environment Setup
 
