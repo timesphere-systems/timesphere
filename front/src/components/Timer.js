@@ -36,7 +36,7 @@ let getTimePassed = (startTime, setHours, setMinutes, setSeconds) =>{
     let time = Date.now() - Date.parse(startTime);
 
     //bellow converts the time from milliseconds to hours and minutes
-    setHours(formatTwoDigits(Math.floor(time / (1000 * 60 * 60)) % 24));
+    setHours(formatTwoDigits(Math.floor(time / (1000 * 60 * 60))));
     setMinutes(formatTwoDigits(Math.floor((time / 1000 / 60) % 60)));
     setSeconds(formatTwoDigits(Math.floor((time / 1000) % 60)));
 }
