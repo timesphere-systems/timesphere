@@ -1,8 +1,7 @@
-from pydantic import BaseModel
-from datetime import datetime
-from enum import Enum
-from ..models import User
+"""Module providing JSON models for the consultant API."""
+from api.models import User
 
 
 class ConsultantDetails(User):
+    """Model for the consultant details."""
     assigned_manager: str
