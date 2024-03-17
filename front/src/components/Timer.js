@@ -10,7 +10,7 @@ const TIMER = styled.div `
     justify-content: center;
     align-items: center;
     gap: 15px;
-    border-radius: 15px;
+    border-radius: 16px;
     background: #9DA1AD;
 `
 
@@ -23,7 +23,6 @@ const TIMEREADING = styled.p `
     font-weight: 700;
     line-height: normal;
 `
-
 
 let formatTwoDigits = (num) => {
     if (num > 9){
