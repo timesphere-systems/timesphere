@@ -15,6 +15,10 @@ After the initial setup you'll just need to activate the virtual environment and
 To exit the virtual environment:
 `deactivate`
 
+## Extensions
+
+Install `basedpyright` for type checking and `pylint` for linting, make sure they don't throw warnings or your PR wont merge.
+
 ## Container
 
 To build:
