@@ -1,4 +1,5 @@
 """Module providing JSON models for the consultant API."""
+# pylint: disable=too-few-public-methods
 from api.models import User
 
 

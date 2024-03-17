@@ -17,7 +17,6 @@ def get_holiday_request(_id: int) -> models.Holiday:
     Args:
         id (int): The holiday request's ID.
     """
-    # return models.Holiday(id=id, start_date="2021-01-01", end_date="2021-01-02", status=models.HolidayStatus.WAITING)
     raise NotImplementedError()
 
 @router.put("/{id}", status_code=status.HTTP_200_OK)
