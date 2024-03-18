@@ -1,8 +1,12 @@
 """Consultant router and routes, data belonging to a particular consultant."""
-from fastapi import APIRouter
-from fastapi import status
+from typing import Annotated
+from fastapi import APIRouter, status, Depends
+from fastapi.responses import JSONResponse
+from psycopg_pool import ConnectionPool
+from psycopg.errors import ForeignKeyViolation
 from api.holiday.models import Holiday
 from api.timesheet.models import Timesheet
+from api.dependencies import get_connection_pool
 from . import models
 
 # /consultant
@@ -11,26 +15,53 @@ router = APIRouter(
     tags=["consultant"],
 )
 
-@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=models.ConsultantDetails)
-def get_consultant_details(_id: int) -> models.ConsultantDetails:
+@router.post("", status_code=status.HTTP_201_CREATED)
+def create_consultant(request: models.Consultant,
+                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]) -> None:
+    """Create a new consultant.
+    
+    Args:
+        request (models.Consultant): The consultant's details."""
+    with pool.connection() as connection:
+        consultant_id = None
+        try:
+            consultant_id = connection.execute("""
+                INSERT INTO consultants (user_id, contracted_hours, manager_id)
+                VALUES (%s, %s, %s) RETURNING id""",
+                (request.user_id, request.contracted_hours, request.manager_id)).fetchone()
+        except ForeignKeyViolation:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Failed to create consultant, invalid user or manager ID"}
+            )
+        if consultant_id is not None:
+            return JSONResponse(status_code=status.HTTP_201_CREATED, content={"id": consultant_id})
+        else:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Failed to create consultant"}
+            )
+
+@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=models.Consultant)
+def get_consultant_details(_id: int) -> models.Consultant:
     """Get the details of a consultant.
     
     Args:
         id (int): The consultant's ID.
     
     Returns:
-        models.ConsultantDetails: The consultant's details.
+        models.Consultant: The consultant's details.
     """
-    #return models.ConsultantDetails(name="name", email="email", assigned_manager="AssignedManager")
+    #return models.Consultant(name="name", email="email", assigned_manager="AssignedManager")
     raise NotImplementedError()
 
 @router.put("/{id}", status_code=status.HTTP_200_OK)
-def update_consultant(_id: int, _request: models.ConsultantDetails) -> None:
+def update_consultant(_id: int, _request: models.Consultant) -> None:
     """Update the details of a consultant.
     
     Args:
         id (int): The consultant's ID.
-        request (models.ConsultantDetails): The consultant's updated details.
+        request (models.Consultant): The consultant's updated details.
     """
     raise NotImplementedError()
 
@@ -41,14 +72,6 @@ def delete_consultant(_id: int) -> None:
     Args:
         id (int): The consultant's ID.
     """
-    raise NotImplementedError()
-
-@router.post("/", status_code=status.HTTP_200_OK)
-def create_consultant(request: models.ConsultantDetails) -> None:
-    """Create a new consultant.
-    
-    Args:
-        request (models.ConsultantDetails): The consultant's details."""
     raise NotImplementedError()
 
 @router.post("/{id}/holiday", status_code=status.HTTP_200_OK)

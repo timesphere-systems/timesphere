@@ -15,7 +15,8 @@ def get_connection_pool() -> psycopg_pool.ConnectionPool:
     print("making new pool")
     return psycopg_pool.ConnectionPool(
         f"dbname={settings.postgres_db_name} \
-            user={settings.postgres_db_user} \
-            password={settings.postgres_db_password} \
-            host={settings.postgres_db_host}"
+            user={settings.postgres_app_user} \
+            password={settings.postgres_app_password} \
+            host={settings.postgres_host} \
+            port={settings.postgres_port}"
     )
