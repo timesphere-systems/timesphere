@@ -8,6 +8,11 @@ ingress:
       match:
         path:
           prefix: /
+    - component:
+        name: timesphere-fastapi
+      match:
+        path:
+          prefix: /api/
 name: timesphere
 region: lon
 databases:
@@ -44,10 +49,7 @@ services:
         value: ${db-postgresql-oxinar-london.PASSWORD}
       - key: POSTGRES_DB_HOST
         value: ${db-postgresql-oxinar-london.HOSTNAME}
-    routes:
-    - preserve_path_prefix: true
-      path: /api
-    enviornment_slug: python
+    environment_slug: python
     name: timesphere-fastapi
     source_dir: /back
     http_port: 5000
