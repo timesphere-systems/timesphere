@@ -2,6 +2,32 @@ import React from 'react'
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
+const GREET = styled.h1`
+    font-family: Inter;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 44px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #1B143E;
+`
+
+const DATE = styled.h1`
+    font-family: Inter;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 22px;
+    letter-spacing: 0em;
+    text-align: right;
+    color: #1B143E;
+`
+
+const DIV = styled.div`
+    width: 29.75rem;
+    height: 4.8125rem;
+    flex-shrink: 0;
+`
+
 function getDate() {
     const date = new Date();
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -48,5 +74,25 @@ function getGreeting() {
         stringy.concat(greet, ", ");
         return stringy;
     }
+}
+
+function getImage() {
+    const time = getTiming();
+    if (time == "" || time == "Afternoon") {
+        //return ();
+    } else if (time == "Morning" || time == "Evening") {
+        //return ()
+    } else {
+        //return ()
+    }
+}
+
+const Greeting = () {
+    return (
+        <DIV>
+            <GREET>getGreeting().concat("Amal")</GREET>
+            <DATE>getDate()</DATE>
+        </DIV>
+    )
 }
 
