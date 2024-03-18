@@ -10,6 +10,14 @@ ingress:
           prefix: /
 name: timesphere
 region: lon
+databases:
+  - cluster_name: db-postgresql-timesphere
+    db_name: timesphere
+    db_user: timesphere
+    engine: PG
+    name: db-postgresql-timesphere
+    production: true
+    version: "16"
 services:
   - build_command: npm run build
     environment_slug: node-js
@@ -22,3 +30,27 @@ services:
     instance_size_slug: basic-xxs
     name: timesphere-react
     source_dir: /front
+  - build_command: python -m pip install -r requirements.txt
+    github:
+      branch: main
+      deploy_on_push: true
+      repo: timesphere-systems/timesphere
+    envs:
+      - key: POSTGRES_DB_NAME
+        value: timesphere
+      - key: POSTGRES_DB_USER
+        value: ${db-postgresql-oxinar-london.USERNAME}
+      - key: POSTGRES_DB_PASSWORD
+        value: ${db-postgresql-oxinar-london.PASSWORD}
+      - key: POSTGRES_DB_HOST
+        value: ${db-postgresql-oxinar-london.HOSTNAME}
+    routes:
+    - preserve_path_prefix: true
+      path: /api
+    enviornment_slug: python
+    name: timesphere-fastapi
+    source_dir: /back
+    http_port: 5000
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    run_command: uvicorn api.main:app --host 0.0.0.0 --port 5000
