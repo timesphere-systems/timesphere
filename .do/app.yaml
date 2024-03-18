@@ -1,10 +1,24 @@
+domains:
+  - domain: timesphere.systems
+    type: PRIMARY
+ingress:
+  rules:
+    - component:
+        name: timesphere-react
+      match:
+        path:
+          prefix: /
 name: timesphere
+region: lon
 services:
-- build_command: yarn build
-  environment_slug: node-js
-  github:
-    branch: main
-    deploy_on_push: true
-    repo: timesphere-systems/timesphere
-  source_dir: /front
-  name: timesphere-react
+  - build_command: npm run build
+    environment_slug: node-js
+    github:
+      branch: main
+      deploy_on_push: true
+      repo: timesphere-systems/timesphere
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    name: timesphere-react
+    source_dir: /front
