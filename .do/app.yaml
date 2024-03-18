@@ -1,0 +1,10 @@
+name: timesphere
+services:
+- build_command: yarn build
+  environment_slug: node-js
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: timesphere-systems/timesphere
+  source_dir: /front
+  name: timesphere-react
