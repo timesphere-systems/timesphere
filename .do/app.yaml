@@ -43,12 +43,14 @@ services:
     envs:
       - key: POSTGRES_DB_NAME
         value: timesphere
-      - key: POSTGRES_DB_USER
+      - key: POSTGRES_APP_USER
         value: ${db-postgresql-oxinar-london.USERNAME}
-      - key: POSTGRES_DB_PASSWORD
+      - key: POSTGRES_APP_PASSWORD
         value: ${db-postgresql-oxinar-london.PASSWORD}
-      - key: POSTGRES_DB_HOST
+      - key: POSTGRES_HOST
         value: ${db-postgresql-oxinar-london.HOSTNAME}
+      - key: POSTGRES_PORT
+        value: ${db-postgresql-oxinar-london.PORT}
     environment_slug: python
     name: timesphere-fastapi
     source_dir: /back
