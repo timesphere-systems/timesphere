@@ -1,4 +1,5 @@
 fastapi
 uvicorn
 pydantic-settings
-psycopg2
+psycopg
+psycopg_pool
