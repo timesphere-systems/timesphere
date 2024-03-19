@@ -1,8 +1,8 @@
 -- insert statements
 
---setting up Status, TimeEntryType and Role Values
+--setting up Approval Status, TimeEntryType and User Role Values
 --this is stored inorder so the id is consistant with the ENUMs defined
-INSERT INTO status (status_type)
+INSERT INTO approval_status (status_type)
 VALUES 
   ('WAITING'),
   ('APPROVED'),
@@ -14,7 +14,7 @@ VALUES
   ('SICK'),
   ('HOLIDAY');
 
-INSERT INTO Role (role_type)
+INSERT INTO user_role (role_type)
 VALUES
   ('CONSULTANT'),
   ('MANAGER'),

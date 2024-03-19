@@ -3,7 +3,7 @@
 --CREATE DATABASE Timesphere_DB
 
 --Status for both TimeSheets and HolidayRequests
-CREATE TABLE status (
+CREATE TABLE approval_status (
   id  SERIAL PRIMARY KEY,
   status_type TEXT NOT NULL
 );
@@ -13,8 +13,8 @@ CREATE TABLE time_entry_type (
   entry_type TEXT NOT NULL
 );
 
---Role will define the type of User stored in db
-CREATE TABLE role (
+--user role will define the type of User stored in db
+CREATE TABLE user_role (
   id  SERIAL PRIMARY KEY,
   role_type TEXT NOT NULL
 );
@@ -24,8 +24,8 @@ CREATE TABLE users (
    firstname TEXT NOT NULL,
    lastname TEXT NOT NULL,
    email TEXT NOT NULL,
-   role INT NOT NULL,
-   FOREIGN KEY (role) REFERENCES role(id)
+   user_role INT NOT NULL,
+   FOREIGN KEY (user_role) REFERENCES user_role(id)
 );
 
 -- Table storing Consultant Specific Details
@@ -43,9 +43,9 @@ CREATE TABLE timesheets (
   id SERIAL PRIMARY KEY,
   week_commencing DATE NOT NULL,
   consultant INT NOT NULL,
-  status INT NOT NULL,
+  approval_status INT NOT NULL,
   FOREIGN KEY (consultant) REFERENCES consultants(id),
-  FOREIGN KEY (status) REFERENCES Status(id)
+  FOREIGN KEY (approval_status) REFERENCES approval_status(id)
 );
 
 CREATE TABLE time_entries (
@@ -63,7 +63,7 @@ CREATE TABLE holidays(
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   consultant INT NOT NULL,
-  status INT NOT NULL,
+  approval_status INT NOT NULL,
   FOREIGN KEY (consultant) REFERENCES consultants(id),
-  FOREIGN KEY (status) REFERENCES status(id)
+  FOREIGN KEY (approval_status) REFERENCES approval_status(id)
 );

@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_consultant(request: models.Consultant,
+def create_consultant(request: models.CreateConsultant,
                       pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                       ) -> JSONResponse:
     """Create a new consultant.
