@@ -15,7 +15,7 @@ router = APIRouter(
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_user(request: models.User,
-                pool: Annotated[ConnectionPool, Depends(get_connection_pool)]) -> None:
+                pool: Annotated[ConnectionPool, Depends(get_connection_pool)]) -> JSONResponse:
     """Create a new user.
     
     Args:
@@ -34,8 +34,7 @@ def create_user(request: models.User,
             )
         if user_id is not None:
             return JSONResponse(status_code=status.HTTP_201_CREATED, content={"id": user_id})
-        else:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "Failed to create user"}
-            )
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": "Failed to create user"}
+        )
