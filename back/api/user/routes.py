@@ -24,7 +24,7 @@ def create_user(request: models.User,
         user_id = None
         try:
             user_id = connection.execute("""
-                INSERT INTO users (firstname, lastname, email, role)
+                INSERT INTO users (firstname, lastname, email, user_role)
                 VALUES (%s, %s, %s, 1) RETURNING id""",
                 (request.firstname, request.lastname, request.email)).fetchone()
         except ForeignKeyViolation:
