@@ -17,7 +17,7 @@ router = APIRouter(
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_consultant(request: models.Consultant,
-                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]) -> None:
+                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]) -> JSONResponse:
     """Create a new consultant.
     
     Args:
@@ -36,11 +36,10 @@ def create_consultant(request: models.Consultant,
             )
         if consultant_id is not None:
             return JSONResponse(status_code=status.HTTP_201_CREATED, content={"id": consultant_id})
-        else:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "Failed to create consultant"}
-            )
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": "Failed to create consultant"}
+        )
 
 @router.get("/{id}", status_code=status.HTTP_200_OK, response_model=models.Consultant)
 def get_consultant_details(_id: int) -> models.Consultant:
