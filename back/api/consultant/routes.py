@@ -73,8 +73,8 @@ def delete_consultant(_id: int) -> None:
     """
     raise NotImplementedError()
 
-@router.post("/{id}/holiday", status_code=status.HTTP_200_OK)
-def create_holiday_request(id: int, request: models.CreateHoliday,
+@router.post("/{_id}/holiday", status_code=status.HTTP_200_OK)
+def create_holiday_request(_id: int, request: models.CreateHoliday,
                            pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                            ) -> JSONResponse:
     """Create a new holiday request.
@@ -95,7 +95,7 @@ def create_holiday_request(id: int, request: models.CreateHoliday,
             holiday_id = connection.execute("""
                 INSERT INTO holidays (start_date, end_date, consultant, approval_status)
                 VALUES (%s, %s, %s, 1) RETURNING id""",
-                (request.start_date, request.end_date, id)).fetchone()
+                (request.start_date, request.end_date, _id)).fetchone()
         except ForeignKeyViolation:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
