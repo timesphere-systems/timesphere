@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, status, Depends
 from fastapi.responses import JSONResponse
+from psycopg.rows import TupleRow
 from psycopg_pool import ConnectionPool
 from psycopg.errors import ForeignKeyViolation
 from ..dependencies import get_connection_pool
@@ -39,8 +40,10 @@ def create_consultant(request: models.CreateConsultant,
             content={"id": consultant_id}
         )
 
-@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=models.Consultant)
-def get_consultant_details(_id: int) -> models.Consultant:
+@router.get("/{consultant_id}", status_code=status.HTTP_200_OK)
+def get_consultant_details(consultant_id: int,
+                           pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                           ):
     """Get the details of a consultant.
     
     Args:
@@ -49,8 +52,63 @@ def get_consultant_details(_id: int) -> models.Consultant:
     Returns:
         models.Consultant: The consultant's details.
     """
+    with pool.connection() as connection:
+        consultant_details: TupleRow | None
+        try:
+            consultant_details = connection.execute("""
+                SELECT * FROM consultants 
+                WHERE id = {};""".format(consultant_id)).fetchone()
+        except:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "DB error"}
+            )
+
+        if consultant_details is None:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Failed to get consultant details, invalid Consultant ID"}
+            )
+        user_details: TupleRow | None
+        try:
+            user_details = connection.execute(f"""
+                SELECT * FROM users 
+                WHERE id = {consultant_details[1]};""").fetchone()
+        except:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "DB error: Failed to get consultant user details"}
+            )
+        manager_details: TupleRow | None
+        try:
+            manager_details = connection.execute(f"""
+                SELECT firstname, lastname FROM users 
+                WHERE id = {consultant_details[3]};""").fetchone()
+        except:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "DB error: Failed to get assigned manager"}
+            )
+        if manager_details is None or user_details is None: 
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "DB error"}
+            )
+        firstname : str=user_details[1]
+        lastname : str=user_details[2]
+        email : str=user_details[3]
+        contracted_hours : float=consultant_details[2]
+        manager : str=manager_details[0] + " " + manager_details[1]
+        return models.ResponseConsultant(
+            firstname=firstname,
+            lastname=lastname,
+            email=email,
+            contracted_hours=contracted_hours,
+            manager=manager
+        )
+
+       
     #return models.Consultant(name="name", email="email", assigned_manager="AssignedManager")
-    raise NotImplementedError()
 
 @router.put("/{id}", status_code=status.HTTP_200_OK)
 def update_consultant(_id: int, _request: models.Consultant) -> None:
