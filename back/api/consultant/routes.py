@@ -102,16 +102,16 @@ def create_holiday_request(consultant_id: int, request: models.CreateHoliday,
         )
 
 @router.post("/{consultant_id}/timesheet", status_code=status.HTTP_200_OK)
-def create_timesheet(consultant_id: int, week_commencing: datetime,
+def create_timesheet(consultant_id: int, start: datetime,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                      ) -> JSONResponse:
     """Create a new timesheet.
 
     Args:
         consultant_id (int): The consultant's ID.
-        week_commencing (datetime): The start date of the Weekly timesheet.
+        start (datetime): The start date of the Weekly timesheet.
     """
-    if week_commencing.weekday() != 0:
+    if start.weekday() != 0:
         return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "Week Commencing value must be a Monday weekday date"}
@@ -120,9 +120,9 @@ def create_timesheet(consultant_id: int, week_commencing: datetime,
         timesheet_id = None
         try:
             timesheet_id = connection.execute("""
-                INSERT INTO timesheets (week_commencing, consultant, approval_status)
+                INSERT INTO timesheets (start, consultant, approval_status)
                 VALUES (%s, %s, 1) RETURNING id""",
-                (week_commencing, consultant_id)).fetchone()
+                (start, consultant_id)).fetchone()
         except ForeignKeyViolation:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
