@@ -5,6 +5,7 @@
 INSERT INTO approval_status (status_type)
 VALUES 
   ('WAITING'),
+  ('SUBMITTED'),
   ('APPROVED'),
   ('DENIED');
 
