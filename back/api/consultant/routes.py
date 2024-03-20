@@ -118,7 +118,7 @@ def create_timesheet(consultant_id: int, week_commencing: datetime,
         consultant_id (int): The consultant's ID.
         week_commencing (datetime): The start date of the Weekly timesheet.
     """
-    if(week_commencing.weekday() != 0):
+    if week_commencing.weekday() != 0:
         return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "Week Commencing value must be a Monday weekday date"}
@@ -137,7 +137,7 @@ def create_timesheet(consultant_id: int, week_commencing: datetime,
             )
         if timesheet_id is not None:
             return JSONResponse(
-                status_code=status.HTTP_201_CREATED, 
+                status_code=status.HTTP_201_CREATED,
                 content={"id": timesheet_id}
             )
         return JSONResponse(
