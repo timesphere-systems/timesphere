@@ -4,8 +4,8 @@ from fastapi import APIRouter, status, Depends
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg.errors import ForeignKeyViolation
-from ...api.timesheet.models import Timesheet
-from ...api.dependencies import get_connection_pool
+from ..timesheet.models import Timesheet
+from ..dependencies import get_connection_pool
 from . import models
 
 # /consultant
@@ -106,7 +106,7 @@ def create_holiday_request(id: int, request: models.CreateHoliday,
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"message": "Failed to create holiday"}
-        )   
+        )
 
 @router.post("/{id}/timesheet", status_code=status.HTTP_200_OK)
 def create_timesheet(_id: int, _request: Timesheet) -> None:
