@@ -33,5 +33,6 @@ def create_user(request: models.User,
                 content={"message": "Failed to create user, invalid role ID"}
             )
         return JSONResponse(
-            status_code=status.HTTP_201_CREATED, content={"id": user_id}
+            status_code=status.HTTP_201_CREATED,
+            content={"id": user_id}
         )

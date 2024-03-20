@@ -35,7 +35,8 @@ def create_consultant(request: models.CreateConsultant,
                 content={"message": "Failed to create consultant, invalid user or manager ID"}
             )
         return JSONResponse(
-            status_code=status.HTTP_201_CREATED, content={"id": consultant_id}
+            status_code=status.HTTP_201_CREATED, 
+            content={"id": consultant_id}
         )
 
 @router.get("/{id}", status_code=status.HTTP_200_OK, response_model=models.Consultant)
@@ -98,7 +99,8 @@ def create_holiday_request(consultant_id: int, request: models.CreateHoliday,
                 content={"message": "Failed to create holiday, invalid consultant ID"}
             )
         return JSONResponse(
-            status_code=status.HTTP_201_CREATED, content={"id": holiday_id}
+            status_code=status.HTTP_201_CREATED, 
+            content={"id": holiday_id}
         )
 
 @router.post("/{consultant_id}/timesheet", status_code=status.HTTP_200_OK)
