@@ -1,7 +1,7 @@
 """Module providing JSON models for the consultant API."""
 # pylint: disable=too-few-public-methods
 from pydantic import BaseModel
-from api.user import User
+from api.user.models import User
 from datetime import datetime
 
 
