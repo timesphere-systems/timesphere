@@ -1,10 +1,10 @@
 """Consultant router and routes, data belonging to a particular consultant."""
+from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, status, Depends
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg.errors import ForeignKeyViolation
-from ..timesheet.models import Timesheet
 from ..dependencies import get_connection_pool
 from . import models
 
@@ -108,12 +108,39 @@ def create_holiday_request(consultant_id: int, request: models.CreateHoliday,
             content={"message": "Failed to create holiday"}
         )
 
-@router.post("/{id}/timesheet", status_code=status.HTTP_200_OK)
-def create_timesheet(_id: int, _request: Timesheet) -> None:
+@router.post("/{consultant_id}/timesheet", status_code=status.HTTP_200_OK)
+def create_timesheet(consultant_id: int, week_commencing: datetime,
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                     ) -> JSONResponse:
     """Create a new timesheet.
 
     Args:
-        id (int): The consultant's ID.
-        request (Timesheet): The timesheet.
+        consultant_id (int): The consultant's ID.
+        week_commencing (datetime): The start date of the Weekly timesheet.
     """
-    raise NotImplementedError()
+    if(week_commencing.weekday() != 0):
+        return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Week Commencing value must be a Monday weekday date"}
+            )
+    with pool.connection() as connection:
+        timesheet_id = None
+        try:
+            timesheet_id = connection.execute("""
+                INSERT INTO timesheets (week_commencing, consultant, approval_status)
+                VALUES (%s, %s, 1) RETURNING id""",
+                (week_commencing, consultant_id)).fetchone()
+        except ForeignKeyViolation:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Failed to create timesheet, invalid consultant ID"}
+            )
+        if timesheet_id is not None:
+            return JSONResponse(
+                status_code=status.HTTP_201_CREATED, 
+                content={"id": timesheet_id}
+            )
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": "Failed to create timesheet"}
+        )
