@@ -7,3 +7,4 @@ class User(BaseModel):
     firstname: str
     lastname: str
     email: str
+    user_role: int
