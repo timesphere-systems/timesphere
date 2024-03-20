@@ -10,7 +10,7 @@ class Consultant(User):
     """Model for the consultant details."""
     user_id: int
     contracted_hours: float
-    manager_id: int
+    manager: str
 
 class CreateConsultant(BaseModel):
     """Model for creating a new consultant."""
@@ -22,3 +22,10 @@ class CreateHoliday(BaseModel):
     """Model for the holiday request."""
     start_date: datetime
     end_date: datetime
+
+class ResponseConsultant(BaseModel):
+    firstname: str
+    lastname: str
+    email: str
+    contracted_hours: float
+    manager: str
