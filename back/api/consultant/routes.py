@@ -116,7 +116,7 @@ def create_timesheet(consultant_id: int, start: datetime,
     if start.weekday() != 0:
         return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "Week Commencing value must be a Monday weekday date"}
+                content={"message": "Start date value must be a Monday weekday date"}
             )
     with pool.connection() as connection:
         timesheet_id = None
