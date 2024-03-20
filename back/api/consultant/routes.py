@@ -34,11 +34,8 @@ def create_consultant(request: models.CreateConsultant,
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "Failed to create consultant, invalid user or manager ID"}
             )
-        if consultant_id is not None:
-            return JSONResponse(status_code=status.HTTP_201_CREATED, content={"id": consultant_id})
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={"message": "Failed to create consultant"}
+            status_code=status.HTTP_201_CREATED, content={"id": consultant_id}
         )
 
 @router.get("/{id}", status_code=status.HTTP_200_OK, response_model=models.Consultant)
@@ -88,7 +85,6 @@ def create_holiday_request(consultant_id: int, request: models.CreateHoliday,
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"message": "Start Date and End Date Values are Not Valid"}
         )
-
     with pool.connection() as connection:
         holiday_id = None
         try:
@@ -101,11 +97,8 @@ def create_holiday_request(consultant_id: int, request: models.CreateHoliday,
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "Failed to create holiday, invalid consultant ID"}
             )
-        if holiday_id is not None:
-            return JSONResponse(status_code=status.HTTP_201_CREATED, content={"id": holiday_id})
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={"message": "Failed to create holiday"}
+            status_code=status.HTTP_201_CREATED, content={"id": holiday_id}
         )
 
 @router.post("/{consultant_id}/timesheet", status_code=status.HTTP_200_OK)
@@ -135,12 +128,7 @@ def create_timesheet(consultant_id: int, week_commencing: datetime,
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "Failed to create timesheet, invalid consultant ID"}
             )
-        if timesheet_id is not None:
-            return JSONResponse(
-                status_code=status.HTTP_201_CREATED,
-                content={"id": timesheet_id}
-            )
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={"message": "Failed to create timesheet"}
+            status_code=status.HTTP_201_CREATED,
+            content={"id": timesheet_id}
         )
