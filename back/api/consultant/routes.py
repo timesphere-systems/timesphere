@@ -56,8 +56,10 @@ def get_consultant_details(consultant_id: int,
         consultant_details: TupleRow | None
         try:
             consultant_details = connection.execute("""
-                SELECT * FROM consultants 
-                WHERE id = {};""".format(consultant_id)).fetchone()
+                SELECT firstname, lastname, email, contracted_hours, manager_id
+                FROM consultants, users
+                WHERE users.id = consultants.user_id
+                AND consultants.id = {};""".format(consultant_id)).fetchone()
         except:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -69,35 +71,25 @@ def get_consultant_details(consultant_id: int,
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "Failed to get consultant details, invalid Consultant ID"}
             )
-        user_details: TupleRow | None
-        try:
-            user_details = connection.execute(f"""
-                SELECT * FROM users 
-                WHERE id = {consultant_details[1]};""").fetchone()
-        except:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "DB error: Failed to get consultant user details"}
-            )
         manager_details: TupleRow | None
         try:
             manager_details = connection.execute(f"""
                 SELECT firstname, lastname FROM users 
-                WHERE id = {consultant_details[3]};""").fetchone()
+                WHERE id = {consultant_details[4]};""").fetchone()
         except:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "DB error: Failed to get assigned manager"}
             )
-        if manager_details is None or user_details is None: 
+        if manager_details is None: 
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "DB error"}
+                content={"message": "DB error: Failed to get assigned manager"}
             )
-        firstname : str=user_details[1]
-        lastname : str=user_details[2]
-        email : str=user_details[3]
-        contracted_hours : float=consultant_details[2]
+        firstname : str=consultant_details[0]
+        lastname : str=consultant_details[1]
+        email : str=consultant_details[2]
+        contracted_hours : float=consultant_details[3]
         manager : str=manager_details[0] + " " + manager_details[1]
         return models.ResponseConsultant(
             firstname=firstname,
