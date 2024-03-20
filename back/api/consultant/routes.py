@@ -50,7 +50,7 @@ def get_consultant_details(consultant_id: int,
         id (int): The consultant's ID.
     
     Returns:
-        models.Consultant: The consultant's details.
+        models.ResponseConsultant: The consultant's details.
     """
     with pool.connection() as connection:
         consultant_details: TupleRow | None
@@ -63,9 +63,8 @@ def get_consultant_details(consultant_id: int,
         except:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "DB error"}
+                content={"message": "DB error: Failed to get consultant details"}
             )
-
         if consultant_details is None:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -79,7 +78,7 @@ def get_consultant_details(consultant_id: int,
         except:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "DB error: Failed to get assigned manager"}
+                content={"message": "DB error: Failed to get assigned manager details"}
             )
         if manager_details is None: 
             return JSONResponse(
@@ -98,9 +97,6 @@ def get_consultant_details(consultant_id: int,
             contracted_hours=contracted_hours,
             manager=manager
         )
-
-       
-    #return models.Consultant(name="name", email="email", assigned_manager="AssignedManager")
 
 @router.put("/{id}", status_code=status.HTTP_200_OK)
 def update_consultant(_id: int, _request: models.Consultant) -> None:
