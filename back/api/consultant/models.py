@@ -2,6 +2,7 @@
 # pylint: disable=too-few-public-methods
 from pydantic import BaseModel
 from api.user.models import User
+from datetime import datetime
 
 
 class Consultant(User):
@@ -15,3 +16,8 @@ class CreateConsultant(BaseModel):
     user_id: int
     contracted_hours: float
     manager_id: int
+
+class CreateHoliday(BaseModel):
+    """Model for the holiday request."""
+    start_date: datetime
+    end_date: datetime
