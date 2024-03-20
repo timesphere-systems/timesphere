@@ -4,7 +4,7 @@ from fastapi import APIRouter, status, Depends
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg.errors import ForeignKeyViolation
-from ...api.dependencies import get_connection_pool
+from ..dependencies import get_connection_pool
 from . import models
 
 # /user
