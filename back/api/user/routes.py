@@ -35,4 +35,3 @@ def create_user(request: models.User,
         return JSONResponse(
             status_code=status.HTTP_201_CREATED, content={"id": user_id}
         )
-
