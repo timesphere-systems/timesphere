@@ -41,7 +41,7 @@ CREATE TABLE consultants (
 -- Weekly Timesheets
 CREATE TABLE timesheets (
   id SERIAL PRIMARY KEY,
-  week_commencing DATE NOT NULL,
+  start DATE NOT NULL,
   consultant INT NOT NULL,
   approval_status INT NOT NULL,
   FOREIGN KEY (consultant) REFERENCES consultants(id),
