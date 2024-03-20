@@ -75,14 +75,39 @@ def delete_consultant(_id: int) -> None:
     raise NotImplementedError()
 
 @router.post("/{id}/holiday", status_code=status.HTTP_200_OK)
-def create_holiday_request(_id: int, _request: Holiday) -> None:
+def create_holiday_request(id: int, request: models.CreateHoliday,
+                           pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                           ) -> JSONResponse:
     """Create a new holiday request.
     
     Args:
         id (int): The consultant's ID.
         request (Holiday): The holiday request.
     """
-    raise NotImplementedError()
+    if request.start_date > request.end_date:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": "Start Date and End Date Values are Not Valid"}
+        )
+
+    with pool.connection() as connection:
+        holiday_id = None
+        try:
+            holiday_id = connection.execute("""
+                INSERT INTO holidays (start_date, end_date, consultant, approval_status)
+                VALUES (%s, %s, %s, 1) RETURNING id""",
+                (request.start_date, request.end_date, id)).fetchone()
+        except ForeignKeyViolation:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Failed to create holiday, invalid consultant ID"}
+            )
+        if holiday_id is not None:
+            return JSONResponse(status_code=status.HTTP_201_CREATED, content={"id": holiday_id})
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": "Failed to create holiday"}
+        )   
 
 @router.post("/{id}/timesheet", status_code=status.HTTP_200_OK)
 def create_timesheet(_id: int, _request: Timesheet) -> None:
