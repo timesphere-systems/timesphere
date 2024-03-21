@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from ..user.models import User
 
 
-
 class Consultant(User):
     """Model for the consultant details."""
     user_id: int
@@ -23,7 +22,8 @@ class CreateHoliday(BaseModel):
     start_date: datetime
     end_date: datetime
 
-class ResponseConsultant(BaseModel):
+class ConsultantUser(BaseModel):
+    """Model for consultant and user details"""
     firstname: str
     lastname: str
     email: str
