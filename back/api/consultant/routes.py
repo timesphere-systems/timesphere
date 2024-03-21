@@ -1,11 +1,11 @@
 """Consultant router and routes, data belonging to a particular consultant."""
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, cast
 from fastapi import APIRouter, status, Depends
 from fastapi.responses import JSONResponse
-from psycopg.rows import TupleRow
 from psycopg_pool import ConnectionPool
 from psycopg.errors import ForeignKeyViolation
+from psycopg.rows import class_row
 from ..dependencies import get_connection_pool
 from . import models
 # /consultant
@@ -23,18 +23,21 @@ def create_consultant(request: models.CreateConsultant,
     Args:
         request (models.Consultant): The consultant's details."""
     with pool.connection() as connection:
-        consultant_id = None
-        with connection.cursor() as cur:
-            try:
-                consultant_id = cur.execute("""
-                    INSERT INTO consultants (user_id, contracted_hours, manager_id)
-                    VALUES (%s, %s, %s) RETURNING id""",
-                    (request.user_id, request.contracted_hours, request.manager_id)).fetchone()[0]
-            except ForeignKeyViolation:
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"message": "Failed to create consultant, invalid user or manager ID"}
-                )
+        consultant_id: int = 0
+        try:
+            row = connection.execute("""
+                INSERT INTO consultants (user_id, contracted_hours, manager_id)
+                VALUES (%s, %s, %s) RETURNING id""",
+                (request.user_id, request.contracted_hours, request.manager_id)).fetchone()
+            # Should be impossible
+            if row is None:
+                raise ValueError("Failed to create consultant")
+            consultant_id = cast(int, row[0])
+        except ForeignKeyViolation:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Failed to create consultant, invalid user or manager ID"}
+            )
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
             content={"id": consultant_id}
@@ -43,7 +46,7 @@ def create_consultant(request: models.CreateConsultant,
 @router.get("/{consultant_id}", status_code=status.HTTP_200_OK)
 def get_consultant_details(consultant_id: int,
                            pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
-                           ):
+                           ) -> JSONResponse | models.ConsultantUser:
     """Get the details of a consultant.
     
     Args:
@@ -51,49 +54,30 @@ def get_consultant_details(consultant_id: int,
     
     Returns:
         models.ResponseConsultant: The consultant's details.
-    """    
+    """
     with pool.connection() as connection:
-        consultant_details: TupleRow | None
-        try:
-            consultant_details = connection.execute("""
-                SELECT firstname, lastname, email, contracted_hours, manager_id
-                FROM consultants, users
-                WHERE users.id = consultants.user_id
-                AND consultants.id = %s;""", (consultant_id,)
-            ).fetchone()
-        except Exception as e:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "DB error: Failed to get consultant details"}
-            )
-        if consultant_details is None:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "Failed to get consultant details, invalid Consultant ID"}
-            )
-        manager_details: TupleRow | None
-        try:
-            manager_details = connection.execute("""
-                SELECT firstname, lastname FROM users 
-                WHERE id = %s;""", (consultant_details[4],)).fetchone()
-        except:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "DB error: Failed to get assigned manager details"}
-            )
+        consultant_details = None
+        with connection.cursor(row_factory=class_row(models.ConsultantUser)) as cursor:
+            try:
+                consultant_details = cursor.execute("""
+                    SELECT users.firstname AS firstname, users.lastname AS lastname, users.email AS email, contracted_hours, managers.firstname AS manager
+                    FROM consultants, users, users AS managers
+                    WHERE users.id = consultants.user_id AND managers.id = consultants.manager_id
+                    AND consultants.id = %s;""", (consultant_id,)
+                ).fetchone()
+            except Exception as e:
+                print(e)
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "DB error: Failed to get consultant details"}
+                )
+            if consultant_details is None:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "Failed to get consultant details, invalid Consultant ID"}
+                )
 
-        firstname = str(consultant_details[0])
-        lastname : str=consultant_details[1]
-        email : str=consultant_details[2]
-        contracted_hours : float=consultant_details[3]
-        manager : str=manager_details[0] + " " + manager_details[1]
-        return models.ResponseConsultant(
-            firstname=firstname,
-            lastname=lastname,
-            email=email,
-            contracted_hours=contracted_hours,
-            manager=manager
-        )
+    return consultant_details
 
 @router.put("/{id}", status_code=status.HTTP_200_OK)
 def update_consultant(_id: int, _request: models.Consultant) -> None:
