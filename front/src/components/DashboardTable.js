@@ -5,6 +5,8 @@ import { useState } from 'react'
 
 const TIMESHEET = styled.table`
     margin: auto;
+    margin-bottom: 10px;
+    border-radius: 9px;
     display: flex;
     flex-wrap: wrap;
     flex-direction: column;
@@ -43,7 +45,7 @@ const TD = styled.td`
     text-align: center;
 `
 
-const Dropdown = styled.select`
+const STATUS = styled.select`
     width: 100%;
 `
 
@@ -57,9 +59,15 @@ const TIME = styled.input`
     }
 `
 
-const Toggle = styled.button`
-    margin-bottom: 20px;
-    padding: 10px;
+const EDIT_BTN = styled.button`
+    padding: 10px;  
+    border: none;
+    border-radius: 20px;
+    color: white;
+    background-color: rgba(27, 20, 62, 1);
+    display: flex;
+    margin: auto;
+    cursor: pointer;
 `
 
 
@@ -129,7 +137,7 @@ const DashboardTable = () => {
 
 
     return (
-        <div>
+        <div style={{display:'flex', flexDirection:'column'}}>
             <TIMESHEET>
                 <HEADERS>
                         <TR>
@@ -147,11 +155,11 @@ const DashboardTable = () => {
                                 <TD>{['Monday','Tuesday','Wednesday','Thursday','Friday'][index]}</TD>
                                 <TD>{row.date.toLocaleDateString()}</TD>
                                 <TD>
-                                    <Dropdown value={row.status} onChange={(e) => handleStatusChange(index, e.target.value)} disabled={!editable}>
+                                    <STATUS value={row.status} onChange={(e) => handleStatusChange(index, e.target.value)} disabled={!editable}>
                                         <option value="Working">Working</option>
                                         <option value="Sick">Sick</option>
                                         <option value="Holiday">Holiday</option>
-                                    </Dropdown>
+                                    </STATUS>
                                 </TD>
                                 <TD>
                                     <TIME
@@ -174,9 +182,9 @@ const DashboardTable = () => {
                         ))}
                 </tbody>
             </TIMESHEET> 
-            <Toggle onClick={toggleEditMode}>
+            <EDIT_BTN onClick={toggleEditMode}>
                 {editable ? 'Non-editable' : 'Editable'}
-            </Toggle>
+            </EDIT_BTN>
         </div>
     )
 }
