@@ -8,7 +8,6 @@ from psycopg_pool import ConnectionPool
 from psycopg.errors import ForeignKeyViolation
 from ..dependencies import get_connection_pool
 from . import models
-
 # /consultant
 router = APIRouter(
     prefix="/consultant",
@@ -51,7 +50,7 @@ def get_consultant_details(consultant_id: int,
     
     Returns:
         models.ResponseConsultant: The consultant's details.
-    """
+    """    
     with pool.connection() as connection:
         consultant_details: TupleRow | None
         try:
@@ -59,7 +58,8 @@ def get_consultant_details(consultant_id: int,
                 SELECT firstname, lastname, email, contracted_hours, manager_id
                 FROM consultants, users
                 WHERE users.id = consultants.user_id
-                AND consultants.id = {};""".format(consultant_id)).fetchone()
+                AND consultants.id = %s;""", (consultant_id,)
+            ).fetchone()
         except:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -72,9 +72,9 @@ def get_consultant_details(consultant_id: int,
             )
         manager_details: TupleRow | None
         try:
-            manager_details = connection.execute(f"""
+            manager_details = connection.execute("""
                 SELECT firstname, lastname FROM users 
-                WHERE id = {consultant_details[4]};""").fetchone()
+                WHERE id = %s;""", (consultant_details[4],)).fetchone()
         except:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
