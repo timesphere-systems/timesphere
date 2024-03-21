@@ -21,7 +21,7 @@ def create_consultant(request: models.CreateConsultant,
     """Create a new consultant.
     
     Args:
-        request (models.Consultant): The consultant's details."""
+        request (models.CreateConsultant): The consultant's details."""
     with pool.connection() as connection:
         consultant_id: int = 0
         try:
@@ -53,7 +53,7 @@ def get_consultant_details(consultant_id: int,
         id (int): The consultant's ID.
     
     Returns:
-        models.ResponseConsultant: The consultant's details.
+        models.ConsultantUser: The consultant's details.
     """
     with pool.connection() as connection:
         consultant_details = None
@@ -109,7 +109,7 @@ def create_holiday_request(consultant_id: int, request: models.CreateHoliday,
     
     Args:
         id (int): The consultant's ID.
-        request (Holiday): The holiday request.
+        request (models.CreateHoliday): The holiday request.
     """
     if request.start_date > request.end_date:
         return JSONResponse(
