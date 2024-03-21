@@ -58,22 +58,15 @@ def get_consultant_details(consultant_id: int,
     with pool.connection() as connection:
         consultant_details = None
         with connection.cursor(row_factory=class_row(models.ConsultantUser)) as cursor:
-            try:
-                consultant_details = cursor.execute("""
-                    SELECT users.firstname AS firstname, users.lastname AS lastname, 
-                                                    users.email AS email, contracted_hours,
-                                                    managers.firstname AS manager_firstname,
-                                                    managers.lastname AS manager_lastname
-                    FROM consultants, users, users AS managers
-                    WHERE users.id = consultants.user_id AND managers.id = consultants.manager_id
-                    AND consultants.id = %s;""", (consultant_id,)
-                ).fetchone()
-            except Exception as e:
-                print(e)
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"message": "DB error: Failed to get consultant details"}
-                )
+            consultant_details = cursor.execute("""
+                SELECT users.firstname AS firstname, users.lastname AS lastname, 
+                                                users.email AS email, contracted_hours,
+                                                managers.firstname AS manager_firstname,
+                                                managers.lastname AS manager_lastname
+                FROM consultants, users, users AS managers
+                WHERE users.id = consultants.user_id AND managers.id = consultants.manager_id
+                AND consultants.id = %s;""", (consultant_id,)
+            ).fetchone()
             if consultant_details is None:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST,
