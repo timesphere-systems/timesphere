@@ -150,7 +150,6 @@ def create_timesheet(consultant_id: int, start: datetime,
                 INSERT INTO timesheets (start, consultant, approval_status)
                 VALUES (%s, %s, 1) RETURNING id""",
                 (start, consultant_id)).fetchone()
-            
             if row is None:
                 raise ValueError("Failed to create timesheet")
             timesheet_id = cast(int, row[0])
