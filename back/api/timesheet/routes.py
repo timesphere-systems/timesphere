@@ -1,6 +1,9 @@
 """Timesheet router and routes, data belonging to a particular timesheet."""
-from fastapi import APIRouter
-from fastapi import status
+from typing import Annotated
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse
+from psycopg_pool import ConnectionPool
+from ..dependencies import get_connection_pool
 from . import models
 
 # /timesheet
@@ -9,8 +12,8 @@ router = APIRouter(
     tags=["timesheet"],
 )
 
-@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=models.Timesheet)
-def get_timesheet(_id: int) -> models.Timesheet:
+@router.get("/{timesheet_id}", status_code=status.HTTP_200_OK, response_model=models.Timesheet)
+def get_timesheet(timesheet_id: int) -> models.Timesheet:
     """Get the details of a timesheet.
     
     Args:
@@ -19,8 +22,8 @@ def get_timesheet(_id: int) -> models.Timesheet:
     # return models.Timesheet(consultant_id=1, status=models.Status.WaitingApproval)
     raise NotImplementedError()
 
-@router.put("/{id}", status_code=status.HTTP_200_OK)
-def update_timesheet(_id: int, _request: models.Timesheet):
+@router.put("/{timesheet_id}", status_code=status.HTTP_200_OK)
+def update_timesheet(timesheet_id: int, request: models.Timesheet):
     """Update the details of a timesheet.
 
     Args:
@@ -28,3 +31,32 @@ def update_timesheet(_id: int, _request: models.Timesheet):
         request (models.Timesheet): The timesheet's updated details.
     """
     raise NotImplementedError()
+
+@router.post("/{timesheet_id}/submit", status_code=status.HTTP_200_OK)
+def submit_timesheet(timesheet_id: int,
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                     ) -> JSONResponse:
+    """Submits a selected timesheet.
+
+    Args:
+        timesheet_id (int): The timesheet's ID.
+    """
+    with pool.connection() as connection:
+        with connection.cursor() as cursor:
+            _ = cursor.execute("""
+                UPDATE timesheets
+                SET approval_status = 2
+                WHERE id = (%s);""",
+                (timesheet_id,))
+            connection.commit()
+            if cursor.rowcount == 1:
+                cursor.close()
+                return JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content={"message":"Timesheet submitted sucessfully"}
+                )
+            cursor.close()
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Failed to submit timesheet, invalid timesheet ID"}
+            )
