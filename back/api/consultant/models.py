@@ -28,4 +28,5 @@ class ConsultantUser(BaseModel):
     lastname: str
     email: str
     contracted_hours: float
-    manager: str
+    manager_firstname: str
+    manager_lastname: str

@@ -43,7 +43,7 @@ def create_consultant(request: models.CreateConsultant,
             content={"id": consultant_id}
         )
 
-@router.get("/{consultant_id}", status_code=status.HTTP_200_OK)
+@router.get("/{consultant_id}", status_code=status.HTTP_200_OK, response_model=None)
 def get_consultant_details(consultant_id: int,
                            pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                            ) -> JSONResponse | models.ConsultantUser:
@@ -60,7 +60,10 @@ def get_consultant_details(consultant_id: int,
         with connection.cursor(row_factory=class_row(models.ConsultantUser)) as cursor:
             try:
                 consultant_details = cursor.execute("""
-                    SELECT users.firstname AS firstname, users.lastname AS lastname, users.email AS email, contracted_hours, managers.firstname AS manager
+                    SELECT users.firstname AS firstname, users.lastname AS lastname, 
+                                                    users.email AS email, contracted_hours,
+                                                    managers.firstname AS manager_firstname,
+                                                    managers.lastname AS manager_lastname
                     FROM consultants, users, users AS managers
                     WHERE users.id = consultants.user_id AND managers.id = consultants.manager_id
                     AND consultants.id = %s;""", (consultant_id,)
