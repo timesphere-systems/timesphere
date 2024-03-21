@@ -24,16 +24,17 @@ def create_consultant(request: models.CreateConsultant,
         request (models.Consultant): The consultant's details."""
     with pool.connection() as connection:
         consultant_id = None
-        try:
-            consultant_id = connection.execute("""
-                INSERT INTO consultants (user_id, contracted_hours, manager_id)
-                VALUES (%s, %s, %s) RETURNING id""",
-                (request.user_id, request.contracted_hours, request.manager_id)).fetchone()
-        except ForeignKeyViolation:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "Failed to create consultant, invalid user or manager ID"}
-            )
+        with connection.cursor() as cur:
+            try:
+                consultant_id = cur.execute("""
+                    INSERT INTO consultants (user_id, contracted_hours, manager_id)
+                    VALUES (%s, %s, %s) RETURNING id""",
+                    (request.user_id, request.contracted_hours, request.manager_id)).fetchone()[0]
+            except ForeignKeyViolation:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "Failed to create consultant, invalid user or manager ID"}
+                )
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
             content={"id": consultant_id}
@@ -60,7 +61,7 @@ def get_consultant_details(consultant_id: int,
                 WHERE users.id = consultants.user_id
                 AND consultants.id = %s;""", (consultant_id,)
             ).fetchone()
-        except:
+        except Exception as e:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "DB error: Failed to get consultant details"}
@@ -80,12 +81,8 @@ def get_consultant_details(consultant_id: int,
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "DB error: Failed to get assigned manager details"}
             )
-        if manager_details is None: 
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "DB error: Failed to get assigned manager"}
-            )
-        firstname : str=consultant_details[0]
+
+        firstname = str(consultant_details[0])
         lastname : str=consultant_details[1]
         email : str=consultant_details[2]
         contracted_hours : float=consultant_details[3]
