@@ -114,17 +114,22 @@ def create_holiday_request(consultant_id: int, request: models.CreateHoliday,
             content={"message": "Start Date and End Date Values are Not Valid"}
         )
     with pool.connection() as connection:
-        holiday_id = None
+        holiday_id:int = 0
         try:
-            holiday_id = connection.execute("""
+            row = connection.execute("""
                 INSERT INTO holidays (start_date, end_date, consultant, approval_status)
                 VALUES (%s, %s, %s, 1) RETURNING id""",
                 (request.start_date, request.end_date, consultant_id)).fetchone()
+            
+            if row is None:
+                raise ValueError("Failed to create holiday")
+            holiday_id = cast(int, row[0])
         except ForeignKeyViolation:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "Failed to create holiday, invalid consultant ID"}
             )
+        
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
             content={"id": holiday_id}
@@ -146,12 +151,16 @@ def create_timesheet(consultant_id: int, start: datetime,
                 content={"message": "Start date value must be a Monday weekday date"}
             )
     with pool.connection() as connection:
-        timesheet_id = None
+        timesheet_id:int = 0
         try:
-            timesheet_id = connection.execute("""
+            row = connection.execute("""
                 INSERT INTO timesheets (start, consultant, approval_status)
                 VALUES (%s, %s, 1) RETURNING id""",
                 (start, consultant_id)).fetchone()
+            
+            if row is None:
+                raise ValueError("Failed to create timesheet")
+            timesheet_id = cast(int, row[0])
         except ForeignKeyViolation:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
