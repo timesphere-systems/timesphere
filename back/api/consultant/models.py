@@ -9,7 +9,7 @@ class Consultant(User):
     """Model for the consultant details."""
     user_id: int
     contracted_hours: float
-    manager: str
+    manager_id: int
 
 class CreateConsultant(BaseModel):
     """Model for creating a new consultant."""
