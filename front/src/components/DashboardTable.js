@@ -39,6 +39,7 @@ const TD = styled.td`
     color: white;
     border: 1px solid rgba(91, 91, 91, 1);
     background-color: rgba(54, 54, 54, 1);
+    font-weight: 300;
     text-align: center;
 `
 
@@ -46,6 +47,15 @@ const Dropdown = styled.select`
     width: 100%;
 `
 
+const TIME = styled.input`
+    background-color: transparent;
+    border: none;
+    color: white;
+
+    &::-webkit-calendar-picker-indicator {
+        display: none;
+    }
+`
 
 
 const DashboardTable = () => {
@@ -58,7 +68,7 @@ const DashboardTable = () => {
         const weekDates = [...Array(5)].map((_, index) => {
             const date = new Date(monday);
             date.setDate(date.getDate() + index);
-            return { date, status: 'Working' };
+            return { date, status: 'Working', clockIn: '', clockOut:''};
         })
         return weekDates;
     };
@@ -74,6 +84,15 @@ const DashboardTable = () => {
         };
         setWeekDates(newWeekDates);
     };
+
+    const handleTimeChange = (index, field, value) => {
+        const newWeekDates = [...weekDates];
+        newWeekDates[index] = {
+            ...newWeekDates[index],
+            [field]: value
+        };
+        setWeekDates(newWeekDates);
+    }
 
     return (
     <TIMESHEET>
@@ -99,8 +118,20 @@ const DashboardTable = () => {
                                 <option value="Holiday">Holiday</option>
                             </Dropdown>
                         </TD>
-                        <TD></TD>
-                        <TD></TD>
+                        <TD>
+                            <TIME
+                                type="time"
+                                value={row.clockIn}
+                                onChange={(e) => handleTimeChange(index, 'clockIn', e.target.value)}
+                            />
+                        </TD>
+                        <TD>
+                            <TIME
+                                type="time"
+                                value={row.clockOut}
+                                onChange={(e) => handleTimeChange(index, 'clockOut', e.target.value)}
+                            />
+                        </TD>
                         <TD></TD>
                     </TR>
                 ))}
