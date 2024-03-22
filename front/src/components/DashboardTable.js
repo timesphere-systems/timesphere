@@ -60,25 +60,12 @@ const TIME = styled.input`
     }
 `
 
-const EDIT_BTN = styled.button`
-    padding: 10px;  
-    border: none;
-    border-radius: 20px;
-    color: white;
-    background-color: rgba(27, 20, 62, 1);
-    display: flex;
-    margin: auto;
-    cursor: pointer;
-`
-
-
 const OVERLAY_CONTAINER = styled.div`
     position: relative;
     margin: auto;
     border-radius: 9px;
     overflow: hidden;
 `
-
 
 const OVERLAY = styled.div`
     position: absolute;
@@ -94,7 +81,6 @@ const OVERLAY = styled.div`
     z-index: 1;
 `
 
-
 const OVERLAY_TEXT = styled.p`
     color: white;
     font-size: 18px;
@@ -106,6 +92,7 @@ const DashboardTable = () => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
     const [editable, setEditable] = useState(false);
 
+    // Function to generate the current week dates to display on table rows
     function getWeekDates() {
         const today = new Date();
         const monday = new Date(today);
@@ -118,7 +105,7 @@ const DashboardTable = () => {
         return weekDates;
     };
 
-    
+    // Function to handle status change for a specific date
     const handleStatusChange = (index, value) => {
         const newWeekDates =  [...weekDates];
         newWeekDates[index] = {
@@ -128,7 +115,7 @@ const DashboardTable = () => {
         setWeekDates(newWeekDates);
     };
 
-
+    // Function to handle time change (clock in/out) for a specific date
     const handleTimeChange = (index, field, value) => {
         const newWeekDates = [...weekDates];
         newWeekDates[index] = {
@@ -146,9 +133,9 @@ const DashboardTable = () => {
             }
         }
         setWeekDates(newWeekDates);
-    }
+    };
 
-
+    // Function to calculate hours worked based on clock in/out times
     const calculateHours = (clockIn, clockOut) => {
         const [hoursIn, minutesIn] = clockIn.split(':').map(Number);
         const [hoursOut, minutesOut] = clockOut.split(':').map(Number);
@@ -158,23 +145,25 @@ const DashboardTable = () => {
             hours--;
             minutes += 60;
         }
-        return `${hours}:${minutes.toString().padStart(2, '0')}`;
-    };    
+        let totalHours = hours + minutes / 60;   // convert minutes to fraction of hours
+        totalHours = totalHours.toFixed(1);      // round to 1 d.p.
+        return totalHours % 1 === 0 ? parseInt(totalHours) : parseFloat(totalHours);
+    };
 
-
+    // Function for edit button 
     const toggleEditMode = () => {
         setEditable(!editable);
     };
+    
+    // Function to check if the current date is a weekend or holiday (needed for the overlay)
+    const isWeekendOrHoliday = (weekDates) => {
+        const currentDate = new Date();
+        const currentDayStatus = weekDates[currentDate.getDay()].status;
 
-
-    const isWeekendOrHoliday = (date, status) => {
-        const day = date.getDay();
-
-        // check if weekend or holiday 
-        if (day === 6 || day === 0 || status === 'Holiday') {
+        // Check if current day is a weekend (Saturday/Sunday) or has holiday status
+        if (currentDate.getDay() === 6 || currentDate.getDay() === 0 || currentDayStatus === 'Holiday') {
             return true;
         }
-        return false;
     };
 
 
@@ -225,15 +214,12 @@ const DashboardTable = () => {
                             ))}
                     </tbody>
                 </TIMESHEET> 
-                {!editable && weekDates.some((row) => isWeekendOrHoliday(row.date, row.status)) && (
+                {!editable && weekDates.some((row, index) => isWeekendOrHoliday(row.date, row.status, index)) && (
                     <OVERLAY>
-                        <OVERLAY_TEXT>Holiday / Weekend</OVERLAY_TEXT>
+                        <OVERLAY_TEXT>Holiday / Weekend</OVERLAY_TEXT>     
                     </OVERLAY>
                 )}
             </OVERLAY_CONTAINER>
-            <EDIT_BTN onClick={toggleEditMode}>
-                {editable ? 'Non-editable' : 'Editable'} 
-            </EDIT_BTN>
         </div>
     )
 }
