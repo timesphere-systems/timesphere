@@ -45,7 +45,7 @@ def submit_timesheet(timesheet_id: int,
         with connection.cursor() as cursor:
             _ = cursor.execute("""
                 UPDATE timesheets
-                SET approval_status = 2
+                SET approval_status = (SELECT id FROM approval_status WHERE status_type='SUBMITTED')
                 WHERE id = (%s);""",
                 (timesheet_id,))
             connection.commit()
