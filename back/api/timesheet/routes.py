@@ -48,7 +48,8 @@ def submit_timesheet(timesheet_id: int,
                 SET approval_status = (SELECT id FROM approval_status WHERE status_type='SUBMITTED')
                 WHERE id = (%s);""",
                 (timesheet_id,))
-            #if statement check the number of modified rows to ensure a valid timesheet ID was provided
+            #if statement check the number of modified rows
+            #to ensure a valid timesheet ID was provided
             # number of modified rows == cursor.rowcount
             if cursor.rowcount == 1:
                 return JSONResponse(
