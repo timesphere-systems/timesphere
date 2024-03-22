@@ -70,6 +70,41 @@ const EDIT_BTN = styled.button`
     cursor: pointer;
 `
 
+const TOGGLE_EDIT = styled.div`
+    align-self: center;
+`
+
+const TOGGLE = styled.input`
+`
+
+const LABEL = styled.label`
+`
+
+const OverlayContainer = styled.div`
+    position: relative;
+`;
+
+
+const Overlay = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+`;
+
+
+const OverlayText = styled.p`
+    color: white;
+    font-size: 18px;
+`;
+
+
 
 const DashboardTable = () => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
@@ -136,55 +171,77 @@ const DashboardTable = () => {
     };
 
 
+    const isWeekendOrHoliday = (date, status) => {
+        const day = date.getDay();
+
+        // check if weekend or holiday 
+        if (day === 6 || day === 0 || status === 'Holiday') {
+            return true;
+        }
+        return false;
+    };
+
+
     return (
         <div style={{display:'flex', flexDirection:'column'}}>
-            <TIMESHEET>
-                <HEADERS>
-                        <TR>
-                            <TH></TH>
-                            <TH>Date</TH>
-                            <TH>Status</TH>
-                            <TH>Clock-In</TH>
-                            <TH>Clock-Out</TH>
-                            <TH>Hours</TH>
-                        </TR>
-                </HEADERS>
-                <tbody>
-                        {weekDates.map((row, index) => (
-                            <TR key={index}>
-                                <TD>{['Monday','Tuesday','Wednesday','Thursday','Friday'][index]}</TD>
-                                <TD>{row.date.toLocaleDateString()}</TD>
-                                <TD>
-                                    <STATUS value={row.status} onChange={(e) => handleStatusChange(index, e.target.value)} disabled={!editable}>
-                                        <option value="Working">Working</option>
-                                        <option value="Sick">Sick</option>
-                                        <option value="Holiday">Holiday</option>
-                                    </STATUS>
-                                </TD>
-                                <TD>
-                                    <TIME
-                                        type="time"
-                                        value={row.clockIn}
-                                        onChange={(e) => handleTimeChange(index, 'clockIn', e.target.value)}
-                                        disabled={!editable}
-                                    />
-                                </TD>
-                                <TD>
-                                    <TIME
-                                        type="time"
-                                        value={row.clockOut}
-                                        onChange={(e) => handleTimeChange(index, 'clockOut', e.target.value)}
-                                        disabled={!editable}
-                                    />
-                                </TD>
-                                <TD>{row.hours}</TD>
+            <OverlayContainer>
+                <TIMESHEET>
+                    <HEADERS>
+                            <TR>
+                                <TH></TH>
+                                <TH>Date</TH>
+                                <TH>Status</TH>
+                                <TH>Clock-In</TH>
+                                <TH>Clock-Out</TH>
+                                <TH>Hours</TH>
                             </TR>
-                        ))}
-                </tbody>
-            </TIMESHEET> 
+                    </HEADERS>
+                    <tbody>
+                            {weekDates.map((row, index) => (
+                                <TR key={index}>
+                                    <TD>{['Monday','Tuesday','Wednesday','Thursday','Friday'][index]}</TD>
+                                    <TD>{row.date.toLocaleDateString()}</TD>
+                                    <TD>
+                                        <STATUS value={row.status} onChange={(e) => handleStatusChange(index, e.target.value)} disabled={!editable}>
+                                            <option value="Working">Working</option>
+                                            <option value="Sick">Sick</option>
+                                            <option value="Holiday">Holiday</option>
+                                        </STATUS>
+                                    </TD>
+                                    <TD>
+                                        <TIME
+                                            type="time"
+                                            value={row.clockIn}
+                                            onChange={(e) => handleTimeChange(index, 'clockIn', e.target.value)}
+                                            disabled={!editable}
+                                        />
+                                    </TD>
+                                    <TD>
+                                        <TIME
+                                            type="time"
+                                            value={row.clockOut}
+                                            onChange={(e) => handleTimeChange(index, 'clockOut', e.target.value)}
+                                            disabled={!editable}
+                                        />
+                                    </TD>
+                                    <TD>{row.hours}</TD>
+                                </TR>
+                            ))}
+                    </tbody>
+                </TIMESHEET> 
+                {!editable && weekDates.some((row) => isWeekendOrHoliday(row.date, row.status)) && (
+                    <Overlay>
+                        <OverlayText>Nothing needs to be done at the moment</OverlayText>
+                    </Overlay>
+                )}
+            </OverlayContainer>
             <EDIT_BTN onClick={toggleEditMode}>
-                {editable ? 'Non-editable' : 'Editable'}
+                {editable ? 'Non-editable' : 'Editable'} 
             </EDIT_BTN>
+            <TOGGLE_EDIT>
+                <TOGGLE type="checkbox" onClick={toggleEditMode}/>
+                <LABEL>{editable ? 'Editable' : 'Editable'} </LABEL>
+            </TOGGLE_EDIT>
         </div>
     )
 }
