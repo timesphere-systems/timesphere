@@ -5,14 +5,15 @@ import { useState } from 'react'
 
 const TIMESHEET = styled.table`
     margin: auto;
-    margin-bottom: 10px;
-    border-radius: 9px;
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: inherit;
 `
 
 const HEADERS = styled.thead`
@@ -70,39 +71,34 @@ const EDIT_BTN = styled.button`
     cursor: pointer;
 `
 
-const TOGGLE_EDIT = styled.div`
-    align-self: center;
-`
 
-const TOGGLE = styled.input`
-`
-
-const LABEL = styled.label`
-`
-
-const OverlayContainer = styled.div`
+const OVERLAY_CONTAINER = styled.div`
     position: relative;
-`;
+    margin: auto;
+    border-radius: 9px;
+    overflow: hidden;
+`
 
 
-const Overlay = styled.div`
+const OVERLAY = styled.div`
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 9px;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1;
-`;
+`
 
 
-const OverlayText = styled.p`
+const OVERLAY_TEXT = styled.p`
     color: white;
     font-size: 18px;
-`;
+`
 
 
 
@@ -184,7 +180,7 @@ const DashboardTable = () => {
 
     return (
         <div style={{display:'flex', flexDirection:'column'}}>
-            <OverlayContainer>
+            <OVERLAY_CONTAINER>
                 <TIMESHEET>
                     <HEADERS>
                             <TR>
@@ -230,18 +226,14 @@ const DashboardTable = () => {
                     </tbody>
                 </TIMESHEET> 
                 {!editable && weekDates.some((row) => isWeekendOrHoliday(row.date, row.status)) && (
-                    <Overlay>
-                        <OverlayText>Nothing needs to be done at the moment</OverlayText>
-                    </Overlay>
+                    <OVERLAY>
+                        <OVERLAY_TEXT>Holiday / Weekend</OVERLAY_TEXT>
+                    </OVERLAY>
                 )}
-            </OverlayContainer>
+            </OVERLAY_CONTAINER>
             <EDIT_BTN onClick={toggleEditMode}>
                 {editable ? 'Non-editable' : 'Editable'} 
             </EDIT_BTN>
-            <TOGGLE_EDIT>
-                <TOGGLE type="checkbox" onClick={toggleEditMode}/>
-                <LABEL>{editable ? 'Editable' : 'Editable'} </LABEL>
-            </TOGGLE_EDIT>
         </div>
     )
 }
