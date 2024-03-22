@@ -33,7 +33,7 @@ def update_holiday_request(_id: int, _request: models.Holiday) -> None:
     raise NotImplementedError()
 
 @router.post("/{holiday_id}/submit", status_code=status.HTTP_200_OK)
-def submit_holiday(holiday_id: int,
+def submit_holiday_request(holiday_id: int,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                      ) -> JSONResponse:
     """Submits a selected holiday.
