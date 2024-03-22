@@ -48,14 +48,13 @@ def submit_timesheet(timesheet_id: int,
                 SET approval_status = (SELECT id FROM approval_status WHERE status_type='SUBMITTED')
                 WHERE id = (%s);""",
                 (timesheet_id,))
-            connection.commit()
+            #if statement check the number of modified rows to ensure a valid timesheet ID was provided
+            # number of modified rows == cursor.rowcount
             if cursor.rowcount == 1:
-                cursor.close()
                 return JSONResponse(
                     status_code=status.HTTP_200_OK,
                     content={"message":"Timesheet submitted sucessfully"}
                 )
-            cursor.close()
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "Failed to submit timesheet, invalid timesheet ID"}
