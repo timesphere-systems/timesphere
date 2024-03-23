@@ -77,13 +77,13 @@ const TIMEZONE_ICON = styled(ICON)`
 
 
 
-const ProfileSidebar = ({profileImg, name, email, timezone, isVisible, toggleSidebar}) => {
+const ProfileSidebar = ({profileImg, name, email, timezone, isVisible, hideSidebar}) => {
     
     return (
       <div>
         <SIDEBAR isVisible={isVisible}>
             <div>
-                <ExitButton src={ExitIcon} alt="exit" onClick={toggleSidebar}/>
+                <ExitButton src={ExitIcon} alt="exit" onClick={hideSidebar}/> 
             </div>
             <div>
                 <PFP src={profileImg} alt="profile Pic" />
