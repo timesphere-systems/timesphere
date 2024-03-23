@@ -1,5 +1,4 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ExitIcon from '../assets/icons/ExitIcon.svg';
 import EmailIcon from '../assets/icons/EmailIcon.svg';
@@ -10,7 +9,7 @@ const SIDEBAR = styled.nav`
     position: fixed;
     top: 0;
     right: ${({ isVisible }) => (isVisible ? '0' : '-100%')}; 
-    transition: right 1.5s ease; 
+    transition: right 1s ease; 
     display: flex;
     flex-direction: column;
     border-top-left-radius: 9px;
@@ -37,17 +36,17 @@ const PFP = styled.img`
     width: 100px;
     height: 100px;
     border-radius: 50%; 
+    display: block; 
     object-fit: cover; 
     margin: 0 auto; 
-    display: block; 
-    border: 2px solid #1B143E;
+    //border: 2px solid #1B143E;
 `
 
 const NAME = styled.h1`
     color: black;
     font-size: 22px;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 50px;
 `
 
 const INFO_HEADER = styled.div`
@@ -57,32 +56,29 @@ const INFO_HEADER = styled.div`
     align-items: center;
 `
 
+const INFO = styled.p`
+    font-size: 14px;
+    margin-bottom: 30px;
+`
+
+
 const ICON = styled.img`
-    width:15px;
-    height: 15px;
-    margin-right: 12px;
+    width:13px;
+    height: 13px;
+    margin-right: 8px;
 `
 
 const EMAIL_ICON = styled(ICON)`
-    //padding-right: 10px;
-
 `
 
 const TIMEZONE_ICON = styled(ICON)`
-    //padding-right: 10px;
-
-`
-
-
-const INFO = styled.p`
-    font-size: 20px;
 `
 
 
 
 
 const ProfileSidebar = ({profileImg, name, email, timezone, isVisible, toggleSidebar}) => {
-
+    
     return (
       <div>
         <SIDEBAR isVisible={isVisible}>
