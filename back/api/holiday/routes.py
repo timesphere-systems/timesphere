@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from ..dependencies import get_connection_pool
+from ..common import submit
 from . import models
 
 
@@ -41,21 +42,4 @@ def submit_holiday_request(holiday_id: int,
     Args:
         holiday_id (int): The holiday's ID.
     """
-    with pool.connection() as connection:
-        with connection.cursor() as cursor:
-            _ = cursor.execute("""
-                UPDATE holidays
-                SET approval_status = (SELECT id FROM approval_status WHERE status_type='SUBMITTED')
-                WHERE id = (%s);""",
-                (holiday_id,))
-            # Check number of modified rows to ensure a valid holiday ID was provided
-            if cursor.rowcount == 1:
-                return JSONResponse(
-                    status_code=status.HTTP_200_OK,
-                    content={"message":"holiday request submitted sucessfully"}
-                )
-    # If the success condition is not met, an invalid holiday ID was provided
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content={"message": "Failed to submit holiday request, invalid holiday ID"}
-    )
+    return submit(holiday_id, pool, "holidays")
