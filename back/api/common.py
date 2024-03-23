@@ -2,6 +2,7 @@
 from fastapi import status
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
+from psycopg import sql
 
 def submit(submit_id: int,
            pool: ConnectionPool,
@@ -17,11 +18,14 @@ def submit(submit_id: int,
 
     with pool.connection() as connection:
         with connection.cursor() as cursor:
-            _ = cursor.execute(f"""
-                UPDATE {table}
+            query = sql.SQL(
+         """UPDATE {DBtable}
                 SET approval_status = (SELECT id FROM approval_status WHERE status_type='SUBMITTED')
-                WHERE id = %s;""",
-                (submit_id,))
+                WHERE {pkey} = %s;""").format(
+                    DBtable = sql.Identifier(table),
+                    pkey = sql.Identifier('id')
+                )
+            _ = cursor.execute(query, (submit_id,))
             # Check number of modified rows to ensure a valid ID was provided
             if cursor.rowcount == 1:
                 return JSONResponse(
