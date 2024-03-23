@@ -312,3 +312,5 @@ const PendingHolidayRequestsTable = () => {
         </BIGTABLE>
     )
 }
+
+export default PendingHolidayRequestsTable;
