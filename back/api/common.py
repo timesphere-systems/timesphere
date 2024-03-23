@@ -19,10 +19,10 @@ def submit(submit_id: int,
     with pool.connection() as connection:
         with connection.cursor() as cursor:
             query = sql.SQL(
-         """UPDATE {DBtable}
+         """UPDATE {table}
                 SET approval_status = (SELECT id FROM approval_status WHERE status_type='SUBMITTED')
                 WHERE {pkey} = %s;""").format(
-                    DBtable = sql.Identifier(table),
+                    table = sql.Identifier(table),
                     pkey = sql.Identifier('id')
                 )
             _ = cursor.execute(query, (submit_id,))
