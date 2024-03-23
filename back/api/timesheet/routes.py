@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from ..dependencies import get_connection_pool
+from ..common import submit
 from . import models
 
 # /timesheet
@@ -41,21 +42,4 @@ def submit_timesheet(timesheet_id: int,
     Args:
         timesheet_id (int): The timesheet's ID.
     """
-    with pool.connection() as connection:
-        with connection.cursor() as cursor:
-            _ = cursor.execute("""
-                UPDATE timesheets
-                SET approval_status = (SELECT id FROM approval_status WHERE status_type='SUBMITTED')
-                WHERE id = (%s);""",
-                (timesheet_id,))
-            # Check number of modified rows to ensure a valid timesheet ID was provided
-            if cursor.rowcount == 1:
-                return JSONResponse(
-                    status_code=status.HTTP_200_OK,
-                    content={"message":"Timesheet submitted sucessfully"}
-                )
-    # If the success condition is not met, an invalid timesheet ID was provided
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content={"message": "Failed to submit timesheet, invalid timesheet ID"}
-    )
+    return submit(timesheet_id, pool, "timesheets")
