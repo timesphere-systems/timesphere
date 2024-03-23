@@ -25,6 +25,10 @@ const SIDEBAR = styled.nav`
 
 const ExitButton = styled.img`
     cursor: pointer;
+    display: block;
+    margin-left: auto;
+    margin-bottom: 30px;
+    width: 12px;
 `
 
 
@@ -42,6 +46,7 @@ const NAME = styled.h1`
     color: black;
     font-size: 22px;
     text-align: center;
+    margin-bottom: 30px;
 `
 
 const INFO_HEADER = styled.div`
@@ -49,6 +54,22 @@ const INFO_HEADER = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
+`
+
+const ICON = styled.img`
+    width:15px;
+    height: 15px;
+    margin-right: 12px;
+`
+
+const EMAIL_ICON = styled(ICON)`
+    //padding-right: 10px;
+
+`
+
+const TIMEZONE_ICON = styled(ICON)`
+    //padding-right: 10px;
+
 `
 
 
@@ -75,11 +96,11 @@ const ProfileSidebar = ({profileImg, name = "Matthew", email, timezone}) => {
                 <NAME>{name}</NAME>
             </div>
             <div>
-                <INFO_HEADER><img src={EmailIcon}/>Email Address</INFO_HEADER>
+                <INFO_HEADER><EMAIL_ICON src={EmailIcon} alt=""/>Email Address</INFO_HEADER>
                 <EMAIL>{email}</EMAIL>
             </div>
             <div>
-                <INFO_HEADER><img src={TimezoneIcon}/>Timezone</INFO_HEADER>
+                <INFO_HEADER><TIMEZONE_ICON src={TimezoneIcon} alt=""/>Timezone</INFO_HEADER>
                 <TIMEZONE>{timezone}</TIMEZONE>
             </div>
         </SIDEBAR>
