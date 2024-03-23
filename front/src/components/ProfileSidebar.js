@@ -1,18 +1,18 @@
-import React from 'react'
-import styled from 'styled-components'
+import React from 'react';
+import { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import ExitIcon from '../assets/icons/ExitIcon.svg';
 import EmailIcon from '../assets/icons/EmailIcon.svg';
 import TimezoneIcon from '../assets/icons/TimezoneIcon.svg';
 
 
 const SIDEBAR = styled.nav`
-    position: absolute;
+    position: fixed;
     top: 0;
-    right: 0;
+    right: ${({ isVisible }) => (isVisible ? '0' : '-100%')}; 
+    transition: right 1.5s ease; 
     display: flex;
     flex-direction: column;
-    //align-items: end;
-    border-left: 1px solid black;
     border-top-left-radius: 9px;
     border-bottom-left-radius: 9px;
     padding-inline: 20px;
@@ -20,7 +20,8 @@ const SIDEBAR = styled.nav`
     background-color: white; 
     height: 98%;
     width: 200px; 
-    
+    box-shadow: -5px 0 5px rgba(0, 0, 0, 0.1); 
+    border: 1px solid rgba(0, 0, 0, 0.1); 
 `
 
 const ExitButton = styled.img`
@@ -73,21 +74,20 @@ const TIMEZONE_ICON = styled(ICON)`
 `
 
 
-const EMAIL = styled.p`
+const INFO = styled.p`
+    font-size: 20px;
 `
 
-const TIMEZONE = styled.p`
-`
 
 
 
-const ProfileSidebar = ({profileImg, name = "Matthew", email, timezone}) => {
+const ProfileSidebar = ({profileImg, name, email, timezone, isVisible, toggleSidebar}) => {
 
     return (
       <div>
-        <SIDEBAR>
+        <SIDEBAR isVisible={isVisible}>
             <div>
-                <ExitButton src={ExitIcon} alt="exit" />
+                <ExitButton src={ExitIcon} alt="exit" onClick={toggleSidebar}/>
             </div>
             <div>
                 <PFP src={profileImg} alt="profile Pic" />
@@ -97,11 +97,11 @@ const ProfileSidebar = ({profileImg, name = "Matthew", email, timezone}) => {
             </div>
             <div>
                 <INFO_HEADER><EMAIL_ICON src={EmailIcon} alt=""/>Email Address</INFO_HEADER>
-                <EMAIL>{email}</EMAIL>
+                <INFO>{email}</INFO>
             </div>
             <div>
                 <INFO_HEADER><TIMEZONE_ICON src={TimezoneIcon} alt=""/>Timezone</INFO_HEADER>
-                <TIMEZONE>{timezone}</TIMEZONE>
+                <INFO>{timezone}</INFO>
             </div>
         </SIDEBAR>
       </div>
