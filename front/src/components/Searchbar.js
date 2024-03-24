@@ -15,13 +15,14 @@ const BAR = styled.div`
     background: #FFF;
 `
 
-const TEXT = styled.p`
+const TEXT = styled.input`
     color: rgba(0, 0, 0, 0.39);
     font-family: Inter;
     font-size: 15px;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+    border: none;
 `
 const SEARCH = styled.div`
     display: flex;
@@ -33,23 +34,18 @@ const SEARCH = styled.div`
 const PIC = styled.div`
     width: 14px;
     height: 14px;
-    transform: rotate(-90deg);
 `
 
 
 const Searchbar = () => {
     return(
         <BAR>
-            <form id="searchEmployeesForm" name="searchEmployeesForm">
-                <TEXT>
-                    <input type="text" name="searchEmployee" id="searchEmployee" placeholder="Search Employee" />
-                </TEXT>
-                <SEARCH>
-                    <PIC>
-                        <input type="image" src={SearchIcon} alt="Submit"/>
-                    </PIC>
-                </SEARCH>
-            </form>
+            <TEXT placeholder="Search Employee" />
+            <SEARCH>
+                <PIC>
+                    <input type="image" src={SearchIcon} alt="Submit"/>
+                </PIC>
+            </SEARCH>
         </BAR>
 
     )
