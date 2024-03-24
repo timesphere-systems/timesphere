@@ -4,6 +4,7 @@ from typing import Annotated, cast
 from fastapi import APIRouter, status, Depends
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
+from psycopg import sql
 from psycopg.errors import ForeignKeyViolation
 from psycopg.rows import class_row
 from ..dependencies import get_connection_pool
@@ -164,3 +165,50 @@ def create_timesheet(consultant_id: int, start: datetime,
             status_code=status.HTTP_201_CREATED,
             content={"id": timesheet_id}
         )
+
+@router.post("/{consultant_id}/timesheets", status_code=status.HTTP_200_OK, response_model=None)
+def get_timesheets(consultant_id: int,
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     approval_status: str | None = None
+                     ) -> JSONResponse | list[models.ConsultantTimesheet]:
+    """Returns all consultants submitted timesheets filtered by approval_status.
+    
+    Args:
+        id (int): The consultant's ID.
+    Returns:
+        List
+    """
+    query = ""
+    if approval_status is None:
+        query = sql.SQL("""SELECT timesheets.id AS timesheet_id, timesheets.created AS created,
+                                                timesheets.submitted AS email, submitted,
+                                                approval_status.status_type AS approval_status
+                FROM timesheets, approval_status
+                WHERE approval_status.id = timesheets.approval_status
+                AND timesheets.approval_status != 
+                        (SELECT id FROM approval_status WHERE status_type='INCOMPLETE')
+                AND timesheets.consultant = %s;""")
+    else:
+        query = sql.SQL(
+        """SELECT timesheets.id AS timesheet_id, timesheets.created AS created, 
+                                        timesheets.submitted AS email, submitted,
+                                        approval_status.status_type AS approval_status
+                FROM timesheets, approval_status
+                WHERE approval_status.id = timesheets.approval_status
+                AND approval_status.status_type = {approval_status}
+                AND timesheets.consultant = %s;"""
+                ).format(
+                    approval_status = approval_status
+                )
+    with pool.connection() as connection:
+        timesheets = []
+        with connection.cursor(row_factory=class_row(models.ConsultantTimesheet)) as cursor:
+            timesheets = cursor.execute(query, (consultant_id,)
+            ).fetchall()
+            if len(timesheets) == 0:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "Failed to get timesheets"}
+                )
+
+        return timesheets
