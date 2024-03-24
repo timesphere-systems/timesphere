@@ -1,39 +1,42 @@
 import React from 'react'
 import styled from 'styled-components';
+import Moon from "../assets/icons/moon.svg";
+import Sun from "../assets/icons/sun.svg";
 
 const GREET = styled.h1`
+    color: #1B143E;
+    //leading-trim: both;
+    //text-edge: cap;
     font-family: Inter;
     font-size: 36px;
+    font-style: normal;
     font-weight: 800;
-    line-height: 44px;
-    letter-spacing: 0em;
-    text-align: left;
-    color: #1B143E;
+    line-height: normal;
 `
 
 const DATE = styled.h1`
+    color: #1B143E;
+    text-align: right;
     font-family: Inter;
     font-size: 18px;
+    font-style: normal;
     font-weight: 700;
-    line-height: 22px;
-    letter-spacing: 0em;
-    text-align: right;
-    color: #1B143E;
+    line-height: normal;
 `
 
 const DIV = styled.div`
-    width: 29.75rem;
-    height: 4.8125rem;
+    width: 476px;
+    height: 77px;
     flex-shrink: 0;
 `
 
 const IMG = styled.image`
-    width: 1.875rem;
-    height: 1.875rem;
+    width: 30px;
+    height: 30px;
     flex-shrink: 0;
 
     fill: #1B143E;
-    stroke-width: 3.571px;
+    stroke-width: 1.571px;
     stroke: #1B143E;
 `
 
@@ -81,30 +84,33 @@ const getGreeting = () => {
         return "Greetings, ";
     } else {
         const stringy = "Good ";
-        stringy.concat(greet, ", ");
-        return stringy;
+        let result = stringy.concat(greet, ", ");
+        return result;
     }
 }
 
 const getImage = () => {
     let time = getTiming();
-    if (time === "" || time === "Afternoon") {
-        return (<img src="..\assets\icons\sun.sng" alt="little sun"/>);
-    } else if (time === "Night" || time === "Evening") {
-        return (<img src="..\assets\icons\moon.svg" alt="little moon"/>);
+    if (time === "Night" || time === "Evening") {
+        return ({Moon});
     } else {
-        return (<img src="..\assets\icons\sunset.svg" alt="little sunrise"/>);
+        return ({Sun});
     }
 }
 
 const Greeting = () => {
     let fullGreet = getGreeting();
-    fullGreet.concat("Amal");
+    fullGreet = fullGreet.concat("Amal");
     let dateFull = getDate();
     let greetImage = getImage();
     return (
         <DIV>
-            <GREET><IMG>{greetImage}</IMG>{fullGreet}</GREET>
+            <GREET>
+                <IMG>
+                    <img src={Sun} alt='time-based icon'></img>
+                </IMG>
+                {fullGreet}
+            </GREET>
             <DATE>{dateFull}</DATE>
         </DIV>
     )
