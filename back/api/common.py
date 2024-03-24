@@ -1,4 +1,5 @@
 """Common functions for the API."""
+from datetime import datetime
 from fastapi import status
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
@@ -20,9 +21,12 @@ def submit(submit_id: int,
         with connection.cursor() as cursor:
             query = sql.SQL(
          """UPDATE {table}
-                SET approval_status = (SELECT id FROM approval_status WHERE status_type='SUBMITTED')
+                SET approval_status = 
+                    (SELECT id FROM approval_status WHERE status_type='WAITING'), 
+                    submitted = {current_time}
                 WHERE {pkey} = %s;""").format(
                     table = sql.Identifier(table),
+                    current_time = datetime.today().strftime('%Y-%m-%d'),
                     pkey = sql.Identifier('id')
                 )
             _ = cursor.execute(query, (submit_id,))

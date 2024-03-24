@@ -41,6 +41,8 @@ CREATE TABLE consultants (
 -- Weekly Timesheets
 CREATE TABLE timesheets (
   id SERIAL PRIMARY KEY,
+  created DATE NOT NULL,
+  submitted DATE,
   start DATE NOT NULL,
   consultant INT NOT NULL,
   approval_status INT NOT NULL,
@@ -60,6 +62,8 @@ CREATE TABLE time_entries (
 
 CREATE TABLE holidays(
   id SERIAL PRIMARY KEY,
+  created DATE NOT NULL,
+  submitted DATE,
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   consultant INT NOT NULL,
