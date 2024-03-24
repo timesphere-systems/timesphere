@@ -4,8 +4,8 @@
 --this is stored inorder so the id is consistant with the ENUMs defined
 INSERT INTO approval_status (status_type)
 VALUES 
+  ('INCOMPLETE'),
   ('WAITING'),
-  ('SUBMITTED'),
   ('APPROVED'),
   ('DENIED');
 
