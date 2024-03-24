@@ -90,7 +90,7 @@ const OVERLAY_TEXT = styled.p`
 
 const DashboardTable = () => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
-    const [editable, setEditable] = useState(false);
+    const [editable, setEditable] = useState(false);   //change to true for testing 
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
@@ -100,7 +100,7 @@ const DashboardTable = () => {
         const weekDates = [...Array(5)].map((_, index) => {
             const date = new Date(monday);
             date.setDate(date.getDate() + index);
-            return { date, status: 'Working', clockIn: '', clockOut:'', hours: ''};
+            return { date, status: 'Working', clockIn: '', clockOut:'', hours: 0};
         });
         return weekDates;
     };
@@ -129,7 +129,7 @@ const DashboardTable = () => {
                 const hoursWorked = calculateHours(clockIn, clockOut);
                 newWeekDates[index].hours = hoursWorked;
             } else {
-                newWeekDates[index].hours = '';
+                newWeekDates[index].hours = 0;
             }
         }
         setWeekDates(newWeekDates);
@@ -164,6 +164,7 @@ const DashboardTable = () => {
         if (currentDate.getDay() === 6 || currentDate.getDay() === 0 || currentDayStatus === 'Holiday') {
             return true;
         }
+        return false;
     };
 
 
