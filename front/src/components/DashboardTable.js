@@ -156,9 +156,9 @@ const DashboardTable = () => {
     };
     
     // Function to check if the current date is a weekend or holiday (needed for the overlay)
-    const isWeekendOrHoliday = (weekDates) => {
+    const isWeekendOrHoliday = (row) => {
         const currentDate = new Date();
-        const currentDayStatus = weekDates[currentDate.getDay()].status;
+        const currentDayStatus = row.status;
 
         // Check if current day is a weekend (Saturday/Sunday) or has holiday status
         if (currentDate.getDay() === 6 || currentDate.getDay() === 0 || currentDayStatus === 'Holiday') {
@@ -214,7 +214,7 @@ const DashboardTable = () => {
                             ))}
                     </tbody>
                 </TIMESHEET> 
-                {!editable && weekDates.some((row, index) => isWeekendOrHoliday(row.date, row.status, index)) && (
+                {!editable && weekDates.some((row) => isWeekendOrHoliday(row)) && (
                     <OVERLAY>
                         <OVERLAY_TEXT>Holiday / Weekend</OVERLAY_TEXT>     
                     </OVERLAY>
