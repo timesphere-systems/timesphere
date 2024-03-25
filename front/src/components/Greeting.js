@@ -95,9 +95,9 @@ const getGreeting = () => {
 const getImage = () => {
     let time = getTiming();
     if (time === "Night" || time === "Evening") {
-        return ({Moon});
+        return (Moon);
     } else {
-        return ({Sun});
+        return (Sun);
     }
 }
 
@@ -110,7 +110,7 @@ const Greeting = () => {
         <DIV>
             <GREET>
                 <IMG>
-                    <img src={Sun} alt='time-based icon'></img>
+                    <img src={greetImage} alt='time-based icon'></img>
                 </IMG>
                 {fullGreet}
             </GREET>
