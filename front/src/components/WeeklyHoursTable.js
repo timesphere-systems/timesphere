@@ -1,15 +1,11 @@
 import React from 'react'
 import styled from 'styled-components'
 import { useState } from 'react'
-
-import { IoClose } from "react-icons/io5";
-
-import ApproveIcon from '../assets/icons/Approve.svg';
-import WaitingIcon from '../assets/icons/Waiting.svg';
-import DenyIcon from '../assets/icons/Deny.svg';
 import EditIcon from '../assets/icons/Edit.svg';
 import unEditIcon from '../assets/icons/unEdit.svg';
 import Timesheet from '../assets/icons/Timesheet.svg';
+import SetStatusButton from './SetStatusButton';
+import ModalWrapper from './ModalWrapper';
 
 
 const TIMESHEET = styled.table`
@@ -54,24 +50,21 @@ const TD = styled.td`
     background-color: rgba(54, 54, 54, 1);
     font-weight: 300;
     text-align: center;
+
+    img{
+        width: 25px;
+        height: 25px;
+    }  
 `
 
 const EDIT = styled.div`
     cursor: ${({ editable }) => editable ? 'pointer' : 'default'};
     display: inline-block;
-`;
 
-const Overlay = styled.div`
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    visibility: ${({ isVisible }) => isVisible ? 'visible' : 'hidden'};
+    img{
+        width: 25px;
+        height: 25px;
+    }
 `;
 
 const OVERLAY_CONTAINER = styled.div`
@@ -79,32 +72,6 @@ const OVERLAY_CONTAINER = styled.div`
     margin: auto;
     border-radius: 9px;
     overflow: hidden;
-`;
-
-const OVERLAY_HEADER = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h2{
-        margin-top: 0;
-    }
-`;
-
-const CLOSEBUTTON = styled.button`
-    background: none;
-    border: none;
-    cursor: pointer;
-`;
-
-const OVERLAY_CONTENT = styled.div`
-    display: flex;
-    flex-direction: column;
-    background-color: white;
-    border-radius: 9px;
-    border: 1.5px solid black;
-    padding: 30px;
-
 `;
 
 const fetchedTimesheetData = [
@@ -133,24 +100,6 @@ const fetchedTimesheetData = [
 const DashboardTable = () => {
     const [timesheetData, setTimesheetData] = useState(fetchedTimesheetData);
     const [overlayVisible, setOverlayVisible] = useState(false);
-    // Function to generate the current week dates to display on table rows
-    function getTimesheetDates() {
-        const created = new Date();
-        const submitted = new Date();
-        return { dateCreated: created, dateSubmitted: submitted };
-    }
-
-    function getStatusIcon(status) {
-        switch(status) {
-            case 'Approved':
-                return <img src={ApproveIcon} alt="Approved" />;
-            case 'Denied':
-                return <img src={DenyIcon} alt="Denied" />;
-            case 'Waiting':
-            default:
-                return <img src={WaitingIcon} alt="Waiting" />;
-        }
-    }
 
     const toggleOverlay = () => {
         setOverlayVisible(!overlayVisible);
@@ -176,13 +125,13 @@ const DashboardTable = () => {
                             <TR key={timesheet.id}>
                                 <TD>
                                     <button onClick={toggleOverlay} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
-                                    <img src={Timesheet} alt="Timesheet Icon" />
+                                    <img src={Timesheet} alt="Timesheet Icon"/>
                                     </button>
                                 </TD>
                                 <TD>{timesheet.dateCreated.toLocaleDateString()}</TD>
                                 <TD>{timesheet.dateSubmitted.toLocaleDateString()}</TD>
                                 <TD>
-                                    {getStatusIcon(timesheet.status)}
+                                    <SetStatusButton status={timesheet.status} />
                                 </TD>
                                 <TD>
                                     <EDIT editable={isRowEditable}>
@@ -195,39 +144,7 @@ const DashboardTable = () => {
                     </tbody>
                 </TIMESHEET> 
             </OVERLAY_CONTAINER>
-            <Overlay isVisible={overlayVisible}>
-                <OVERLAY_CONTENT>
-                    <OVERLAY_HEADER>
-                        <h2>Timesheet</h2>
-                        <CLOSEBUTTON onClick={toggleOverlay}><IoClose style={{height: '25px', width: '25px'}}/></CLOSEBUTTON>
-                    </OVERLAY_HEADER>
-                    {/* Add the timesheet form here */}
-                        <OVERLAY_CONTAINER>
-                        <TIMESHEET>
-                            <HEADERS>
-                                    <TR>
-                                        <TH></TH>
-                                        <TH>Date</TH>
-                                        <TH>Status</TH>
-                                        <TH>Clock-In</TH>
-                                        <TH>Clock-Out</TH>
-                                        <TH>Hours</TH>
-                                    </TR>
-                            </HEADERS>
-                            <tbody>
-                                <TR>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                </TR>
-                            </tbody>
-                        </TIMESHEET> 
-                    </OVERLAY_CONTAINER>
-                </OVERLAY_CONTENT>
-            </Overlay>
+            <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} />
         </div>
     )
     
