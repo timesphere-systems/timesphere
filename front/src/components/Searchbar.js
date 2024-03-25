@@ -16,12 +16,15 @@ const BAR = styled.div`
 `
 
 const TEXT = styled.input`
-    color: rgba(0, 0, 0, 0.39);
+    color: #605984;
     font-family: Inter;
     font-size: 15px;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+    border: none;
+    width: 90%;
+    height: 80%;
     border: none;
 `
 const SEARCH = styled.div`
