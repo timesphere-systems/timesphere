@@ -11,6 +11,7 @@ from ..dependencies import get_connection_pool
 from ..models import ApprovalStatus
 from . import models
 
+
 # /consultant
 router = APIRouter(
     prefix="/consultant",

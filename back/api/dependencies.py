@@ -3,6 +3,7 @@ from functools import lru_cache
 import psycopg_pool
 from .config import Settings
 
+
 @lru_cache
 def get_settings() -> Settings:
     """Get the settings for the API."""
