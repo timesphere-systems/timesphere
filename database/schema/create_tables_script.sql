@@ -52,7 +52,7 @@ CREATE TABLE timesheets (
 
 CREATE TABLE time_entries (
   start_time TIMESTAMP NOT NULL,
-  end_time TIMESTAMP NOT NULL,
+  end_time TIMESTAMP,
   timesheet INT NOT NULL,
   entry_type INT NOT NULL,
   PRIMARY KEY (timesheet, start_time),
