@@ -110,15 +110,21 @@ const OVERLAY_CONTENT = styled.div`
 const fetchedTimesheetData = [
     {
       id: 1,
-      dateCreated: new Date('2023-03-20'),
-      dateSubmitted: new Date('2023-03-21'),
+      dateCreated: new Date('2023-03-01'),
+      dateSubmitted: new Date('2023-03-05'),
       status: 'Approved',
     },
     {
       id: 2,
-      dateCreated: new Date('2023-03-22'),
-      dateSubmitted: new Date('2023-03-23'),
+      dateCreated: new Date('2023-03-08'),
+      dateSubmitted: new Date('2023-03-12'),
       status: 'Denied',
+    },
+    {
+      id: 3,
+      dateCreated: new Date('2023-03-15'),
+      dateSubmitted: new Date('2023-03-20'),
+      status: 'Waiting',
     },
     // more entries...
   ];
