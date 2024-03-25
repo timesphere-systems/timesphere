@@ -174,21 +174,57 @@ def create_timesheet(consultant_id: int, start: datetime,
 def get_timesheets(consultant_id: int,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
                      approval_status: ApprovalStatus | None = None
-                     ) -> JSONResponse | list[models.ConsultantTimesheet]:
+                     ) -> list[models.Entry]:
     """Returns all consultants submitted timesheets filtered by approval_status.
     
     Args:
         id (int): The consultant's ID.
+        pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
+        approval_status: (ApprovalStatus) The new status_type of the entry
     Returns:
-        List
+        list[models.Entry]
     """
+    return get_entries(consultant_id, 'timesheets', pool, approval_status)
 
-    base_query = sql.SQL("""SELECT timesheets.id AS timesheet_id, timesheets.created AS created,
-                                                timesheets.submitted AS email, submitted,
+@router.get("/{consultant_id}/holidays", status_code=status.HTTP_200_OK, response_model=None)
+def get_holidays(consultant_id: int,
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     approval_status: ApprovalStatus | None = None
+                     ) -> list[models.Entry]:
+    """Returns all consultants submitted holidays filtered by approval_status.
+    
+    Args:
+        id (int): The consultant's ID.
+        pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
+        approval_status: (ApprovalStatus) The new status_type of the entry
+    Returns:
+        list[models.Entry]
+    """
+    return get_entries(consultant_id, 'holidays', pool, approval_status)
+
+def get_entries(consultant_id: int,
+                 table: str,
+                 pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                 approval_status: ApprovalStatus | None = None
+                 ) -> list[models.Entry]:
+    """Returns all consultants submitted entries filtered by approval_status.
+    
+    Args:
+        id (int): The consultant's ID.
+        pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
+        table (str): The table to update.
+        approval_status: (ApprovalStatus) The new status_type of the entry
+    Returns:
+        list[models.Entry]
+    """
+    base_query = sql.SQL("""SELECT {table}.id AS entry_id, {table}.created AS created,
+                                                {table}.submitted AS email, submitted,
                                                 approval_status.status_type AS approval_status
-                FROM timesheets, approval_status
-                WHERE approval_status.id = timesheets.approval_status
-                AND timesheets.consultant = %s""")
+                FROM {table}, approval_status
+                WHERE approval_status.id = {table}.approval_status
+                AND {table}.consultant = %s""").format(
+                    table = sql.Identifier(table)
+                )
 
     # Append the condition for approval_status if provided,
     # exclude 'INCOMPLETE' status by default.
@@ -202,8 +238,7 @@ def get_timesheets(consultant_id: int,
         parameters = (consultant_id,)
 
     with pool.connection() as connection:
-        timesheets = []
-        with connection.cursor(row_factory=class_row(models.ConsultantTimesheet)) as cursor:
-            timesheets = cursor.execute(query, parameters).fetchall()
-
-        return timesheets
+        entries = []
+        with connection.cursor(row_factory=class_row(models.Entry)) as cursor:
+            entries = cursor.execute(query, parameters).fetchall()
+        return entries
