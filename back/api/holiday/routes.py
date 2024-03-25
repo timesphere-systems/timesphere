@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from ..dependencies import get_connection_pool
-from ..common import submit
+from ..common import submit, approve
 from . import models
 
 
@@ -43,3 +43,16 @@ def submit_holiday_request(holiday_id: int,
         holiday_id (int): The holiday's ID.
     """
     return submit(holiday_id, pool, "holidays")
+
+@router.post("/{holiday_id}/approve", status_code=status.HTTP_200_OK)
+def approve_holiday_request(holiday_id: int, approved: bool,
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                     ) -> JSONResponse:
+    """Approves/Denies a selected holiday.
+
+    Args:
+        holiday_id (int): The holiday's ID.
+        approved: (bool): Boolean Value representing is it is Approved (true)
+                          or Denied (false)
+    """
+    return approve(holiday_id, pool, "holidays", approved)
