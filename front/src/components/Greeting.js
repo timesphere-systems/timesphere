@@ -11,17 +11,20 @@ const GREET = styled.h1`
     font-size: 36px;
     font-style: normal;
     font-weight: 800;
+    text-align: center;
     line-height: normal;
+    margin: 0;
 `
 
-const DATE = styled.h1`
+const DATE = styled.p`
     color: #1B143E;
-    text-align: right;
+    text-align: center;
     font-family: Inter;
     font-size: 18px;
     font-style: normal;
     font-weight: 700;
     line-height: normal;
+    margin: 0;
 `
 
 const DIV = styled.div`
@@ -81,9 +84,9 @@ function getTiming() {
 const getGreeting = () => {
     let greet = getTiming();
     if (greet === "") {
-        return "Greetings, ";
+        return " Greetings, ";
     } else {
-        const stringy = "Good ";
+        const stringy = " Good ";
         let result = stringy.concat(greet, ", ");
         return result;
     }
