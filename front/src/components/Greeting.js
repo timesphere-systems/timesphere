@@ -43,11 +43,11 @@ const IMG = styled.image`
     stroke: #1B143E;
 `
 
-const getDate = () => {
-    const date = new Date();
+let getDate = () => {
+    let date = new Date();
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     let weekday = days[date.getDay()];
-    const dateNo = date.getDate();
+    let dateNo = date.getDate();
     let wholeDate = "";
     if (dateNo ===1) {
         wholeDate = "st";
@@ -60,14 +60,14 @@ const getDate = () => {
     }
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     let month = months[date.getMonth()];
-    const year = date.getFullYear();
+    let year = date.getFullYear();
     let fulldate = weekday.concat(" ", dateNo.toString(), wholeDate, " ", month, " ", year);
     return fulldate
 }
 
 function getTiming() {
-    const date = new Date();
-    const hour = date.getHours();
+    let date = new Date();
+    let hour = date.getHours();
     if (hour < 5 || hour > 21) {
         return "Night";
     } else if (4 < hour < 12) {
