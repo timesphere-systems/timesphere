@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from ..dependencies import get_connection_pool
-from ..common import approve, submit
+from ..common import submit, update_status
 from . import models
+from ..models import ApprovalStatus
 
 # /timesheet
 router = APIRouter(
@@ -44,15 +45,14 @@ def submit_timesheet(timesheet_id: int,
     """
     return submit(timesheet_id, pool, "timesheets")
 
-@router.post("/{timesheet_id}/approve", status_code=status.HTTP_200_OK)
-def approve_timesheet(timesheet_id: int, approved: bool,
+@router.put("/{timesheet_id}/status", status_code=status.HTTP_200_OK)
+def update_timesheet_status(timesheet_id: int, status_type: ApprovalStatus,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                      ) -> JSONResponse:
     """Approves/Denies a selected timesheet.
 
     Args:
         timesheet_id (int): The timesheet's ID.
-        approved: (bool): Boolean Value representing is it is Approved (true)
-                    or Denied (false)
+        status_type: (ApprovalStatus) The new status_type of the timesheet
     """
-    return approve(timesheet_id, pool, "timesheets", approved)
+    return update_status(timesheet_id, pool, "timesheets", status_type)

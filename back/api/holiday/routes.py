@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from ..dependencies import get_connection_pool
-from ..common import submit, approve
+from ..common import submit, update_status
 from . import models
+from ..models import ApprovalStatus
 
 
 # /holiday
@@ -44,15 +45,14 @@ def submit_holiday_request(holiday_id: int,
     """
     return submit(holiday_id, pool, "holidays")
 
-@router.post("/{holiday_id}/approve", status_code=status.HTTP_200_OK)
-def approve_holiday_request(holiday_id: int, approved: bool,
+@router.put("/{holiday_id}/status", status_code=status.HTTP_200_OK)
+def update_holiday_request_status(holiday_id: int, status_type: ApprovalStatus,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                      ) -> JSONResponse:
     """Approves/Denies a selected holiday.
 
     Args:
         holiday_id (int): The holiday's ID.
-        approved: (bool): Boolean Value representing is it is Approved (true)
-                          or Denied (false)
+        status_type: (ApprovalStatus) The new status_type of the timesheet
     """
-    return approve(holiday_id, pool, "holidays", approved)
+    return update_status(holiday_id, pool, "holidays", status_type)
