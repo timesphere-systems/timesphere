@@ -107,12 +107,26 @@ const OVERLAY_CONTENT = styled.div`
 
 `;
 
-const DashboardTable = () => {
-    const [timesheetDates, setTimesheetDates] = useState(getTimesheetDates());
-    const [timesheetStatus, setTimesheetStatus] = useState(); // Default status is waiting
-    const [editable, setEditable] = useState(false);
-    const [overlayVisible, setOverlayVisible] = useState(false);
+const fetchedTimesheetData = [
+    {
+      id: 1,
+      dateCreated: new Date('2023-03-20'),
+      dateSubmitted: new Date('2023-03-21'),
+      status: 'Approved',
+    },
+    {
+      id: 2,
+      dateCreated: new Date('2023-03-22'),
+      dateSubmitted: new Date('2023-03-23'),
+      status: 'Denied',
+    },
+    // more entries...
+  ];
+  
 
+const DashboardTable = () => {
+    const [timesheetData, setTimesheetData] = useState(fetchedTimesheetData);
+    const [overlayVisible, setOverlayVisible] = useState(false);
     // Function to generate the current week dates to display on table rows
     function getTimesheetDates() {
         const created = new Date();
@@ -150,23 +164,28 @@ const DashboardTable = () => {
                             </TR>
                     </HEADERS>
                     <tbody>
-                        <TR>
-                            <TD>
-                                <button onClick={toggleOverlay} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
-                                <img src={Timesheet} alt="Timesheet Icon" />
-                                </button>
-                            </TD>
-                            <TD>{timesheetDates.dateCreated.toLocaleDateString()}</TD>
-                            <TD>{timesheetDates.dateSubmitted.toLocaleDateString()}</TD>
-                            <TD>
-                                {getStatusIcon(timesheetStatus)}
-                            </TD>
-                            <TD>
-                                <EDIT editable={editable}>
-                                    {editable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
-                                </EDIT>
-                            </TD>
-                        </TR>
+                    {timesheetData.map((timesheet) => {
+                        const isRowEditable = timesheet.status === 'Denied';
+                        return (                        
+                            <TR key={timesheet.id}>
+                                <TD>
+                                    <button onClick={toggleOverlay} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
+                                    <img src={Timesheet} alt="Timesheet Icon" />
+                                    </button>
+                                </TD>
+                                <TD>{timesheet.dateCreated.toLocaleDateString()}</TD>
+                                <TD>{timesheet.dateSubmitted.toLocaleDateString()}</TD>
+                                <TD>
+                                    {getStatusIcon(timesheet.status)}
+                                </TD>
+                                <TD>
+                                    <EDIT editable={isRowEditable}>
+                                        {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
+                                    </EDIT>
+                                </TD>
+                            </TR>
+                        );
+                    })}
                     </tbody>
                 </TIMESHEET> 
             </OVERLAY_CONTAINER>
@@ -205,6 +224,7 @@ const DashboardTable = () => {
             </Overlay>
         </div>
     )
+    
 }
 
 export default DashboardTable
