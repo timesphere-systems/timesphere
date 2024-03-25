@@ -77,8 +77,10 @@ const TIMEZONE_ICON = styled(ICON)`
 
 
 
-const ProfileSidebar = ({profileImg, name, email, timezone, isVisible, hideSidebar}) => {
-    
+const ProfileSidebar = ({profileImg, firstname, lastname, email, isVisible, hideSidebar}) => {
+    const timezone = React.useState("GMT"); // timezone hard coded
+
+
     return (
       <div>
         <SIDEBAR isVisible={isVisible}>
@@ -89,7 +91,7 @@ const ProfileSidebar = ({profileImg, name, email, timezone, isVisible, hideSideb
                 <PFP src={profileImg} alt="profile Pic" />
             </div>
             <div>
-                <NAME>{name}</NAME>
+                <NAME>{firstname} {lastname}</NAME>
             </div>
             <div>
                 <INFO_HEADER><EMAIL_ICON src={EmailIcon} alt=""/>Email Address</INFO_HEADER>

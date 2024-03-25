@@ -16,9 +16,9 @@ const Profile = () => {
       <button onClick={hideSidebar}>sidebar</button> {/* move to pfp in navbar*/}
       <ProfileSidebar
       profileImg={ProfileIcon} //default profile image shown
-      name="Firstname Lastname"
+      firstname="Firstname" 
+      lastname="Lastname"
       email="fullname@example.com"
-      timezone="GMT+0"
       isVisible={isVisible}
       hideSidebar={hideSidebar}
       />
