@@ -35,5 +35,5 @@ class ConsultantTimesheet(BaseModel):
     """Model for displaying timesheets (as an inital list on the consultant page)"""
     timesheet_id: int
     created: datetime
-    submitted: datetime
+    submitted: datetime | None
     approval_status: str
