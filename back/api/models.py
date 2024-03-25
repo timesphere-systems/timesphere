@@ -2,6 +2,7 @@
 # pylint: disable=too-few-public-methods
 from enum import Enum
 
+
 class ApprovalStatus(Enum):
     """Enum for timesheet and holiday statuses."""
     INCOMPLETE = 'INCOMPLETE'

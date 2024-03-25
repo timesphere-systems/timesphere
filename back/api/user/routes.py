@@ -7,6 +7,7 @@ from psycopg.errors import ForeignKeyViolation
 from ..dependencies import get_connection_pool
 from . import models
 
+
 # /user
 router = APIRouter(
     prefix="/user",

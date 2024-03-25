@@ -5,6 +5,7 @@ from .holiday.routes import router as holiday
 from .timesheet.routes import router as timesheet
 from .user.routes import router as user
 
+
 app = FastAPI()
 
 app.include_router(consultant)

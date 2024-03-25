@@ -5,6 +5,8 @@ from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg import sql
 from .models import ApprovalStatus
+
+
 def submit(submit_id: int,
            pool: ConnectionPool,
            table: str
