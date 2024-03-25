@@ -65,7 +65,7 @@ let getDate = () => {
     return fulldate
 }
 
-function getTiming() {
+let getTiming = () => {
     let date = new Date();
     let hour = date.getHours();
     if (hour < 5 || hour > 21) {
@@ -81,7 +81,7 @@ function getTiming() {
     }
 }
 
-const getGreeting = () => {
+let getGreeting = () => {
     let greet = getTiming();
     if (greet === "") {
         return " Greetings, ";
@@ -92,7 +92,7 @@ const getGreeting = () => {
     }
 }
 
-const getImage = () => {
+let getImage = () => {
     let time = getTiming();
     if (time === "Night" || time === "Evening") {
         return (Moon);
@@ -101,7 +101,7 @@ const getImage = () => {
     }
 }
 
-const Greeting = () => {
+let Greeting = () => {
     let fullGreet = getGreeting();
     fullGreet = fullGreet.concat("Amal");
     let dateFull = getDate();
