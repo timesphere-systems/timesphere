@@ -7,9 +7,10 @@ from pydantic import BaseModel
 
 class TimesheetStatus(Enum):
     """Enum for timesheet statuses."""
-    WAITING = 1
-    APPROVED = 2
-    DENIED = 3
+    INCOMPLETE = 1
+    WAITING = 2
+    APPROVED = 3
+    DENIED = 4
 
 class TimeEntryType(Enum):
     """Enum for time entry types."""

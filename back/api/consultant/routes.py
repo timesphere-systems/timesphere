@@ -8,7 +8,9 @@ from psycopg import sql
 from psycopg.errors import ForeignKeyViolation
 from psycopg.rows import class_row
 from ..dependencies import get_connection_pool
+from ..models import ApprovalStatus
 from . import models
+
 # /consultant
 router = APIRouter(
     prefix="/consultant",
@@ -111,7 +113,7 @@ def create_holiday_request(consultant_id: int, request: models.CreateHoliday,
             content={"message": "Start Date and End Date Values are Not Valid"}
         )
     with pool.connection() as connection:
-        holiday_id:int = 0
+        holiday_id: int = 0
         current_time = datetime.today().strftime('%Y-%m-%d')
         try:
             row = connection.execute("""
@@ -130,6 +132,7 @@ def create_holiday_request(consultant_id: int, request: models.CreateHoliday,
             status_code=status.HTTP_201_CREATED,
             content={"id": holiday_id}
         )
+
 @router.post("/{consultant_id}/timesheet", status_code=status.HTTP_200_OK)
 def create_timesheet(consultant_id: int, start: datetime,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
@@ -146,7 +149,7 @@ def create_timesheet(consultant_id: int, start: datetime,
                 content={"message": "Start date value must be a Monday weekday date"}
             )
     with pool.connection() as connection:
-        timesheet_id:int = 0
+        timesheet_id: int = 0
         current_time = datetime.today().strftime('%Y-%m-%d')
         try:
             row = connection.execute("""
@@ -166,10 +169,10 @@ def create_timesheet(consultant_id: int, start: datetime,
             content={"id": timesheet_id}
         )
 
-@router.post("/{consultant_id}/timesheets", status_code=status.HTTP_200_OK, response_model=None)
+@router.get("/{consultant_id}/timesheets", status_code=status.HTTP_200_OK, response_model=None)
 def get_timesheets(consultant_id: int,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
-                     approval_status: str | None = None
+                     approval_status: ApprovalStatus | None = None
                      ) -> JSONResponse | list[models.ConsultantTimesheet]:
     """Returns all consultants submitted timesheets filtered by approval_status.
     
@@ -178,37 +181,28 @@ def get_timesheets(consultant_id: int,
     Returns:
         List
     """
-    query = ""
-    if approval_status is None:
-        query = sql.SQL("""SELECT timesheets.id AS timesheet_id, timesheets.created AS created,
+
+    base_query = sql.SQL("""SELECT timesheets.id AS timesheet_id, timesheets.created AS created,
                                                 timesheets.submitted AS email, submitted,
                                                 approval_status.status_type AS approval_status
                 FROM timesheets, approval_status
                 WHERE approval_status.id = timesheets.approval_status
-                AND timesheets.approval_status != 
-                        (SELECT id FROM approval_status WHERE status_type='INCOMPLETE')
-                AND timesheets.consultant = %s;""")
+                AND timesheets.consultant = %s""")
+
+    # Append the condition for approval_status if provided,
+    # exclude 'INCOMPLETE' status by default.
+    if approval_status:
+        status_condition = sql.SQL(" AND approval_status.status_type = %s")
+        query = base_query + status_condition
+        parameters = (consultant_id, approval_status)
     else:
-        query = sql.SQL(
-        """SELECT timesheets.id AS timesheet_id, timesheets.created AS created, 
-                                        timesheets.submitted AS email, submitted,
-                                        approval_status.status_type AS approval_status
-                FROM timesheets, approval_status
-                WHERE approval_status.id = timesheets.approval_status
-                AND approval_status.status_type = {approval_status}
-                AND timesheets.consultant = %s;"""
-                ).format(
-                    approval_status = approval_status
-                )
+        exclude_incomplete_status = sql.SQL(" AND approval_status.status_type != 'INCOMPLETE'")
+        query = base_query + exclude_incomplete_status
+        parameters = (consultant_id,)
+
     with pool.connection() as connection:
         timesheets = []
         with connection.cursor(row_factory=class_row(models.ConsultantTimesheet)) as cursor:
-            timesheets = cursor.execute(query, (consultant_id,)
-            ).fetchall()
-            if len(timesheets) == 0:
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"message": "Failed to get timesheets"}
-                )
+            timesheets = cursor.execute(query, parameters).fetchall()
 
         return timesheets
