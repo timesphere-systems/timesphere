@@ -31,9 +31,9 @@ class ConsultantUser(BaseModel):
     manager_firstname: str
     manager_lastname: str
 
-class ConsultantTimesheet(BaseModel):
-    """Model for displaying timesheets (as an inital list on the consultant page)"""
-    timesheet_id: int
+class Entry(BaseModel):
+    """Model for displaying an entry (as an inital list on the consultant page)"""
+    entry_id: int
     created: datetime
     submitted: datetime | None
     approval_status: str
