@@ -68,11 +68,7 @@ const ICON = styled.img`
     margin-right: 8px;
 `
 
-const EMAIL_ICON = styled(ICON)`
-`
 
-const TIMEZONE_ICON = styled(ICON)`
-`
 
 
 
@@ -88,17 +84,17 @@ const ProfileSidebar = ({profileImg, firstname, lastname, email, isVisible, hide
                 <ExitButton src={ExitIcon} alt="exit" onClick={hideSidebar}/> 
             </div>
             <div>
-                <PFP src={profileImg} alt="profile Pic" />
+                <PFP src={profileImg} alt="profile pic" />
             </div>
             <div>
                 <NAME>{firstname} {lastname}</NAME>
             </div>
             <div>
-                <INFO_HEADER><EMAIL_ICON src={EmailIcon} alt=""/>Email Address</INFO_HEADER>
+                <INFO_HEADER><ICON src={EmailIcon} alt=""/>Email Address</INFO_HEADER>
                 <INFO>{email}</INFO>
             </div>
             <div>
-                <INFO_HEADER><TIMEZONE_ICON src={TimezoneIcon} alt=""/>Timezone</INFO_HEADER>
+                <INFO_HEADER><ICON src={TimezoneIcon} alt=""/>Timezone</INFO_HEADER>
                 <INFO>{timezone}</INFO>
             </div>
         </SIDEBAR>
