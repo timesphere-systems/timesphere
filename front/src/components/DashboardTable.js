@@ -74,6 +74,7 @@ const OVERLAY = styled.div`
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    filter: blur(5px);
     border-radius: 9px;
     display: flex;
     justify-content: center;
@@ -90,7 +91,7 @@ const OVERLAY_TEXT = styled.p`
 
 const DashboardTable = () => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
-    const [editable, setEditable] = useState(false);   //change to true for testing 
+    const [editable, setEditable] = useState(true);   //change to true for testing 
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
@@ -106,7 +107,7 @@ const DashboardTable = () => {
     };
 
     // Function to handle status change for a specific date
-    const handleStatusChange = (index, value) => {
+    let handleStatusChange = (index, value) => {
         const newWeekDates =  [...weekDates];
         newWeekDates[index] = {
             ...newWeekDates[index],
@@ -116,7 +117,7 @@ const DashboardTable = () => {
     };
 
     // Function to handle time change (clock in/out) for a specific date
-    const handleTimeChange = (index, field, value) => {
+    let handleTimeChange = (index, field, value) => {
         const newWeekDates = [...weekDates];
         newWeekDates[index] = {
             ...newWeekDates[index],
@@ -136,7 +137,7 @@ const DashboardTable = () => {
     };
 
     // Function to calculate hours worked based on clock in/out times
-    const calculateHours = (clockIn, clockOut) => {
+    let calculateHours = (clockIn, clockOut) => {
         const [hoursIn, minutesIn] = clockIn.split(':').map(Number);
         const [hoursOut, minutesOut] = clockOut.split(':').map(Number);
         let hours = hoursOut - hoursIn;
@@ -151,12 +152,12 @@ const DashboardTable = () => {
     };
 
     // Function for edit button 
-    const toggleEditMode = () => {
+    let toggleEditMode = () => {
         setEditable(!editable);
     };
     
     // Function to check if the current date is a weekend or holiday (needed for the overlay)
-    const isWeekendOrHoliday = (row) => {
+    let isWeekendOrHoliday = (row) => {
         const currentDate = new Date();
         const currentDayStatus = row.status;
 
