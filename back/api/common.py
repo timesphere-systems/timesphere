@@ -24,10 +24,9 @@ def submit(submit_id: int,
                 SET approval_status = 
                     (SELECT id FROM approval_status WHERE status_type='WAITING'), 
                     submitted = {current_time}
-                WHERE {pkey} = %s;""").format(
+                WHERE id = %s;""").format(
                     table = sql.Identifier(table),
-                    current_time = datetime.today().strftime('%Y-%m-%d'),
-                    pkey = sql.Identifier('id')
+                    current_time = datetime.today().strftime('%Y-%m-%d')
                 )
             _ = cursor.execute(query, (submit_id,))
             # Check number of modified rows to ensure a valid ID was provided
@@ -67,9 +66,8 @@ def approve(submit_id: int,
          """UPDATE {table}
                 SET approval_status = 
                     (SELECT id FROM approval_status WHERE status_type={status_type})
-                WHERE {pkey} = %s;""").format(
+                WHERE id = %s;""").format(
                     table = sql.Identifier(table),
-                    pkey = sql.Identifier('id'),
                     status_type = status_type
                 )
             _ = cursor.execute(query, (submit_id,))
