@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components';
-import {FileIcon} from '../assets/icons/FileIcon.svg';
-import {PeopleIcon} from '../assets/icons/PeopleIcon.svg';
+import FileIcon from "../assets/icons/FileIcon.svg";
+import PeopleIcon from "../assets/icons/PeopleIcon.svg";
 
 const BIGTABLE = styled.div`
     display: flex;
@@ -31,6 +31,7 @@ const REQUESTBOX = styled.div`
     align-items: center;
     gap: 10px;
     align-self: stretch;
+    padding: 0%;
 `
 
 const REQUESTTEXT = styled.p`
@@ -45,15 +46,15 @@ const REQUESTTEXT = styled.p`
 const EMPLOYEEBOX = styled.div`
     display: flex;
     padding: 10px;
+    justify-content: center;
     align-items: center;
     gap: 10px;
     flex: 1 0 0;
     align-self: stretch;
+    padding: 0%;
 `
 
 const EMPLOYEETEXT = styled.p`
-    width: 167px;
-
     color: #000;
     font-family: Inter;
     font-size: 21.169px;
@@ -70,6 +71,7 @@ const DATEREQBOX = styled.div`
     gap: 10px;
     flex: 1 0 0;
     align-self: stretch;
+    padding: 0%;
 `
 
 const DATEREQTEXT = styled.p`
@@ -89,6 +91,8 @@ const STATUSBOX = styled.div`
     gap: 10px;
     flex: 1 0 0;
     align-self: stretch;
+    text-align: right;
+    padding: 0%;
 `
 
 const STATUSTEXT = styled.p`
@@ -113,7 +117,7 @@ const NORMROW = styled.div`
 const FILEBOX = styled.div`
     display: flex;
     width: 168px;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     align-self: stretch;
 
@@ -124,6 +128,8 @@ const FILEPIC = styled.div`
     width: 37px;
     height: 40px;
     flex-shrink: 0;
+    color: #000000;
+
 `
 
 const PEOPLEBOX = styled.div`
@@ -195,7 +201,7 @@ const PendingHolidayRequestsTable = () => {
                     <DATEREQTEXT>Dates Requested</DATEREQTEXT>
                 </DATEREQBOX>
                 <STATUSBOX>
-                    <STATUSTEXT>Status</STATUSTEXT>
+                    <STATUSTEXT>Approve / Deny</STATUSTEXT>
                 </STATUSBOX>
             </TITLEROW>
 
