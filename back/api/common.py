@@ -68,10 +68,16 @@ def update_status(submit_id: int,
             if cursor.rowcount == 1:
                 return JSONResponse(
                     status_code=status.HTTP_200_OK,
-                    content={"message":f"{table} {status_type.value} sucessfully"}
+                    content=
+                    {
+                        "message":f"Sucessfully updated {table} status to {status_type.value}"
+                    }
                 )
     # If the success condition is not met, an invalid ID was provided
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content={"message": f"Failed to {status_type.value} {table}, invalid {table} ID"}
+        content=
+        {
+            "message": f"Failed to update {table} status to {status_type.value}, invalid {table} ID"
+        }
     )
