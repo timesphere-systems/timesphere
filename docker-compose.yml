@@ -12,7 +12,7 @@ services:
     ports:
       - "${POSTGRES_PORT}:5432"
     volumes:
-      - ./database/data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
       - ./database/schema:/docker-entrypoint-initdb.d/schema
       - ./database/scripts/setup.sh:/docker-entrypoint-initdb.d/setup.sh
     healthcheck:
@@ -52,3 +52,5 @@ services:
     depends_on:
       - back
       - front
+volumes:
+  postgres-data:
