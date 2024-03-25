@@ -51,11 +51,11 @@ CREATE TABLE timesheets (
 );
 
 CREATE TABLE time_entries (
+  id SERIAL PRIMARY KEY,
   start_time TIMESTAMP NOT NULL,
   end_time TIMESTAMP,
   timesheet INT NOT NULL,
   entry_type INT NOT NULL,
-  PRIMARY KEY (timesheet, start_time),
   FOREIGN KEY (timesheet) REFERENCES timesheets(id),
   FOREIGN KEY (entry_type) REFERENCES time_entry_type(id)
 );

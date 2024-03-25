@@ -1,10 +1,9 @@
 """Timesheet router and routes, data belonging to a particular timesheet."""
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, cast
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
-from psycopg.errors import UniqueViolation
 from ..dependencies import get_connection_pool
 from ..common import submit, update_status
 from . import models
@@ -70,66 +69,48 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
         timesheet_id (int): The timesheet's ID.
     """
     with pool.connection() as connection:
-        with connection.cursor() as cursor:
-            #check timesheet exists
-            rows = cursor.execute("""SELECT * FROM timesheets
-                                    WHERE id = %s""", (timesheet_id, )).fetchone()
-            if rows is None:
-                return JSONResponse(
+        # Check timesheet exists
+        count: int = 0
+        result = connection.execute(
+            "SELECT Count(*) FROM timesheets WHERE id = %s", (timesheet_id,)
+        ).fetchone()
+
+        if result is not None:
+            count = cast(int, result[0])
+
+        if count != 1:
+            return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "Invalid timsheet ID"}
+                content={"message": "Invalid timesheet ID"}
             )
-            rows = cursor.execute("""SELECT timesheet, start_time FROM time_entries
+
+        # Check if there is an active time entry
+        result = connection.execute("""SELECT id FROM time_entries
                                     WHERE time_entries.timesheet = %s
                                     AND time_entries.end_time IS NULL""",
                                     (timesheet_id,)).fetchone()
-            #Create New Time Entry
-            if rows is None:
-                try:
-                    rows = cursor.execute(
-                        """INSERT INTO time_entries (start_time, timesheet, entry_type)
-                                    VALUES (%s,%s,1) RETURNING start_time""",
-                                    (time, timesheet_id)).fetchone()
-                    if rows != time:
-                        if rows is None:
-                            return JSONResponse(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                content={"message": "Failed to create Time Entry, Clock in Failed"}
-                            )
-                    return JSONResponse(
-                        status_code=status.HTTP_201_CREATED,
-                        content=
-                        {"message": "Successfully Created Time Entry with Clock in Time"}
-                    )
-                except UniqueViolation:
-                    return JSONResponse(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        content=
-                        {
-                            "message":"Failed to create Time Entry, Entry Start Time Already Exists"
-                        }
-                    )
-            #Update Currently active Time Entry
-            else:
-                #rows = (timesheet_id, start_time value)
-                _ = cursor.execute(
-                   """UPDATE time_entries
-                            SET end_time = %s
-                            WHERE timesheet = %s
-                            AND start_time = %s""", (time, rows[0], rows[1]))
-                # Check number of modified rows to ensure time entry added end time
-                if cursor.rowcount == 1:
-                    return JSONResponse(
-                        status_code=status.HTTP_200_OK,
-                        content=
-                        {
-                            "message": "Sucessfully updated Time Entry with Clock Out Time"
-                        }
-                    )
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content=
-                    {
-                        "message": "Failed to updated Time Entry with Clock Out Time"
-                    }
-                )
+
+        if result is not None:
+            # Update currently active time entry
+            time_entry_id = cast(int, result[0])
+            _ = connection.execute(
+                """UPDATE time_entries
+                    SET end_time = %s
+                    WHERE id = %s""", (time, time_entry_id)
+            )
+            # Check number of modified rows to ensure time entry added end time
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={"message": "Successfully updated time entry with clock out time"}
+            )
+        else:
+            # Create new time entry
+            _ = connection.execute(
+                """INSERT INTO time_entries (start_time, timesheet, entry_type)
+                    VALUES (%s, %s, 1)""", (time, timesheet_id)
+            )
+            return JSONResponse(
+                status_code=status.HTTP_201_CREATED,
+                content={"message": "Successfully created time entry with clock in time"}
+            )
+        
