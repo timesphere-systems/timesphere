@@ -144,7 +144,32 @@ const DashboardTable = () => {
                     </tbody>
                 </TIMESHEET> 
             </OVERLAY_CONTAINER>
-            <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} />
+            <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} title={'Weekly Timesheet'}>
+                <OVERLAY_CONTAINER>
+                        <TIMESHEET>
+                            <HEADERS>
+                                    <TR>
+                                        <TH></TH>
+                                        <TH>Date</TH>
+                                        <TH>Status</TH>
+                                        <TH>Clock-In</TH>
+                                        <TH>Clock-Out</TH>
+                                        <TH>Hours</TH>
+                                    </TR>
+                            </HEADERS>
+                            <tbody>
+                                <TR>
+                                    <TD></TD>
+                                    <TD></TD>
+                                    <TD></TD>
+                                    <TD></TD>
+                                    <TD></TD>
+                                    <TD></TD>
+                                </TR>
+                            </tbody>
+                        </TIMESHEET> 
+                    </OVERLAY_CONTAINER>
+            </ModalWrapper>
         </div>
     )
     
