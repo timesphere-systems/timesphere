@@ -103,14 +103,13 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
                 status_code=status.HTTP_200_OK,
                 content={"message": "Successfully updated time entry with clock out time"}
             )
-        else:
-            # Create new time entry
-            _ = connection.execute(
-                """INSERT INTO time_entries (start_time, timesheet, entry_type)
-                    VALUES (%s, %s, 1)""", (time, timesheet_id)
-            )
-            return JSONResponse(
-                status_code=status.HTTP_201_CREATED,
-                content={"message": "Successfully created time entry with clock in time"}
-            )
+        # Create new time entry
+        _ = connection.execute(
+            """INSERT INTO time_entries (start_time, timesheet, entry_type)
+                VALUES (%s, %s, 1)""", (time, timesheet_id)
+        )
+        return JSONResponse(
+            status_code=status.HTTP_201_CREATED,
+            content={"message": "Successfully created time entry with clock in time"}
+        )
         
