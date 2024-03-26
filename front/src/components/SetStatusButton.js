@@ -2,17 +2,48 @@ import React from 'react';
 import ApproveIcon from '../assets/icons/Approve.svg';
 import WaitingIcon from '../assets/icons/Waiting.svg';
 import DenyIcon from '../assets/icons/Deny.svg';
+import styled from 'styled-components'
 
-const SetStatusButton = ({ status }) => {
+const STATUSBUTTON = styled.button`
+    border: none;
+    background: none;
+    cursor: ${props => props.isActive ? 'pointer' : 'cursor'};
+    img {
+        filter: ${props => props.isActive ? 'none' : 'grayscale(100%)'};
+    }
+`;
+
+const SetStatusButton = ({ status, isActive, onClick }) => {
+    let handleClick = (e) => {
+        if (!isActive) {
+            e.preventDefault();
+            return;
+        } else {
+            onClick();
+        }
+    }
     switch (status) {
         case 'Approved':
-            return <img src={ApproveIcon} alt="Approved" />;
+            return(
+                <STATUSBUTTON isActive={isActive} onClick={handleClick}>
+                    <img src={ApproveIcon} alt="Approved" />
+                </STATUSBUTTON>
+            )
         case 'Denied':
-            return <img src={DenyIcon} alt="Denied" />;
+            return(
+                <STATUSBUTTON isActive={isActive} onClick={handleClick}>
+                    return <img src={DenyIcon} alt="Denied" />;
+                </STATUSBUTTON>
+            )
         case 'Waiting':
         default:
-            return <img src={WaitingIcon} alt="Waiting" />;
+            return(
+                <STATUSBUTTON isActive={isActive} onClick={handleClick}>
+                    return <img src={WaitingIcon} alt="Waiting" />;
+                </STATUSBUTTON>
+            )
     }
+
 };
 
 export default SetStatusButton;
