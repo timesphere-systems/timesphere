@@ -4,11 +4,8 @@ import { useState } from 'react'
 import EditIcon from '../assets/icons/Edit.svg';
 import unEditIcon from '../assets/icons/unEdit.svg';
 import Timesheet from '../assets/icons/Timesheet.svg';
-import ApproveIcon from '../assets/icons/Approve.svg';
-import WaitingIcon from '../assets/icons/Waiting.svg';
-import DenyIcon from '../assets/icons/Deny.svg';
 import ModalWrapper from './ModalWrapper';
-
+import SetStatusButton from './SetStatusButton';
 
 const TABLE = styled.table`
     margin: auto;
@@ -80,6 +77,7 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
+// set the holiday request data to be displayed 
 const fetchedRequestData = [
     {
       id: 1,
@@ -99,24 +97,26 @@ const fetchedRequestData = [
     // more entries...
   ];
   
-  function SetStatus (status){
+  // function which uses the SetStatusButton component
+  let SetStatus = (status) => {
     switch (status) {
         case 'Approved':
-            return <img src={ApproveIcon} alt="Approved" />;
+            return <SetStatusButton status='Approved' isActive='true'/>;
         case 'Denied':
-            return <img src={DenyIcon} alt="Denied" />;
+            return <SetStatusButton status='Denied' isActive='true'/>;
         case 'Waiting':
+            return <SetStatusButton status='Waiting' isActive='true'/>
         default:
-            return <img src={WaitingIcon} alt="Waiting" />;
+            return <SetStatusButton status='Waiting' isActive='true'/>;
     }
 
 };
 
 const HolidayRequestsTable = () => {
-    const [requestData, setTimesheetData] = useState(fetchedRequestData);
+    const [requestData, setRequestData] = useState(fetchedRequestData);
     const [overlayVisible, setOverlayVisible] = useState(false);
 
-    const toggleOverlay = () => {
+    let toggleOverlay = () => {
         setOverlayVisible(!overlayVisible);
     };
 
