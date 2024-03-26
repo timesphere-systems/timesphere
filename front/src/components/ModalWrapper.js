@@ -50,7 +50,7 @@ const ModalWrapper = ({ isVisible, toggleOverlay, title, children}) => {
         <OVERLAY_CONTENT>
             <OVERLAY_HEADER>
                 <h2>{title}</h2>
-                <CLOSEBUTTON onClick={toggleOverlay}><IoClose style={{height: '25px', width: '25px'}}/></CLOSEBUTTON>
+                <CLOSEBUTTON onClick={toggleOverlay}><IoClose style={{height: '25px', width: '25px'}}/>{{/* Change this with an uploaded close tag */}}</CLOSEBUTTON>
             </OVERLAY_HEADER>
             {children}
         </OVERLAY_CONTENT>

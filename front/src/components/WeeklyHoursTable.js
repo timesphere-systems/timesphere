@@ -8,6 +8,7 @@ import ApproveIcon from '../assets/icons/Approve.svg';
 import WaitingIcon from '../assets/icons/Waiting.svg';
 import DenyIcon from '../assets/icons/Deny.svg';
 import ModalWrapper from './ModalWrapper';
+import SetStatusButton from './SetStatusButton';
 
 
 const TIMESHEET = styled.table`
@@ -100,20 +101,8 @@ const fetchedTimesheetData = [
       status: 'Waiting',
     },
     // more entries...
-  ];
+];
   
-  function SetStatus (status){
-    switch (status) {
-        case 'Approved':
-            return <img src={ApproveIcon} alt="Approved" />;
-        case 'Denied':
-            return <img src={DenyIcon} alt="Denied" />;
-        case 'Waiting':
-        default:
-            return <img src={WaitingIcon} alt="Waiting" />;
-    }
-
-};
 
 const DashboardTable = () => {
     const [timesheetData, setTimesheetData] = useState(fetchedTimesheetData);
@@ -148,7 +137,7 @@ const DashboardTable = () => {
                                 </TD>
                                 <TD>{timesheet.dateCreated.toLocaleDateString()}</TD>
                                 <TD>{timesheet.dateSubmitted.toLocaleDateString()}</TD>
-                                <TD>{SetStatus(timesheet.status)}</TD>
+                                <TD><SetStatusButton status={timesheet.status} isActive={false} /></TD>
                                 <TD>
                                     <EDIT editable={isRowEditable}>
                                         {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}

@@ -8,9 +8,6 @@ const STATUSBUTTON = styled.button`
     border: none;
     background: none;
     cursor: ${props => props.isActive ? 'pointer' : 'cursor'};
-    img {
-        filter: ${props => props.isActive ? 'none' : 'grayscale(100%)'};
-    }
 `;
 
 const SetStatusButton = ({ status, isActive, onClick }) => {
@@ -32,14 +29,14 @@ const SetStatusButton = ({ status, isActive, onClick }) => {
         case 'Denied':
             return(
                 <STATUSBUTTON isActive={isActive} onClick={handleClick}>
-                    return <img src={DenyIcon} alt="Denied" />;
+                    <img src={DenyIcon} alt="Denied" />
                 </STATUSBUTTON>
             )
         case 'Waiting':
         default:
             return(
                 <STATUSBUTTON isActive={isActive} onClick={handleClick}>
-                    return <img src={WaitingIcon} alt="Waiting" />;
+                    <img src={WaitingIcon} alt="Waiting" />
                 </STATUSBUTTON>
             )
     }
