@@ -4,7 +4,9 @@ import { useState } from 'react'
 import EditIcon from '../assets/icons/Edit.svg';
 import unEditIcon from '../assets/icons/unEdit.svg';
 import Timesheet from '../assets/icons/Timesheet.svg';
-import SetStatusButton from './SetStatusButton';
+import ApproveIcon from '../assets/icons/Approve.svg';
+import WaitingIcon from '../assets/icons/Waiting.svg';
+import DenyIcon from '../assets/icons/Deny.svg';
 import ModalWrapper from './ModalWrapper';
 
 
@@ -39,7 +41,9 @@ const TH = styled.th`
     padding: 10px;
     width: 120px;
     border: 1px solid rgba(91, 91, 91, 1); 
-    justify-self: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 const TD = styled.td`
@@ -49,7 +53,9 @@ const TD = styled.td`
     border: 1px solid rgba(91, 91, 91, 1);
     background-color: rgba(54, 54, 54, 1);
     font-weight: 300;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     img{
         width: 25px;
@@ -96,6 +102,18 @@ const fetchedTimesheetData = [
     // more entries...
   ];
   
+  function SetStatus (status){
+    switch (status) {
+        case 'Approved':
+            return <img src={ApproveIcon} alt="Approved" />;
+        case 'Denied':
+            return <img src={DenyIcon} alt="Denied" />;
+        case 'Waiting':
+        default:
+            return <img src={WaitingIcon} alt="Waiting" />;
+    }
+
+};
 
 const DashboardTable = () => {
     const [timesheetData, setTimesheetData] = useState(fetchedTimesheetData);
@@ -130,9 +148,7 @@ const DashboardTable = () => {
                                 </TD>
                                 <TD>{timesheet.dateCreated.toLocaleDateString()}</TD>
                                 <TD>{timesheet.dateSubmitted.toLocaleDateString()}</TD>
-                                <TD>
-                                    <SetStatusButton status={timesheet.status} />
-                                </TD>
+                                <TD>{SetStatus(timesheet.status)}</TD>
                                 <TD>
                                     <EDIT editable={isRowEditable}>
                                         {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
