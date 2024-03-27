@@ -34,7 +34,7 @@ def get_holiday_request(holiday_id: int,
                        holidays.consultant AS consultant_id, approval_status.status_type AS approval_status
                 FROM holidays, approval_status
                 WHERE holidays.approval_status = approval_status.id
-                AND holidays.consultant = %s;""", (holiday_id,)).fetchone()
+                AND holidays.id = %s;""", (holiday_id,)).fetchone()
             if holiday_details is None:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST,
