@@ -8,12 +8,6 @@ const STATUSBUTTON = styled.button`
     border: none;
     background: none;
     cursor: ${props => props.isActive ? 'pointer' : 'cursor'};
-<<<<<<< HEAD
-    img {
-        filter: ${props => props.isActive ? 'none' : 'grayscale(100%)'};
-    }
-=======
->>>>>>> 8c655ed (finished table!!!!!)
 `;
 
 const SetStatusButton = ({ status, isActive, onClick }) => {
