@@ -2,9 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { useState } from 'react'
 
-
 const TIMESHEET = styled.table`
-    margin: auto;
     width: 100%;
     display: flex;
     flex-wrap: wrap;
@@ -13,7 +11,7 @@ const TIMESHEET = styled.table`
     align-items: center;
     border-collapse: collapse;
     overflow: hidden;
-    border-radius: inherit;
+    border-radius: 16px;
 `
 
 const HEADERS = styled.thead`
@@ -32,18 +30,35 @@ const TR = styled.tr`
 
 const TH = styled.th`
     padding: 10px;
-    width: 100px;
+    width: 180px;
+    height: 50px;
+    font-size: 18px;
+    font-weight: 800;
     border: 1px solid rgba(91, 91, 91, 1); 
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `
 
 const TD = styled.td`
     padding: 10px;
-    width: 100px;
+    width: 180px;
+    height: 50px;
     color: white;
     border: 1px solid rgba(91, 91, 91, 1);
     background-color: rgba(54, 54, 54, 1);
-    font-weight: 300;
-    text-align: center;
+
+    font-size: 18px;
+    font-weight: 400;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:nth-child(1) {
+        font-weight: 800;
+    }
 `
 
 const STATUS = styled.select`
@@ -54,6 +69,8 @@ const TIME = styled.input`
     background-color: transparent;
     border: none;
     color: white;
+
+    font-size: 18px;
 
     &::-webkit-calendar-picker-indicator {
         display: none;
@@ -87,12 +104,11 @@ const OVERLAY_TEXT = styled.p`
     font-size: 18px;
 `
 
-
-
 const DashboardTable = () => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
     const [editable, setEditable] = useState(true);   //change to true for testing 
 
+    // TODO: Make table values editable / uneditable based on the status of EditToggleButton
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
         const today = new Date();
@@ -152,9 +168,9 @@ const DashboardTable = () => {
     };
 
     // Function for edit button 
-    let toggleEditMode = () => {
-        setEditable(!editable);
-    };
+    // let toggleEditMode = () => {
+    //     setEditable(!editable);
+    // };
     
     // Function to check if the current date is a weekend or holiday (needed for the overlay)
     let isWeekendOrHoliday = (row) => {
@@ -167,7 +183,6 @@ const DashboardTable = () => {
         }
         return false;
     };
-
 
     return (
         <div style={{display:'flex', flexDirection:'column'}}>

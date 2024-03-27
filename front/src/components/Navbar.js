@@ -41,7 +41,7 @@ const R_CONTAINER = styled.div`
     gap: 32px;
 
     margin-right: 2rem;
-    max-width: min-content;
+    max-width: 200px;
 `
 
 const PFP = styled.img`
@@ -76,7 +76,7 @@ const Navbar = () => {
             <Notifications hasNew={true}/>
 
             <Link to={"/profile"} style={{textDecoration: 'none', color: 'inherit'}}>
-                <PFP src={"https://i.imgflip.com/122vae.jpg?a475128"} />
+                <PFP src={"https://clasebcn.com/wp-content/uploads/2020/04/harold-thumb.jpg"} />
             </Link>
         </R_CONTAINER>
     </NAV>
