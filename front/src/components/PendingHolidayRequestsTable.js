@@ -2,6 +2,8 @@ import React from 'react'
 import styled from 'styled-components';
 import FileIcon from "../assets/icons/FileIcon.svg";
 import PeopleIcon from "../assets/icons/PeopleIcon.svg";
+import SetStatusButton from "./SetStatusButton";
+
 
 const BIGTABLE = styled.div`
     display: flex;
@@ -216,7 +218,10 @@ const PendingHolidayRequestsTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2025 - 10/01/2025</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -228,7 +233,10 @@ const PendingHolidayRequestsTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2025 - 14/01/2025</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -240,7 +248,10 @@ const PendingHolidayRequestsTable = () => {
                 <DATEBOX>
                     <DATETEXT>23/08/2024 - 15/09/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -252,7 +263,10 @@ const PendingHolidayRequestsTable = () => {
                 <DATEBOX>
                     <DATETEXT>13/07/2024 - 23/07/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -264,7 +278,10 @@ const PendingHolidayRequestsTable = () => {
                 <DATEBOX>
                     <DATETEXT>06/01/2025 - 16/01/2025</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -276,7 +293,10 @@ const PendingHolidayRequestsTable = () => {
                 <DATEBOX>
                     <DATETEXT>12/12/2024 - 16/12/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -288,7 +308,10 @@ const PendingHolidayRequestsTable = () => {
                 <DATEBOX>
                     <DATETEXT>07/02/2025 - 14/02/2025</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -300,7 +323,10 @@ const PendingHolidayRequestsTable = () => {
                 <DATEBOX>
                     <DATETEXT>26/06/2025 - 27/06/2025</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -312,7 +338,10 @@ const PendingHolidayRequestsTable = () => {
                 <DATEBOX>
                     <DATETEXT>07/07/2024 - 15/07/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
         </BIGTABLE>
