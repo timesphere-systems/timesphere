@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
 
 const TIMESHEET = styled.table`
     width: 100%;
@@ -104,11 +105,16 @@ const OVERLAY_TEXT = styled.p`
     font-size: 18px;
 `
 
-const DashboardTable = () => {
-    const [weekDates, setWeekDates] = useState(getWeekDates());
-    const [editable, setEditable] = useState(true);   //change to true for testing 
 
-    // TODO: Make table values editable / uneditable based on the status of EditToggleButton
+
+const DashboardTable = ({submittable}) => {
+    const [weekDates, setWeekDates] = useState(getWeekDates());
+    const [editable, setEditable] = useState(false);   //change to true for testing 
+
+    useEffect(() => {
+        setEditable(submittable);
+    }, [submittable]);
+
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
         const today = new Date();
