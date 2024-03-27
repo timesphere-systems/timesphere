@@ -5,14 +5,19 @@ from enum import Enum
 from pydantic import BaseModel
 
 
+
 class HoidayStatus(Enum):
     """Enum for the holiday status."""
-    WAITING = 1
-    APPROVED = 2
-    DENIED = 3
+    INCOMPLETE = 'INCOMPLETE'
+    WAITING = 'WAITING'
+    APPROVED = 'APPROVED'
+    DENIED = 'DENIED'
 
 class Holiday(BaseModel):
     """Model for the holiday request."""
-    start: datetime
-    end: datetime
-    status: HoidayStatus
+    created: datetime
+    submitted: datetime | None
+    start_date: datetime
+    end_date: datetime
+    consultant_id: int
+    approval_status: HoidayStatus
