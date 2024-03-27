@@ -70,14 +70,16 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
     """
     with pool.connection() as connection:
         # Check timesheet exists
-        count: int = 0
         result = connection.execute(
             "SELECT Count(*) FROM timesheets WHERE id = %s", (timesheet_id,)
         ).fetchone()
 
-        if result is not None:
-            count = cast(int, result[0])
+        # The following should be impossible, so raise error
+        if result is None:
+            raise RuntimeError("Error checking timesheet ID")
+        count = cast(int, result[0])
 
+        # Count should be 1, IDs are unique
         if count != 1:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
