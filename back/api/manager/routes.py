@@ -29,9 +29,9 @@ def get_assigned_consultants(user_id: int,
         with connection.cursor() as cursor:
             rows = cursor.execute(
                 """SELECT id FROM consultants
-                         WHERE manager_id = %s""", (user_id,)).fetchall()
-            rows = cast(list[int], rows)
-            consultants = rows
+                         WHERE manager_id = %s""", (manager_id,)).fetchall()
+            rows = list(sum(rows, ()))
+            consultants = cast(list[int], rows)
     return consultants
 
 @router.get("/{user_id}/timesheets", status_code=status.HTTP_200_OK, response_model=None)
