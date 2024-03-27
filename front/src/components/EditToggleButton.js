@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import EditIcon from '../assets/icons/EditIcon.svg';
 
 // hide default html checkbox
 const INPUT = styled.input`
@@ -25,7 +26,7 @@ const SLIDER = styled.span`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: ${props => props.checked ? '#2196F3' : '#ccc'};
+    background-color: ${props => props.checked ? '#1B143E' : '#ccc'};
     transition: background-color .4s, box-shadow .4s;
     border-radius: 30px;
 
@@ -40,6 +41,16 @@ const SLIDER = styled.span`
         background-color: white;
         transition: transform .4s;
         transform: ${props => props.checked ? 'translateX(1.5em)' : 'translateX(0)'};
+    }
+
+    &::after {
+        content: url(${EditIcon}); // Use the imported edit.svg file
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: ${props => props.checked ? '1' : '0'}; // Show/hide the image based on checked state
+        transition: opacity .4s;
     }
 `
 
