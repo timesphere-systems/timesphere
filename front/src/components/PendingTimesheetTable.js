@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components';
 import FileIcon from "../assets/icons/FileIcon.svg";
 import PeopleIcon from "../assets/icons/PeopleIcon.svg";
+import SetStatusButton from "./SetStatusButton";
 
 const BIGTABLE = styled.div`
     display: flex;
@@ -194,7 +195,10 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -209,7 +213,10 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -224,7 +231,10 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -239,7 +249,10 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -254,7 +267,10 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -269,7 +285,10 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -284,7 +303,10 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -299,7 +321,10 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
             <NORMROW>
@@ -314,7 +339,10 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
-                <BUTTONBOX></BUTTONBOX>
+                <BUTTONBOX>
+                    <SetStatusButton status='Approved' isActive={false} />
+                    <SetStatusButton status='Denied' isActive={false} />
+                </BUTTONBOX>
             </NORMROW>
 
         </BIGTABLE>
