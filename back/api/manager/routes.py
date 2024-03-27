@@ -1,7 +1,8 @@
 """Consultant router and routes, data belonging to a particular consultant."""
-from typing import Annotated
+from typing import Annotated, cast
 from fastapi import APIRouter, status, Depends
 from psycopg_pool import ConnectionPool
+from psycopg import sql
 from ..dependencies import get_connection_pool
 
 
@@ -23,7 +24,7 @@ def get_waiting_timesheets(manager_id: int,
     Returns:
         list[int]: the list of ID's of timesheets
     """
-    raise NotImplementedError()
+    return get_waiting_entry(manager_id, 'timesheets', pool)
 
 @router.get("/{manager_id}/holidays", status_code=status.HTTP_200_OK, response_model=None)
 def get_waiting_holidays(manager_id: int,
@@ -37,7 +38,7 @@ def get_waiting_holidays(manager_id: int,
     Returns:
         list[int]: the list of ID's of holidays
     """
-    raise NotImplementedError()
+    return get_waiting_entry(manager_id, 'holidays', pool)
 
 def get_waiting_entry(manager_id: int, table: str,
                       pool: ConnectionPool)->list[int]:
@@ -49,4 +50,20 @@ def get_waiting_entry(manager_id: int, table: str,
     Returns:
         list[int]: the list of ID's of entries
     """
-    raise NotImplementedError()
+    query = sql.SQL(
+    """SELECT {table}.id FROM consultants, {table}, approval_status
+            WHERE {table}.consultant = consultants.id
+            AND {table}.approval_status = approval_status.id
+            AND approval_status.status_type = 'WAITING'
+            AND consultants.manager_id = %s""").format(
+                table = sql.Identifier(table)
+            )
+    entry_ids:list[int]=[]
+    with pool.connection() as connection:
+        with connection.cursor() as cursor:
+            row = cursor.execute(
+                query, (manager_id,)
+            ).fetchall()
+            row = cast(list[int], row)
+            entry_ids = row
+    return entry_ids
