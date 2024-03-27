@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import ExitIcon from "../assets/icons/ExitIcon.svg"
+import ExitIcon from '../assets/icons/ExitIcon.svg';
 
 const Overlay = styled.div`
     position: fixed;
@@ -50,7 +50,7 @@ const ModalWrapper = ({ isVisible, toggleOverlay, title, children}) => {
         <OVERLAY_CONTENT>
             <OVERLAY_HEADER>
                 <h2>{title}</h2>
-                <CLOSEBUTTON onClick={toggleOverlay}><img src={ExitIcon} /></CLOSEBUTTON>
+                <CLOSEBUTTON onClick={toggleOverlay}><img src={ExitIcon} alt="Exit" style={{height: '15px', width: '15px'}}/></CLOSEBUTTON>
             </OVERLAY_HEADER>
             {children}
         </OVERLAY_CONTENT>

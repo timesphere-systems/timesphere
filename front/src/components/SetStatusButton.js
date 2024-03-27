@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ApproveIcon from '../assets/icons/Approve.svg';
 import WaitingIcon from '../assets/icons/Waiting.svg';
