@@ -12,8 +12,8 @@ router = APIRouter(
     tags=["manager"],
 )
 
-@router.get("/{manager_id}/timesheets", status_code=status.HTTP_200_OK, response_model=None)
-def get_waiting_timesheets(manager_id: int,
+@router.get("/{user_id}/timesheets", status_code=status.HTTP_200_OK, response_model=None)
+def get_waiting_timesheets(user_id: int,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                      ) -> list[int]:
     """Returns all waiting to be approved timesheets for consultants under there management
@@ -24,10 +24,10 @@ def get_waiting_timesheets(manager_id: int,
     Returns:
         list[int]: the list of ID's of timesheets
     """
-    return get_waiting_entry(manager_id, 'timesheets', pool)
+    return get_waiting_entry(user_id, 'timesheets', pool)
 
-@router.get("/{manager_id}/holidays", status_code=status.HTTP_200_OK, response_model=None)
-def get_waiting_holidays(manager_id: int,
+@router.get("/{user_id}/holidays", status_code=status.HTTP_200_OK, response_model=None)
+def get_waiting_holidays(user_id: int,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                      ) -> list[int]:
     """Returns all waiting to be approved holidays for consultants under there management
@@ -38,10 +38,10 @@ def get_waiting_holidays(manager_id: int,
     Returns:
         list[int]: the list of ID's of holidays
     """
-    return get_waiting_entry(manager_id, 'holidays', pool)
+    return get_waiting_entry(user_id, 'holidays', pool)
 
-def get_waiting_entry(manager_id: int, table: str,
-                      pool: ConnectionPool)->list[int]:
+def get_waiting_entry(user_id: int, table: str,
+                      pool: ConnectionPool) -> list[int]:
     """Returns all waiting to be approved entreis for consultants under there management
     
     Args:
@@ -62,9 +62,7 @@ def get_waiting_entry(manager_id: int, table: str,
     with pool.connection() as connection:
         with connection.cursor() as cursor:
             rows = cursor.execute(
-                query, (manager_id,)
+                query, (user_id,)
             ).fetchall()
-            #function bellow converts a list of tuples into a list
-            rows = list(sum(rows, ()))
-            entry_ids = cast(list[int], rows)
+            entry_ids = [cast(int, row[0]) for row in rows]
     return entry_ids
