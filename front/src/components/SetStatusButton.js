@@ -8,6 +8,9 @@ const STATUSBUTTON = styled.button`
     border: none;
     background: none;
     cursor: ${props => props.isActive ? 'pointer' : 'cursor'};
+    img {
+        filter: ${props => props.isActive ? 'none' : 'grayscale(100%)'};
+    }
 `;
 
 const SetStatusButton = ({ status, isActive, onClick }) => {
