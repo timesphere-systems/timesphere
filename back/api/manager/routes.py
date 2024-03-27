@@ -58,12 +58,13 @@ def get_waiting_entry(manager_id: int, table: str,
             AND consultants.manager_id = %s""").format(
                 table = sql.Identifier(table)
             )
-    entry_ids:list[int]=[]
+    entry_ids: list[int] = []
     with pool.connection() as connection:
         with connection.cursor() as cursor:
-            row = cursor.execute(
+            rows = cursor.execute(
                 query, (manager_id,)
             ).fetchall()
-            row = cast(list[int], row)
-            entry_ids = row
+            #function bellow converts a list of tuples into a list
+            rows = list(sum(rows, ()))
+            entry_ids = cast(list[int], rows)
     return entry_ids
