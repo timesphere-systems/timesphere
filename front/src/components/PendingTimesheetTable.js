@@ -3,6 +3,10 @@ import styled from 'styled-components';
 import FileIcon from "../assets/icons/FileIcon.svg";
 import PeopleIcon from "../assets/icons/PeopleIcon.svg";
 import SetStatusButton from "./SetStatusButton";
+<<<<<<< HEAD:front/src/components/PendingTimesheetTable.js
+=======
+
+>>>>>>> 8ce5b8e (finished table!!!!!):front/src/components/PendingHolidayRequestsTable.js
 
 const BIGTABLE = styled.div`
     display: flex;
@@ -192,9 +196,12 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>01/01/2024</DATETEXT>
                 </DATEBOX>
+<<<<<<< HEAD:front/src/components/PendingTimesheetTable.js
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
+=======
+>>>>>>> 8ce5b8e (finished table!!!!!):front/src/components/PendingHolidayRequestsTable.js
                 <BUTTONBOX>
                     <SetStatusButton status='Approved' isActive={false} />
                     <SetStatusButton status='Denied' isActive={false} />
@@ -210,9 +217,12 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>01/01/2024</DATETEXT>
                 </DATEBOX>
+<<<<<<< HEAD:front/src/components/PendingTimesheetTable.js
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
+=======
+>>>>>>> 8ce5b8e (finished table!!!!!):front/src/components/PendingHolidayRequestsTable.js
                 <BUTTONBOX>
                     <SetStatusButton status='Approved' isActive={false} />
                     <SetStatusButton status='Denied' isActive={false} />
@@ -228,9 +238,12 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>01/01/2024</DATETEXT>
                 </DATEBOX>
+<<<<<<< HEAD:front/src/components/PendingTimesheetTable.js
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
+=======
+>>>>>>> 8ce5b8e (finished table!!!!!):front/src/components/PendingHolidayRequestsTable.js
                 <BUTTONBOX>
                     <SetStatusButton status='Approved' isActive={false} />
                     <SetStatusButton status='Denied' isActive={false} />
@@ -246,9 +259,12 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>01/01/2024</DATETEXT>
                 </DATEBOX>
+<<<<<<< HEAD:front/src/components/PendingTimesheetTable.js
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
+=======
+>>>>>>> 8ce5b8e (finished table!!!!!):front/src/components/PendingHolidayRequestsTable.js
                 <BUTTONBOX>
                     <SetStatusButton status='Approved' isActive={false} />
                     <SetStatusButton status='Denied' isActive={false} />
@@ -264,9 +280,12 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>01/01/2024</DATETEXT>
                 </DATEBOX>
+<<<<<<< HEAD:front/src/components/PendingTimesheetTable.js
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
+=======
+>>>>>>> 8ce5b8e (finished table!!!!!):front/src/components/PendingHolidayRequestsTable.js
                 <BUTTONBOX>
                     <SetStatusButton status='Approved' isActive={false} />
                     <SetStatusButton status='Denied' isActive={false} />
@@ -282,9 +301,12 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>01/01/2024</DATETEXT>
                 </DATEBOX>
+<<<<<<< HEAD:front/src/components/PendingTimesheetTable.js
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
+=======
+>>>>>>> 8ce5b8e (finished table!!!!!):front/src/components/PendingHolidayRequestsTable.js
                 <BUTTONBOX>
                     <SetStatusButton status='Approved' isActive={false} />
                     <SetStatusButton status='Denied' isActive={false} />
@@ -300,9 +322,12 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>01/01/2024</DATETEXT>
                 </DATEBOX>
+<<<<<<< HEAD:front/src/components/PendingTimesheetTable.js
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
+=======
+>>>>>>> 8ce5b8e (finished table!!!!!):front/src/components/PendingHolidayRequestsTable.js
                 <BUTTONBOX>
                     <SetStatusButton status='Approved' isActive={false} />
                     <SetStatusButton status='Denied' isActive={false} />
@@ -318,9 +343,12 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>01/01/2024</DATETEXT>
                 </DATEBOX>
+<<<<<<< HEAD:front/src/components/PendingTimesheetTable.js
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
+=======
+>>>>>>> 8ce5b8e (finished table!!!!!):front/src/components/PendingHolidayRequestsTable.js
                 <BUTTONBOX>
                     <SetStatusButton status='Approved' isActive={false} />
                     <SetStatusButton status='Denied' isActive={false} />
@@ -336,9 +364,12 @@ const PendingTimesheetTable = () => {
                 <DATEBOX>
                     <DATETEXT>01/01/2024</DATETEXT>
                 </DATEBOX>
+<<<<<<< HEAD:front/src/components/PendingTimesheetTable.js
                 <DATEBOX>
                     <DATETEXT>05/01/2024</DATETEXT>
                 </DATEBOX>
+=======
+>>>>>>> 8ce5b8e (finished table!!!!!):front/src/components/PendingHolidayRequestsTable.js
                 <BUTTONBOX>
                     <SetStatusButton status='Approved' isActive={false} />
                     <SetStatusButton status='Denied' isActive={false} />
