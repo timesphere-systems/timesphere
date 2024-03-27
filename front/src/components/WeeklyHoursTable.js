@@ -101,7 +101,7 @@ const fetchedTimesheetData = [
 ];
   
 
-const DashboardTable = () => {
+const WeeklyHoursTable = () => {
     const [timesheetData, setTimesheetData] = useState(fetchedTimesheetData);
     const [overlayVisible, setOverlayVisible] = useState(false);
 
@@ -177,4 +177,4 @@ const DashboardTable = () => {
     
 }
 
-export default DashboardTable
+export default WeeklyHoursTable
