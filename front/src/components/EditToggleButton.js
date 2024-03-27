@@ -11,11 +11,10 @@ const INPUT = styled.input`
 
 // box around slider
 const SWITCH = styled.label`
-    font-size: 17px;
     position: relative;
     display: inline-block;
-    width: 3.5em;
-    height: 2em;
+    width: 54px;
+    height: 30px;
 `
 
 // slider styling and toggle animation
@@ -26,32 +25,44 @@ const SLIDER = styled.span`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: ${props => props.checked ? '#1B143E' : '#ccc'};
+    background-color: ${props => props.checked ? '#ccc' : '#ccc'};
     transition: background-color .4s, box-shadow .4s;
     border-radius: 30px;
 
     &::before {
         position: absolute;
         content: "";
-        height: 1.4em;
-        width: 1.4em;
+        height: 30px;
+        width: 30px;
         border-radius: 20px;
-        left: 0.3em;
-        bottom: 0.3em;
-        background-color: white;
-        transition: transform .4s;
+        left: 0;
+        bottom: 0;
+        background-color: #1B143E;
+        transition: transform .2s;
         transform: ${props => props.checked ? 'translateX(1.5em)' : 'translateX(0)'};
     }
 
     &::after {
-        content: url(${EditIcon}); // Use the imported edit.svg file
+        //content: url(${EditIcon}); // Use the imported edit.svg file
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        //top: 50%;
+        //left: 50%;
+        //transform: translate(-50%, -50%);
         opacity: ${props => props.checked ? '1' : '0'}; // Show/hide the image based on checked state
         transition: opacity .4s;
     }
+`
+
+const EDIT_ICON = styled.img`
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    left: 73%;
+    transform: translate(-50%, -50%);
+    height: 20px; 
+    width: 20px; 
+    visibility: ${props => props.checked ? 'visible' : 'hidden'};
+
 `
 
 const EditToggleButton = () => {
@@ -66,7 +77,9 @@ const EditToggleButton = () => {
             <SWITCH>
                 <INPUT type="checkbox" checked={checked} onChange={handleToggle}/>
                 <SLIDER checked={checked}></SLIDER>
+                <EDIT_ICON src={EditIcon} alt="Edit" checked={checked}/>
             </SWITCH>
+            
         </div>
     );
 };
