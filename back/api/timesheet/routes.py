@@ -114,37 +114,3 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
             status_code=status.HTTP_201_CREATED,
             content={"message": "Successfully created time entry with clock in time"}
         )
-
-def create_time_entry(pool: ConnectionPool, start_time: datetime,
-                      timesheet_id: int) -> JSONResponse:
-    """
-        Create a new time entry with timesheet_id and start_time
-        Args:
-            timesheet_id (int): The timesheet's ID.
-            start_time (datetime): The start time of the time entry
-    """
-    with pool.connection() as connection:
-        #check if time entry with timesheet and start time already exists
-        count: int = 0
-        result = connection.execute(
-            """SELECT Count(*) FROM time_entries 
-                     WHERE time_entries.start_time = %s
-                     AND time_entries.timesheet = %s""", (timesheet_id,start_time)
-        ).fetchone()
-        if result is not None:
-            count = cast(int, result[0])
-
-        if count == 1:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "Time Entry With Provided Start Time Already Exists"}
-            )
-        # Create new time entry
-        _ = connection.execute(
-            """INSERT INTO time_entries (start_time, timesheet, entry_type)
-                VALUES (%s, %s, 1)""", (start_time, timesheet_id)
-        )
-        return JSONResponse(
-            status_code=status.HTTP_201_CREATED,
-            content={"message": "Successfully created time entry with clock in time"}
-        )
