@@ -28,6 +28,18 @@ const SLIDER = styled.span`
     background-color: #ccc;
     transition: .4s;
     border-radius: 30px;
+
+    &::before {
+        position: absolute;
+        content: "";
+        height: 1.4em;
+        width: 1.4em;
+        border-radius: 20px;
+        left: 0.3em;
+        bottom: 0.3em;
+        background-color: white;
+        transition: .4s;
+    }
 `
 
 const EditToggleButton = () => {
