@@ -12,6 +12,28 @@ router = APIRouter(
     tags=["manager"],
 )
 
+@router.get("/{user_id}/consultants", status_code=status.HTTP_200_OK, response_model=None)
+def get_assigned_consultants(user_id: int,
+                             pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                             ) -> list[int]:
+    """Returns a list of consultants ID's of the consultants assigned to the specified manager
+
+    Args:
+        id (int): The managers ID.
+        pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
+    Returns:
+        list[int]: the list of ID's of consultants
+    """
+    consultants: list[int] = []
+    with pool.connection() as connection:
+        with connection.cursor() as cursor:
+            rows = cursor.execute(
+                """SELECT id FROM consultants
+                         WHERE manager_id = %s""", (user_id,)).fetchall()
+            rows = cast(list[int], rows)
+            consultants = rows
+    return consultants
+
 @router.get("/{user_id}/timesheets", status_code=status.HTTP_200_OK, response_model=None)
 def get_waiting_timesheets(user_id: int,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
