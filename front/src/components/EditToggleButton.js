@@ -17,7 +17,7 @@ const SWITCH = styled.label`
     height: 2em;
 `
 
-
+// slider styling and toggle animation
 const SLIDER = styled.span`
     position: absolute;
     cursor: pointer;
@@ -25,8 +25,8 @@ const SLIDER = styled.span`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
+    background-color: ${props => props.checked ? '#2196F3' : '#ccc'};
+    transition: background-color .4s, box-shadow .4s;
     border-radius: 30px;
 
     &::before {
@@ -38,20 +38,26 @@ const SLIDER = styled.span`
         left: 0.3em;
         bottom: 0.3em;
         background-color: white;
-        transition: .4s;
+        transition: transform .4s;
+        transform: ${props => props.checked ? 'translateX(1.5em)' : 'translateX(0)'};
     }
 `
 
 const EditToggleButton = () => {
+    const [checked, setChecked] = React.useState(false);
 
-  return (
-    <div>
-        <SWITCH>
-            <INPUT type="checkbox"/>
-            <SLIDER></SLIDER>
-        </SWITCH>
-    </div>
-  );
+    const handleToggle = () => {
+        setChecked(!checked);
+    };
+
+    return (
+        <div>
+            <SWITCH>
+                <INPUT type="checkbox" checked={checked} onChange={handleToggle}/>
+                <SLIDER checked={checked}></SLIDER>
+            </SWITCH>
+        </div>
+    );
 };
 
 export default EditToggleButton;
