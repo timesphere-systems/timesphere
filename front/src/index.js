@@ -4,7 +4,7 @@ import './index.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Import Pages //
-import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
 import Layout from './pages/Layout';
 import PageNotFound from './pages/PageNotFound';
 import Profile from './pages/Profile';
@@ -15,7 +15,7 @@ root.render(
   <BrowserRouter>
     <Routes>
       <Route path='/' element={<Layout />}>
-        <Route index element={<Home />} />
+        <Route index path='/dashboard' element={<Dashboard />} />
         <Route path='/profile' element={<Profile />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>

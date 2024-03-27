@@ -68,7 +68,7 @@ let getDate = () => {
 let getTiming = () => {
     let date = new Date();
     let hour = date.getHours();
-    if (hour < 5 || hour > 21) {
+    if (hour < 5 || hour >= 21) {
         return "Night";
     } else if (4 < hour < 12) {
         return "Morning";
@@ -101,9 +101,9 @@ let getImage = () => {
     }
 }
 
-let Greeting = () => {
+let Greeting = ({ name }) => {
     let fullGreet = getGreeting();
-    fullGreet = fullGreet.concat("Amal");
+    fullGreet = fullGreet.concat(name);
     let dateFull = getDate();
     let greetImage = getImage();
     return (

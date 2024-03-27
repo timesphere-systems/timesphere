@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
-const ACTIONBUTTON = styled.button`
-    border: none;
+const SUBMITBUTTON = styled.button`
+    border: black;
     background: none;
     border-radius: 16px;
     display: flex;
@@ -18,8 +18,8 @@ const ACTIONBUTTON = styled.button`
     background-color: ${props => (props.clickable ? '#1B143E' : '#9DA1AD')};
     cursor: ${props => props.clickable ? 'pointer' : 'not-allowed'};
 `
-
-const ActionButton = ({onClick, width, height, clickable, icon, text}) => {
+const SubmitButton = ({onClick, width, height, clickable, icon}) => {
+    
     // If clickable is false, then we prevent anything from happening when the button is clicked
     let handleClick = (e) => {
         if (!clickable) {
@@ -29,17 +29,17 @@ const ActionButton = ({onClick, width, height, clickable, icon, text}) => {
             onClick();
         }
     }
-  return (
-    <ACTIONBUTTON
-        width={width}
-        height={height}
-        clickable={clickable}
-        onClick={handleClick}
-    >
-        <img src={icon} alt="button icon" />
-        <p>{text !== undefined ? text : 'Submit'}</p>
-    </ACTIONBUTTON>
-  )
+    return (
+        <SUBMITBUTTON
+            width={width}
+            height={height}
+            clickable={clickable}
+            onClick={handleClick}
+        >
+            <p>Submit</p>
+            <img src={icon} alt="submit button icon" />
+        </SUBMITBUTTON>
+      )
 }
 
-export default ActionButton
+export default SubmitButton

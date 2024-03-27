@@ -30,7 +30,6 @@ const SLIDER = styled.span`
     border-radius: 30px;
     //background-color: ${props => props.checked ? '#ccc' : '#ccc'};
     //transition: background-color .4s, box-shadow .4s;
-    
 
     &::before {
         position: absolute;
@@ -66,10 +65,7 @@ const ERROR_ICON = styled.img`
     height: 20px; 
     width: 20px; 
     visibility: ${props => props.checked ? 'visible' : 'visible'};
-
 `
-
-
 
 const EditToggleButton = () => {
     const [checked, setChecked] = React.useState(false);
@@ -86,7 +82,6 @@ const EditToggleButton = () => {
                 <EDIT_ICON src={EditIcon} alt="Edit" checked={checked}/>
                 <ERROR_ICON src={ErrorIcon} alt="" checked={checked}/>
             </SWITCH>
-            
         </div>
     );
 };

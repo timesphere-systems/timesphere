@@ -21,8 +21,8 @@ const NOTIF = styled.div`
 const INDICATOR = styled.p`
     position: absolute;
     right: 10px;
-    top: -3px;
-    font-size: 10px;
+    top: -16px;
+    font-size: 18px;
     color: #FF0000;
     
     display: ${props => props.hasNew ? 'block' : 'none'};
