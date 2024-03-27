@@ -4,9 +4,6 @@ import { useState } from 'react'
 import EditIcon from '../assets/icons/Edit.svg';
 import unEditIcon from '../assets/icons/unEdit.svg';
 import Timesheet from '../assets/icons/Timesheet.svg';
-import ApproveIcon from '../assets/icons/Approve.svg';
-import WaitingIcon from '../assets/icons/Waiting.svg';
-import DenyIcon from '../assets/icons/Deny.svg';
 import ModalWrapper from './ModalWrapper';
 import SetStatusButton from './SetStatusButton';
 
