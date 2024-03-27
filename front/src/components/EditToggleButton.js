@@ -15,7 +15,7 @@ const SWITCH = styled.label`
     position: relative;
     display: inline-block;
     width: 80px;
-    height: 40px;
+    height: 34px;
 `
 
 // slider styling and toggle animation
@@ -35,7 +35,7 @@ const SLIDER = styled.span`
     &::before {
         position: absolute;
         content: "";
-        height: 40px;
+        height: 34px;
         width: 40px;
         border-radius: 20px;
         left: 0;
