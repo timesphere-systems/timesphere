@@ -106,7 +106,7 @@ def create_holiday_request(consultant_id: int, request: RequestHoliday,
     
     Args:
         id (int): The consultant's ID.
-        request (models.CreateHoliday): The holiday request.
+        request (RequestHoliday): The holiday request.
     """
     if request.start_date > request.end_date:
         return JSONResponse(
