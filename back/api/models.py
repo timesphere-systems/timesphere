@@ -12,7 +12,7 @@ class ApprovalStatus(Enum):
     APPROVED = 'APPROVED'
     DENIED = 'DENIED'
 
-class RequestHoliday(BaseModel):
+class HolidayTimes(BaseModel):
     """Model for the holiday request."""
     start_date: datetime
     end_date: datetime

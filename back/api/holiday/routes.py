@@ -7,7 +7,7 @@ from psycopg.rows import class_row
 from ..dependencies import get_connection_pool
 from ..common import submit, update_status
 from . import models
-from ..models import ApprovalStatus, RequestHoliday
+from ..models import ApprovalStatus, HolidayTimes
 
 
 # /holiday
@@ -43,7 +43,7 @@ def get_holiday_request(holiday_id: int,
     return holiday_details
 
 @router.put("/{holiday_id}", status_code=status.HTTP_200_OK)
-def update_holiday_request(holiday_id: int, _request: RequestHoliday) -> None:
+def update_holiday_request(holiday_id: int, _request: HolidayTimes) -> None:
     """Update the details of a holiday request.
     
     Args:
