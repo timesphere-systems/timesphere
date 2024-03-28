@@ -4,6 +4,7 @@ from typing import Annotated, cast
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
+from psycopg.rows import class_row
 from ..dependencies import get_connection_pool
 from ..common import submit, update_status
 from . import models
@@ -17,14 +18,35 @@ router = APIRouter(
 )
 
 @router.get("/{timesheet_id}", status_code=status.HTTP_200_OK, response_model=models.Timesheet)
-def get_timesheet(timesheet_id: int) -> models.Timesheet:
+def get_timesheet(timesheet_id: int,
+                  pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                  ) -> JSONResponse | models.Timesheet:
     """Get the details of a timesheet.
     
     Args:
         id (int): The timesheet's ID.
     """
-    # return models.Timesheet(consultant_id=1, status=models.Status.WaitingApproval)
-    raise NotImplementedError()
+    with pool.connection() as connection:
+        timesheet_details = None
+        with connection.cursor(row_factory=class_row(models.Timesheet)) as cursor:
+            timesheet_details = cursor.execute("""
+                SELECT timesheets.created AS created, timesheets.submitted AS submitted, 
+                       timesheets.start AS start, timesheets.consultant AS consultant_id,
+                       approval_status.status_type AS approval_status, A.entries as entries
+                FROM (SELECT timesheets.id, ARRAY_AGG(time_entries.id) as entries
+                      FROM timesheets
+                      LEFT JOIN time_entries
+                      ON time_entries.timesheet = timesheets.id
+                      GROUP BY timesheets.id) as A, timesheets, approval_status
+                WHERE timesheets.id = A.id
+                AND timesheets.approval_status = approval_status.id
+                AND A.id = %s""", (timesheet_id,)).fetchone()
+            if timesheet_details is None:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "Failed to get timesheets details, invalid timesheets ID"}
+                )
+    return timesheet_details
 
 @router.put("/{timesheet_id}", status_code=status.HTTP_200_OK)
 def update_timesheet(timesheet_id: int, request: models.Timesheet):
