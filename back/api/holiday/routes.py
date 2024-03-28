@@ -43,14 +43,44 @@ def get_holiday_request(holiday_id: int,
     return holiday_details
 
 @router.put("/{holiday_id}", status_code=status.HTTP_200_OK)
-def update_holiday_request(holiday_id: int, _request: HolidayTimes) -> None:
+def update_holiday_request(holiday_id: int, request: HolidayTimes,
+                           pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                           ) -> JSONResponse:
     """Update the details of a holiday request.
     
     Args:
         holiday_id (int): The holiday request's ID.
         request (RequestHoliday): The holiday request's updated details.
     """
-    raise NotImplementedError()
+    if request.start_date > request.end_date:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": "Start Date and End Date Values are Not Valid"}
+        )
+    with pool.connection() as connection:
+        with connection.cursor() as cursor:
+            _ = cursor.execute(
+                """UPDATE holidays
+                        SET start_date = %s, end_date = %s
+                        WHERE id = %s
+                    """, (request.start_date, request.end_date, holiday_id))
+            # Check number of modified rows to ensure a valid ID was provided
+            if cursor.rowcount == 1:
+                return JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content=
+                    {
+                        "message":"Sucessfully updated holiday request"
+                    }
+                )
+    # If the success condition is not met, an invalid ID was provided
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=
+        {
+            "message": "Failed to update holiday request, invalid ID"
+        }
+    )
 
 @router.post("/{holiday_id}/submit", status_code=status.HTTP_200_OK)
 def submit_holiday_request(holiday_id: int,
