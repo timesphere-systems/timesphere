@@ -8,7 +8,7 @@ from psycopg import sql
 from psycopg.errors import ForeignKeyViolation
 from psycopg.rows import class_row
 from ..dependencies import get_connection_pool
-from ..models import ApprovalStatus
+from ..models import ApprovalStatus, RequestHoliday
 from . import models
 
 
@@ -99,7 +99,7 @@ def delete_consultant(_id: int) -> None:
     raise NotImplementedError()
 
 @router.post("/{consultant_id}/holiday", status_code=status.HTTP_200_OK)
-def create_holiday_request(consultant_id: int, request: models.CreateHoliday,
+def create_holiday_request(consultant_id: int, request: RequestHoliday,
                            pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                            ) -> JSONResponse:
     """Create a new holiday request.

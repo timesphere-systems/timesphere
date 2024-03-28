@@ -17,11 +17,6 @@ class CreateConsultant(BaseModel):
     contracted_hours: float
     manager_id: int
 
-class CreateHoliday(BaseModel):
-    """Model for the holiday request."""
-    start_date: datetime
-    end_date: datetime
-
 class ConsultantUser(BaseModel):
     """Model for consultant and user details"""
     firstname: str
