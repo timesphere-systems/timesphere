@@ -52,6 +52,7 @@ def update_holiday_request(holiday_id: int, request: HolidayTimes,
         holiday_id (int): The holiday request's ID.
         request (RequestHoliday): The holiday request's updated details.
     """
+    # pylint: disable-next=duplicate-code
     if request.start_date > request.end_date:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
