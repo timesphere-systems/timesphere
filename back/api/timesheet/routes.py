@@ -32,15 +32,15 @@ def get_timesheet(timesheet_id: int,
             timesheet_details = cursor.execute("""
                 SELECT timesheets.created AS created, timesheets.submitted AS submitted, 
                        timesheets.start AS start, timesheets.consultant AS consultant_id,
-                       approval_status.status_type AS approval_status, A.entries as entries
+                       approval_status.status_type AS approval_status, entries_list.entries as entries
                 FROM (SELECT timesheets.id, ARRAY_AGG(time_entries.id) as entries
                       FROM timesheets
                       LEFT JOIN time_entries
                       ON time_entries.timesheet = timesheets.id
-                      GROUP BY timesheets.id) as A, timesheets, approval_status
-                WHERE timesheets.id = A.id
+                      GROUP BY timesheets.id) as entries_list, timesheets, approval_status
+                WHERE timesheets.id = entries_list.id
                 AND timesheets.approval_status = approval_status.id
-                AND A.id = %s""", (timesheet_id,)).fetchone()
+                AND entries_list.id = %s""", (timesheet_id,)).fetchone()
             if timesheet_details is None:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST,
