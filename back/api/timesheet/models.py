@@ -21,6 +21,7 @@ class TimeEntryType(Enum):
 
 class TimeEntry(BaseModel):
     """Model for the time entries."""
+    id: int
     start_time: datetime
     end_time: datetime | None
     entry_type: TimeEntryType
