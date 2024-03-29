@@ -136,3 +136,14 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
             status_code=status.HTTP_201_CREATED,
             content={"message": "Successfully created time entry with clock in time"}
         )
+
+@router.get("/time_entry/{time_entry_id}", status_code=status.HTTP_200_OK)
+def get_time_entry(time_entry_id: int,
+                   pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                   ) -> JSONResponse | models.TimeEntry:
+    """Get the details of a time_entry.
+    
+    Args:
+        time_entry_id (int): The time_entry's ID.
+    """
+    raise NotImplementedError()
