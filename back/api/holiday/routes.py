@@ -40,7 +40,8 @@ def get_holiday_request(holiday_id: int,
         holiday_details = None
         with connection.cursor(row_factory=class_row(models.Holiday)) as cursor:
             holiday_details = cursor.execute("""
-                SELECT holidays.created AS created, holidays.submitted AS submitted, 
+                SELECT holidays.id as id, holidays.created AS created,
+                       holidays.submitted AS submitted, 
                        holidays.start_date AS start_date, holidays.end_date AS end_date,
                        holidays.consultant AS consultant_id, approval_status.status_type AS approval_status
                 FROM holidays, approval_status
