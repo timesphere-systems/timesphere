@@ -213,3 +213,43 @@ def get_time_entry(time_entry_id: int,
                     content={"message": "Failed to get time entry details, invalid ID"}
                 )
     return time_entry_details
+
+@router.put("/time_entry/{time_entry_id}", status_code=status.HTTP_200_OK)
+def update_time_entry(time_entry_id: int, request: models.UpdateTimeEntry,
+                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                      ) -> JSONResponse:
+    """Update Time Entry Details
+    Args: 
+        time_entry_id (int): The time_entry's ID.
+        request (models.UpdateTimeEntry): model with the details to update the time entry.
+    """
+    if(request.end_time is not None and request.start_time > request.end_time):
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": "Start time and End time values are not valid"}
+        )
+    with pool.connection() as connection:
+        with connection.cursor() as cursor:
+            _ = cursor.execute(
+                """UPDATE time_entries
+                        SET start_time = %s, end_time = %s,
+                        entry_type = (SELECT id FROM time_entry_type WHERE entry_type = %s)
+                        WHERE id = %s
+                    """, (request.start_time, request.end_time, request.entry_type, time_entry_id))
+            # Check number of modified rows to ensure a valid ID was provided
+            if cursor.rowcount == 1:
+                return JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content=
+                    {
+                        "message":"Sucessfully updated time entry"
+                    }
+                )
+    # If the success condition is not met, an invalid ID was provided
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=
+        {
+            "message": "Failed to update time entry, invalid ID"
+        }
+    )
