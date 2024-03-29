@@ -29,9 +29,9 @@ class TimeEntry(BaseModel):
 
 class UpdateTimeEntry(BaseModel):
     """Model for editing time entries"""
-    start_time: datetime
+    start_time: datetime | None
     end_time: datetime | None
-    entry_type: TimeEntryType
+    entry_type: TimeEntryType | None
 
 class Timesheet(BaseModel):
     """Model for timesheets."""
