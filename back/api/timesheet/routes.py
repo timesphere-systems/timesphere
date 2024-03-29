@@ -137,7 +137,7 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
             content={"message": "Successfully created time entry with clock in time"}
         )
 
-@router.get("/time_entry/{time_entry_id}", status_code=status.HTTP_200_OK)
+@router.get("/time_entry/{time_entry_id}", status_code=status.HTTP_200_OK, response_model=None)
 def get_time_entry(time_entry_id: int,
                    pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                    ) -> JSONResponse | models.TimeEntry:
@@ -146,4 +146,19 @@ def get_time_entry(time_entry_id: int,
     Args:
         time_entry_id (int): The time_entry's ID.
     """
-    raise NotImplementedError()
+    with pool.connection() as connection:
+        time_entry_details = None
+        with connection.cursor(row_factory=class_row(models.TimeEntry)) as cursor:
+            time_entry_details = cursor.execute("""
+                SELECT time_entries.start_time AS start_time,time_entries.end_time AS end_time,
+                       time_entries.timesheet AS timesheet_id,
+                       time_entry_type.entry_type AS entry_type
+                FROM time_entries, time_entry_type
+                WHERE time_entries.entry_type = time_entry_type.id
+                AND time_entries.id = %s""", (time_entry_id,)).fetchone()
+            if time_entry_details is None:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "Failed to get time entry details, invalid ID"}
+                )
+    return time_entry_details
