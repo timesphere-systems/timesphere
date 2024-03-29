@@ -137,7 +137,8 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
             content={"message": "Successfully created time entry with clock in time"}
         )
 
-@router.get("/time_entry/{time_entry_id}", status_code=status.HTTP_200_OK, response_model=None)
+@router.get("/time_entry/{time_entry_id}", status_code=status.HTTP_200_OK,
+            response_model=models.TimeEntry)
 def get_time_entry(time_entry_id: int,
                    pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
                    ) -> JSONResponse | models.TimeEntry:
