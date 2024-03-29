@@ -41,7 +41,8 @@ def get_timesheet(timesheet_id: int,
         timesheet_details = None
         with connection.cursor(row_factory=class_row(models.Timesheet)) as cursor:
             timesheet_details = cursor.execute("""
-                SELECT timesheets.created AS created, timesheets.submitted AS submitted, 
+                SELECT timesheets.id as id, timesheets.created AS created,
+                       timesheets.submitted AS submitted, 
                        timesheets.start AS start, timesheets.consultant AS consultant_id,
                        approval_status.status_type AS approval_status, entries_list.entries as entries
                 FROM (SELECT timesheets.id, ARRAY_AGG(time_entries.id) as entries
