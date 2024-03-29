@@ -27,6 +27,12 @@ class TimeEntry(BaseModel):
     entry_type: TimeEntryType
     timesheet_id: int
 
+class UpdateTimeEntry(BaseModel):
+    """Model for editing time entries"""
+    start_time: datetime
+    end_time: datetime | None
+    entry_type: TimeEntryType
+
 class Timesheet(BaseModel):
     """Model for timesheets."""
     created: datetime
