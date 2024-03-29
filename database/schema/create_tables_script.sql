@@ -54,7 +54,7 @@ CREATE TABLE timesheets (
 CREATE TABLE time_entries (
   id SERIAL PRIMARY KEY,
   start_time TIMESTAMP NOT NULL,
-  end_time TIMESTAMP,
+  end_time TIMESTAMP CHECK (end_time > start_time),
   timesheet INT NOT NULL,
   entry_type INT NOT NULL,
   FOREIGN KEY (timesheet) REFERENCES timesheets(id),
