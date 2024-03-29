@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg import sql
 from psycopg.rows import class_row
+from psycopg.errors import CheckViolation
 from ..dependencies import get_connection_pool
 from ..common import submit, update_status
 from . import models
@@ -157,16 +158,22 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
         if result is not None:
             # Update currently active time entry
             time_entry_id = cast(int, result[0])
-            _ = connection.execute(
-                """UPDATE time_entries
-                    SET end_time = %s
-                    WHERE id = %s""", (time, time_entry_id)
-            )
-            # Check number of modified rows to ensure time entry added end time
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={"message": "Successfully updated time entry with clock out time"}
-            )
+            try:
+                _ = connection.execute(
+                    """UPDATE time_entries
+                        SET end_time = %s
+                        WHERE id = %s""", (time, time_entry_id)
+                )
+                # Check number of modified rows to ensure time entry added end time
+                return JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content={"message": "Successfully updated time entry with clock out time"}
+                )
+            except CheckViolation:
+                return JSONResponse(
+                    status_code = status.HTTP_400_BAD_REQUEST,
+                    content = {"message": "Invalid end time value"}
+                )
         # Create new time entry
         _ = connection.execute(
             """INSERT INTO time_entries (start_time, timesheet, entry_type)
@@ -224,12 +231,6 @@ def update_time_entry(time_entry_id: int, request: models.UpdateTimeEntry,
         time_entry_id (int): The time_entry's ID.
         request (models.UpdateTimeEntry): model with the details to update the time entry.
     """
-    if request.start_time is not None and request.end_time is not None:
-        if request.start_time > request.end_time:
-            return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={"message": "Start time and End time values are not valid"}
-            )
     sql_clauses: list[str] = []
     query_params: list[str] = []
     if request.start_time is not None:
@@ -250,22 +251,21 @@ def update_time_entry(time_entry_id: int, request: models.UpdateTimeEntry,
     query_params.append(str(time_entry_id))
     with pool.connection() as connection:
         with connection.cursor() as cursor:
-            print(sql_query)
-            _ = cursor.execute(cast(sql.SQL, sql_query),  tuple(query_params))
-            # Check number of modified rows to ensure a valid ID was provided
-            if cursor.rowcount == 1:
+            try:
+                _ = cursor.execute(cast(sql.SQL, sql_query),  tuple(query_params))
+                # Check number of modified rows to ensure a valid ID was provided
+                if cursor.rowcount == 1:
+                    return JSONResponse(
+                        status_code = status.HTTP_200_OK,
+                        content = {"message":"Sucessfully updated time entry"}
+                    )
+            except CheckViolation:
                 return JSONResponse(
-                    status_code=status.HTTP_200_OK,
-                    content=
-                    {
-                        "message":"Sucessfully updated time entry"
-                    }
+                    status_code = status.HTTP_400_BAD_REQUEST,
+                    content = {"message": "Invalid start or end time values"}
                 )
     # If the success condition is not met, an invalid ID was provided
     return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content=
-        {
-            "message": "Failed to update time entry, invalid ID"
-        }
+        status_code = status.HTTP_400_BAD_REQUEST,
+        content = {"message": "Failed to update time entry, invalid ID"}
     )
