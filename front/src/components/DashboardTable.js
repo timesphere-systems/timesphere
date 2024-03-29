@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { useState, useEffect } from 'react'
-
+import downIcon from '../assets/icons/Down.svg';
 
 const TIMESHEET = styled.table`
     width: 100%;
@@ -63,7 +63,27 @@ const TD = styled.td`
 `
 
 const STATUS = styled.select`
-    width: 100%;
+    font: inherit;
+    appearance: none;
+    border: 0;
+    outline: none;   
+    width: 75%;
+    height: 80%;
+    padding-left: 1em;
+    padding-right: 1em;
+    background: url(${downIcon}) no-repeat right 13px center / 1.4em, white;
+    color: black;
+    border-radius: 9px;
+    font-size: 18px;
+
+    &:disabled {
+        background: url(${downIcon}) no-repeat right 13px center white / 1.4em, #9c9a9a;
+        font-weight: 500;
+    }
+
+    option {
+        border-radius: 9px;
+    }  
 `
 
 const TIME = styled.input`
