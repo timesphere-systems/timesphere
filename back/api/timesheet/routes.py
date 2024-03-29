@@ -151,7 +151,8 @@ def get_time_entry(time_entry_id: int,
         time_entry_details = None
         with connection.cursor(row_factory=class_row(models.TimeEntry)) as cursor:
             time_entry_details = cursor.execute("""
-                SELECT time_entries.start_time AS start_time,time_entries.end_time AS end_time,
+                SELECT time_entries.id AS id, time_entries.start_time AS start_time,
+                       time_entries.end_time AS end_time,
                        time_entries.timesheet AS timesheet_id,
                        time_entry_type.entry_type AS entry_type
                 FROM time_entries, time_entry_type
