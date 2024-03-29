@@ -79,10 +79,10 @@ def get_consultant_details(consultant_id: int,
         consultant_details = None
         with connection.cursor(row_factory=class_row(models.ConsultantUser)) as cursor:
             consultant_details = cursor.execute("""
-                SELECT users.firstname AS firstname, users.lastname AS lastname, 
-                                                users.email AS email, users.id AS user_id,
-                                                contracted_hours,
-                                                managers.id AS manager_id
+                SELECT consultants.id AS id, users.firstname AS firstname, users.lastname AS lastname, 
+                                                users.email AS email, contracted_hours,
+                                                managers.firstname AS manager_firstname,
+                                                managers.lastname AS manager_lastname
                 FROM consultants, users, users AS managers
                 WHERE users.id = consultants.user_id AND managers.id = consultants.manager_id
                 AND consultants.id = %s;""", (consultant_id,)

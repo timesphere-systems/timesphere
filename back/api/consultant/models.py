@@ -20,6 +20,7 @@ class CreateConsultant(BaseModel):
 
 class ConsultantUser(BaseModel):
     """Model for consultant and user details"""
+    id: int
     firstname: str
     lastname: str
     email: str
