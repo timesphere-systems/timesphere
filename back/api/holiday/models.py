@@ -7,6 +7,7 @@ from ..models import ApprovalStatus
 
 class Holiday(BaseModel):
     """Model for the holiday request."""
+    id: int
     created: datetime
     submitted: datetime | None
     start_date: datetime
