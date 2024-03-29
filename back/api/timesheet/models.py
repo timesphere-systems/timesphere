@@ -35,6 +35,7 @@ class UpdateTimeEntry(BaseModel):
 
 class Timesheet(BaseModel):
     """Model for timesheets."""
+    id: int
     created: datetime
     submitted: datetime | None
     start: datetime
