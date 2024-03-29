@@ -21,10 +21,9 @@ class TimeEntryType(Enum):
 
 class TimeEntry(BaseModel):
     """Model for the time entries."""
-    id: int
-    entry_type: TimeEntryType
     start_time: datetime
     end_time: datetime | None
+    entry_type: TimeEntryType
     timesheet_id: int
 
 class Timesheet(BaseModel):
