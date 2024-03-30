@@ -16,3 +16,10 @@ class HolidayTimes(BaseModel):
     """Model for the holiday request."""
     start_date: datetime
     end_date: datetime
+
+class UserDetails(BaseModel):
+    """Model user details"""
+    id: int
+    firstname: str
+    lastname: str
+    email: str

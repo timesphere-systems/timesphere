@@ -3,6 +3,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 from ..user.models import User
+from ..models import UserDetails
 
 
 class Consultant(User):
@@ -18,12 +19,8 @@ class CreateConsultant(BaseModel):
     contracted_hours: float
     manager_id: int
 
-class ConsultantUser(BaseModel):
+class ConsultantUser(UserDetails):
     """Model for consultant and user details"""
-    id: int
-    firstname: str
-    lastname: str
-    email: str
     contracted_hours: float
     manager_id: int
     user_id: int
