@@ -4,6 +4,7 @@ from fastapi import APIRouter, status, Depends, Security
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg import sql
+from psycopg.rows import class_row
 from ..dependencies import get_connection_pool
 from ..auth import User, get_current_user
 
@@ -13,6 +14,35 @@ router = APIRouter(
     prefix="/manager",
     tags=["manager"],
 )
+
+@router.get("/{user_id}", status_code=status.HTTP_200_OK, response_model=None)
+def get_manager_details(user_id: int,
+                           pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                           ) -> JSONResponse | UserDetails:
+    """Get the details of a manager.
+    
+    Args:
+        user_id (int): The managers user ID.
+    
+    Returns:
+        models.UserDetails: The consultant's details.
+    """
+    with pool.connection() as connection:
+        manager_details = None
+        with connection.cursor(row_factory=class_row(UserDetails)) as cursor:
+            manager_details = cursor.execute("""
+                SELECT users.id AS id, users.firstname AS firstname, users.lastname AS lastname, 
+                       users.email AS email
+                FROM users
+                WHERE users.user_role = (SELECT id FROM user_role WHERE role_type = 'MANAGER')
+                AND users.id = %s;""", (user_id,)
+            ).fetchone()
+            if manager_details is None:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "Failed to get managers details, invalid Consultant ID"}
+                )
+    return manager_details
 
 @router.get("/{user_id}/consultants", status_code=status.HTTP_200_OK, response_model=None)
 def get_assigned_consultants(user_id: int,
