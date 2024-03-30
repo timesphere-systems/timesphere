@@ -40,7 +40,7 @@ def get_manager_details(user_id: int,
             if manager_details is None:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"message": "Failed to get managers details, invalid Consultant ID"}
+                    content={"message": "Failed to get managers details, invalid User ID"}
                 )
     return manager_details
 
