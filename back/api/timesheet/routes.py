@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg import sql
 from psycopg.rows import class_row
-from psycopg.errors import CheckViolation
+from psycopg.errors import ForeignKeyViolation, CheckViolation
 from ..dependencies import get_connection_pool
 from ..common import submit, update_status
 from . import models
@@ -222,6 +222,42 @@ def get_time_entry(time_entry_id: int,
                     content={"message": "Failed to get time entry details, invalid ID"}
                 )
     return time_entry_details
+
+@router.post("/entry", status_code=status.HTTP_200_OK)
+def create_time_entry(request: models.CreateTimeEntry,
+                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                      ) -> JSONResponse:
+    """Create Time Entry
+
+    Args:
+        request (models.CreateTimeEntry): JSON Model with the details to create a time entry
+    """
+    with pool.connection() as connection:
+        time_entry_id: int = 0
+        try:
+            row = connection.execute(
+                """INSERT INTO time_entries (start_time, end_time, entry_type, timesheet) 
+                        VALUES (%s, %s, (SELECT id FROM time_entry_type WHERE entry_type = %s), %s)
+                        RETURNING id"""
+                        , (request.start_time, request.end_time, request.entry_type,
+                            request.timesheet_id)).fetchone()
+            if row is None:
+                raise ValueError("Failed to create time entry")
+            time_entry_id = cast(int, row[0])
+        except ForeignKeyViolation:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Failed to create time entry, invalid timesheet ID"}
+            )
+        except CheckViolation:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Failed to create time entry, invalid start and end times"}
+            )
+        return JSONResponse(
+            status_code=status.HTTP_201_CREATED,
+            content={"id": time_entry_id}
+        )
 
 @router.put("/entry/{time_entry_id}", status_code=status.HTTP_200_OK)
 def update_time_entry(time_entry_id: int, request: models.UpdateTimeEntry,
