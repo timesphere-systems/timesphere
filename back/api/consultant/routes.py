@@ -1,7 +1,7 @@
 """Consultant router and routes, data belonging to a particular consultant."""
 from datetime import datetime
 from typing import Annotated, cast
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, Security
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg import sql
@@ -9,6 +9,7 @@ from psycopg.errors import ForeignKeyViolation
 from psycopg.rows import class_row
 from ..dependencies import get_connection_pool
 from ..models import ApprovalStatus, HolidayTimes
+from ..auth import User, get_current_user
 from . import models
 
 
@@ -20,10 +21,14 @@ router = APIRouter(
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_consultant(request: models.CreateConsultant,
-                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                      _current_user: Annotated[User,
+                                    Security(get_current_user, scopes=["timesphere:admin"])]
                       ) -> JSONResponse:
     """Create a new consultant.
     
+    Requires admin permissions.
+
     Args:
         request (models.CreateConsultant): The consultant's details."""
     with pool.connection() as connection:
@@ -49,24 +54,35 @@ def create_consultant(request: models.CreateConsultant,
 
 @router.get("/{consultant_id}", status_code=status.HTTP_200_OK, response_model=None)
 def get_consultant_details(consultant_id: int,
-                           pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                           pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                           current_user: Annotated[User, Security(get_current_user)]
                            ) -> JSONResponse | models.ConsultantUser:
     """Get the details of a consultant.
     
+    Requires admin permissions, or to be a manager of the consultant,
+    or to be the consultant themselves.
+
     Args:
         id (int): The consultant's ID.
     
     Returns:
         models.ConsultantUser: The consultant's details.
     """
+    if consultant_id != current_user.consultant_id and \
+        (not current_user.is_manager_of(consultant_id)):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to view this consultant's details"}
+        )
+
     with pool.connection() as connection:
         consultant_details = None
         with connection.cursor(row_factory=class_row(models.ConsultantUser)) as cursor:
             consultant_details = cursor.execute("""
                 SELECT users.firstname AS firstname, users.lastname AS lastname, 
-                                                users.email AS email, contracted_hours,
-                                                managers.firstname AS manager_firstname,
-                                                managers.lastname AS manager_lastname
+                                                users.email AS email, users.id AS user_id,
+                                                contracted_hours,
+                                                managers.id AS manager_id
                 FROM consultants, users, users AS managers
                 WHERE users.id = consultants.user_id AND managers.id = consultants.manager_id
                 AND consultants.id = %s;""", (consultant_id,)
@@ -82,6 +98,9 @@ def get_consultant_details(consultant_id: int,
 @router.put("/{id}", status_code=status.HTTP_200_OK)
 def update_consultant(_id: int, _request: models.Consultant) -> None:
     """Update the details of a consultant.
+
+    Requires admin permissions, or to be a manager of the consultant,
+    or to be the consultant themselves.
     
     Args:
         id (int): The consultant's ID.
@@ -93,6 +112,8 @@ def update_consultant(_id: int, _request: models.Consultant) -> None:
 def delete_consultant(_id: int) -> None:
     """Delete a consultant.
 
+    Requires admin permissions.
+
     Args:
         id (int): The consultant's ID.
     """
@@ -100,14 +121,25 @@ def delete_consultant(_id: int) -> None:
 
 @router.post("/{consultant_id}/holiday", status_code=status.HTTP_200_OK)
 def create_holiday_request(consultant_id: int, request: HolidayTimes,
-                           pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                           pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                           current_user:
+                            Annotated[User, Security(get_current_user)]
                            ) -> JSONResponse:
     """Create a new holiday request.
     
+    Requires to be the consultant themselves.
+
     Args:
         id (int): The consultant's ID.
         request (models.CreateHoliday): The holiday request.
     """
+    if consultant_id != current_user.consultant_id:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message":
+                     "You do not have permission to create a holiday request for this consultant"}
+        )
+
     if request.start_date > request.end_date:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -136,14 +168,25 @@ def create_holiday_request(consultant_id: int, request: HolidayTimes,
 
 @router.post("/{consultant_id}/timesheet", status_code=status.HTTP_200_OK)
 def create_timesheet(consultant_id: int, start: datetime,
-                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     current_user: Annotated[User,
+                                                   Security(get_current_user)]
                      ) -> JSONResponse:
     """Create a new timesheet.
+
+    Requires you to be the consultant themselves.
 
     Args:
         consultant_id (int): The consultant's ID.
         start (datetime): The start date of the Weekly timesheet.
     """
+    if consultant_id != current_user.consultant_id:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message":
+                     "You do not have permission to create a timesheet for this consultant"}
+        )
+
     if start.weekday() != 0:
         return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -173,10 +216,14 @@ def create_timesheet(consultant_id: int, start: datetime,
 @router.get("/{consultant_id}/timesheets", status_code=status.HTTP_200_OK, response_model=None)
 def get_timesheets(consultant_id: int,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     current_user: Annotated[User,
+                                                   Security(get_current_user)],
                      approval_status: ApprovalStatus | None = None
-                     ) -> list[models.Entry]:
+                     ) -> JSONResponse | list[models.Entry]:
     """Returns all consultants submitted timesheets filtered by approval_status.
     
+    Requires you to be the consultant themselves, their manager, or an admin.
+
     Args:
         id (int): The consultant's ID.
         pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
@@ -184,15 +231,26 @@ def get_timesheets(consultant_id: int,
     Returns:
         list[models.Entry]
     """
+    if consultant_id != current_user.consultant_id and \
+        (not current_user.is_manager_of(consultant_id)):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message":
+                     "You do not have permission to view this consultant's timesheets"}
+        )
     return get_entries(consultant_id, 'timesheets', pool, approval_status)
 
 @router.get("/{consultant_id}/holidays", status_code=status.HTTP_200_OK, response_model=None)
 def get_holidays(consultant_id: int,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     current_user: Annotated[User,
+                                                   Security(get_current_user)],
                      approval_status: ApprovalStatus | None = None
-                     ) -> list[models.Entry]:
+                     ) -> JSONResponse | list[models.Entry]:
     """Returns all consultants submitted holidays filtered by approval_status.
     
+    Requires you to be the consultant themselves, their manager, or an admin.
+
     Args:
         id (int): The consultant's ID.
         pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
@@ -200,6 +258,13 @@ def get_holidays(consultant_id: int,
     Returns:
         list[models.Entry]
     """
+    if consultant_id != current_user.consultant_id and \
+        (not current_user.is_manager_of(consultant_id)):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message":
+                     "You do not have permission to view this consultant's timesheets"}
+        )
     return get_entries(consultant_id, 'holidays', pool, approval_status)
 
 def get_entries(consultant_id: int,
@@ -208,7 +273,7 @@ def get_entries(consultant_id: int,
                  approval_status: ApprovalStatus | None = None
                  ) -> list[models.Entry]:
     """Returns all consultants submitted entries filtered by approval_status.
-    
+
     Args:
         id (int): The consultant's ID.
         pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.

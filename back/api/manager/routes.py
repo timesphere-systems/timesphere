@@ -1,9 +1,11 @@
 """Consultant router and routes, data belonging to a particular consultant."""
 from typing import Annotated, cast
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, Security
+from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg import sql
 from ..dependencies import get_connection_pool
+from ..auth import User, get_current_user
 
 
 # /manager
@@ -14,9 +16,12 @@ router = APIRouter(
 
 @router.get("/{user_id}/consultants", status_code=status.HTTP_200_OK, response_model=None)
 def get_assigned_consultants(user_id: int,
-                             pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
-                             ) -> list[int]:
+                             pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                             current_user: Annotated[User, Security(get_current_user)]
+                             ) -> JSONResponse:
     """Returns a list of consultants ID's of the consultants assigned to the specified manager
+
+    Requires to be the manager of the consultants.
 
     Args:
         id (int): The managers ID.
@@ -24,42 +29,77 @@ def get_assigned_consultants(user_id: int,
     Returns:
         list[int]: the list of ID's of consultants
     """
-    consultants: list[int] = []
-    with pool.connection() as connection:
-        with connection.cursor() as cursor:
-            rows = cursor.execute(
-                """SELECT id FROM consultants
-                         WHERE manager_id = %s""", (user_id,)).fetchall()
-            consultants = [cast(int, row[0]) for row in rows]
-    return consultants
+    # TODO: it's doubtful the permissions are correct here.
+    if current_user.details.user_id != user_id:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to view these consultants"}
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"consultants": current_user.managed_consultants}
+    )
+    # consultants: list[int] = []
+    # with pool.connection() as connection:
+    #     with connection.cursor() as cursor:
+    #         rows = cursor.execute(
+    #             """SELECT id FROM consultants
+    #                      WHERE manager_id = %s""", (user_id,)).fetchall()
+    #         consultants = [cast(int, row[0]) for row in rows]
+    # return consultants
 
 @router.get("/{user_id}/timesheets", status_code=status.HTTP_200_OK, response_model=None)
 def get_waiting_timesheets(user_id: int,
-                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
-                     ) -> list[int]:
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     current_user: Annotated[User, Security(get_current_user)]
+                     ) -> JSONResponse:
     """Returns all waiting to be approved timesheets for consultants under there management
     
+    Requires to be the manager of the consultants.
+
     Args:
         id (int): The managers ID.
         pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
     Returns:
         list[int]: the list of ID's of timesheets
     """
-    return get_waiting_entry(user_id, 'timesheets', pool)
+    if current_user.details.user_id != user_id:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to view these timesheets"}
+        )
+    ids = get_waiting_entry(user_id, 'timesheets', pool)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"timesheets": ids}
+    )
 
 @router.get("/{user_id}/holidays", status_code=status.HTTP_200_OK, response_model=None)
 def get_waiting_holidays(user_id: int,
-                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
-                     ) -> list[int]:
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     current_user: Annotated[User, Security(get_current_user)]
+                     ) -> JSONResponse:
     """Returns all waiting to be approved holidays for consultants under there management
     
+    Requires to be the manager of the consultants.
+
     Args:
         id (int): The managers ID.
         pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
     Returns:
         list[int]: the list of ID's of holidays
     """
-    return get_waiting_entry(user_id, 'holidays', pool)
+    if current_user.details.user_id != user_id:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to view these holidays"}
+        )
+    holidays = get_waiting_entry(user_id, 'holidays', pool)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"holidays": holidays}
+    )
 
 def get_waiting_entry(user_id: int, table: str,
                       pool: ConnectionPool) -> list[int]:

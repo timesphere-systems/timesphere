@@ -20,7 +20,8 @@ CREATE TABLE user_role (
 );
 
 CREATE TABLE users (
-   id  SERIAL PRIMARY KEY,
+   id SERIAL PRIMARY KEY,
+   auth0_username TEXT UNIQUE NOT NULL,
    firstname TEXT NOT NULL,
    lastname TEXT NOT NULL,
    email TEXT NOT NULL,

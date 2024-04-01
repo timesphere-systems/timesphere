@@ -1,7 +1,7 @@
 """Timesheet router and routes, data belonging to a particular timesheet."""
 from datetime import datetime
 from typing import Annotated, cast
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Security, status
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg.rows import class_row
@@ -9,6 +9,7 @@ from ..dependencies import get_connection_pool
 from ..common import submit, update_status
 from . import models
 from ..models import ApprovalStatus
+from ..auth import User, get_current_user
 
 
 # /timesheet
@@ -19,13 +20,23 @@ router = APIRouter(
 
 @router.get("/{timesheet_id}", status_code=status.HTTP_200_OK, response_model=models.Timesheet)
 def get_timesheet(timesheet_id: int,
-                  pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                  pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                  current_user: Annotated[User, Security(get_current_user)]
                   ) -> JSONResponse | models.Timesheet:
     """Get the details of a timesheet.
     
+    Requries to be owner of the timesheet or manager of the consultant.
+
     Args:
         id (int): The timesheet's ID.
     """
+    if not (current_user.is_timesheet_owner(timesheet_id)
+            or current_user.is_manager_of_timesheet(timesheet_id)):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to view this timesheet"}
+        )
+
     with pool.connection() as connection:
         timesheet_details = None
         with connection.cursor(row_factory=class_row(models.Timesheet)) as cursor:
@@ -60,36 +71,64 @@ def update_timesheet(timesheet_id: int, request: models.Timesheet):
 
 @router.post("/{timesheet_id}/submit", status_code=status.HTTP_200_OK)
 def submit_timesheet(timesheet_id: int,
-                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     current_user: Annotated[User, Security(get_current_user)]
                      ) -> JSONResponse:
     """Submits a selected timesheet.
+
+    Requires to be owner of the timesheet.
 
     Args:
         timesheet_id (int): The timesheet's ID.
     """
+    if not current_user.is_timesheet_owner(timesheet_id):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to submit this timesheet"}
+        )
+
     return submit(timesheet_id, pool, "timesheets")
 
 @router.put("/{timesheet_id}/status", status_code=status.HTTP_200_OK)
 def update_timesheet_status(timesheet_id: int, status_type: ApprovalStatus,
-                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     current_user: Annotated[User, Security(get_current_user)]
                      ) -> JSONResponse:
     """Approves/Denies a selected timesheet.
+
+    Requires to be a manager of the consultant.
 
     Args:
         timesheet_id (int): The timesheet's ID.
         status_type: (ApprovalStatus) The new status_type of the timesheet
     """
+
+    if not current_user.is_manager_of_timesheet(timesheet_id):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to update this timesheet"}
+        )
+
     return update_status(timesheet_id, pool, "timesheets", status_type)
 
 @router.post("/{timesheet_id}/toggle", status_code=status.HTTP_200_OK)
 def toggle_time_entry(timesheet_id: int, time: datetime,
-                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
-                      ):
+                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                      current_user: Annotated[User, Security(get_current_user)]
+                      ) -> JSONResponse:
     """Creates new time entry with clock in value or updates time entry with clock out time value.
+
+    Requires to be owner of the timesheet.
 
     Args:
         timesheet_id (int): The timesheet's ID.
     """
+    if not current_user.is_timesheet_owner(timesheet_id):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to update this timesheet"}
+        )
+
     with pool.connection() as connection:
         # Check timesheet exists
         result = connection.execute(
@@ -140,13 +179,23 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
 @router.get("/entry/{time_entry_id}", status_code=status.HTTP_200_OK,
             response_model=models.TimeEntry)
 def get_time_entry(time_entry_id: int,
-                   pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                   pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                   current_user: Annotated[User, Security(get_current_user)]
                    ) -> JSONResponse | models.TimeEntry:
     """Get the details of a time_entry.
     
+    Requires to be owner of the timesheet or manager of the consultant.
+
     Args:
         time_entry_id (int): The time_entry's ID.
     """
+    if not (current_user.is_timesheet_owner(time_entry_id)
+            or current_user.is_manager_of_timesheet(time_entry_id)):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to view this time entry"}
+        )
+
     with pool.connection() as connection:
         time_entry_details = None
         with connection.cursor(row_factory=class_row(models.TimeEntry)) as cursor:

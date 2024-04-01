@@ -25,11 +25,38 @@ The .env file will store environment variables for the project. You can change y
 
 This will build the containers in `/back` and `/front`.
 
+Authentication is the most difficult part to set up for testing. We utilize the following scopes:
+
+- `timesphere:admin` - Admin access to all resources
+
+To set this up, you'll need to create an auth0 acount and either set up an application or ask to be added to an existing one.
+
+To set up an application:
+
+- Create an application
+- Select Web > Python
+- Continue
+- In Settings > Advanced > Grant Types enable implicit and client credentials
+- Add the domain, client ID, audience, and client secret to the .env file
+- Go to the connected API > Permissions > Create Permission and create the scopes above
+- Go to users > select your user, or create one > permissions > add the scopes
+- In Actions > Flows > Login create a custom action with the code in `./.auth0/postlogin.js`
+
+To test with auth (generate a JWT):
+
+- Go to the auth0 dashboard
+- Go to extensions
+- Install the Auth0 Authentication API Debugger
+- Go to the debugger
+- Configure it for the application you created earlier, add its URL as an authorized callback
+- In the OAuth2/OIDC tab, scroll down and add scopes, select Oauth2/OIDC login and login as such
+- Retrieve JWT, click authorize in the fastAPI docs, and paste the JWT in the token field
+
 `docker-compose up`
 
 This starts the container stack, and by default you should be able to access the app at [localhost](http://localhost). Press Ctrl+C to stop the containers, and `docker-compose down` to remove them.
 
-If you need to reset the database, run `docker-compose down` and then `rm -rf database/data`. This will remove the database and all data.
+If you need to reset the database, run `docker-compose down` and then `docker volume rm timesphere_postgres-data`. This will remove the database and all data.
 
 ## General
 

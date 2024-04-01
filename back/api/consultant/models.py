@@ -8,6 +8,7 @@ from ..user.models import User
 class Consultant(User):
     """Model for the consultant details."""
     user_id: int
+    consultant_id: int
     contracted_hours: float
     manager_id: int
 
@@ -23,8 +24,8 @@ class ConsultantUser(BaseModel):
     lastname: str
     email: str
     contracted_hours: float
-    manager_firstname: str
-    manager_lastname: str
+    manager_id: int
+    user_id: int
 
 class Entry(BaseModel):
     """Model for displaying an entry (as an inital list on the consultant page)"""
