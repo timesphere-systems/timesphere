@@ -1,5 +1,6 @@
 """Handle authentication and authorization for the API."""
 # pylint: disable=raise-missing-from
+# pylint: disable=too-many-instance-attributes
 # pyright: reportUnknownMemberType=false
 from typing import Annotated
 from fastapi import Depends
