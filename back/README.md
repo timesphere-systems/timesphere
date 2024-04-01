@@ -15,6 +15,10 @@ After the initial setup you'll just need to activate the virtual environment and
 To exit the virtual environment:
 `deactivate`
 
+## Testing
+
+There are several custom VSCode tasks for testing. You can run these tasks by pressing `Ctrl+Shift+P` or `Cmd+Shift+P` and typing `Tasks: Run Task`.
+
 ## Extensions
 
 Install `basedpyright` for type checking and `pylint` for linting, make sure they don't throw warnings or your PR wont merge.
