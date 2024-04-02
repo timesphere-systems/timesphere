@@ -62,7 +62,7 @@ const PFP = styled.img`
 
 
 const Navbar = () => {
-    const [isVisible, setIsVisible] = useState(true);
+    const [isVisible, setIsVisible] = useState(false);
 
     const hideSidebar = () => {
         setIsVisible(!isVisible);
