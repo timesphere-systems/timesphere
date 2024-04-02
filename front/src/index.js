@@ -23,7 +23,8 @@ root.render(
         <Routes>
           <Route path='/' element={<Layout />}>
             <Route index path='/dashboard' element={<Dashboard />} />
-            <Route path='/profile' element={<Profile />} />
+            <Route path='/timesheets' element={<Profile />} />
+            <Route path='/holiday' element={<Profile />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
         </Routes>

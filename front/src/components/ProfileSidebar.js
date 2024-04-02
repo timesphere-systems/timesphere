@@ -92,7 +92,7 @@ const ProfileSidebar = ({profileImg, firstname, lastname, email, isVisible, hide
                 <INFO>{timezone}</INFO>
             </div>
             <LoginButton 
-            width={'120px'}
+            width={'200px'}
             height={'60px'}/>
         </SIDEBAR>
       </div>
