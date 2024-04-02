@@ -93,9 +93,9 @@ class User:
                 holiday_ids = cursor.execute("""
                     SELECT id
                     FROM holidays
-                    WHERE consultant IN %s
+                    WHERE consultant IN (SELECT id FROM consultants WHERE manager_id=%s)
                     """,
-                    (self.managed_consultants,)).fetchall()
+                    (self.details.user_id,)).fetchall()
         holidays = [holiday[0] for holiday in holiday_ids]
         self.managed_holiday_ids_cache = holidays
         return holidays
@@ -129,9 +129,9 @@ class User:
                 timesheet_ids = cursor.execute("""
                     SELECT id
                     FROM timesheets
-                    WHERE consultant IN %s
+                    WHERE consultant IN (SELECT id FROM consultants WHERE manager_id=%s)
                     """,
-                    (self.managed_consultants,)).fetchall()
+                    (self.details.user_id,)).fetchall()
         timesheets = [timesheet[0] for timesheet in timesheet_ids]
         self.managed_timesheet_ids_cache = timesheets
         return timesheets
