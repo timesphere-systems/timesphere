@@ -67,17 +67,12 @@ const ERROR_ICON = styled.img`
     visibility: ${props => props.checked ? 'visible' : 'visible'};
 `
 
-const EditToggleButton = () => {
-    const [checked, setChecked] = React.useState(false);
-
-    const handleToggle = () => {
-        setChecked(!checked);
-    };
-
+const EditToggleButton = ({ onToggle, checked }) => {
+    
     return (
         <div>
             <SWITCH>
-                <INPUT type="checkbox" checked={checked} onChange={handleToggle}/>
+                <INPUT type="checkbox" checked={checked} onChange={onToggle}/>
                 <SLIDER checked={checked}></SLIDER>
                 <EDIT_ICON src={EditIcon} alt="Edit" checked={checked}/>
                 <ERROR_ICON src={ErrorIcon} alt="" checked={checked}/>
