@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components';
 
 // Import components
@@ -45,6 +45,13 @@ const TOGGLE_WRAPPER = styled.div`
 `
 
 const Dashboard = () => {
+  const [editable, setEditable] = useState(false);   // Variable to store editable state of table
+
+  // Function which toggles the edit mode - passed to EditToggleButton component
+  let toggleEditMode = () => {
+    setEditable(!editable);
+  };
+
   return (
     <div>
       <G_WRAPPER>
@@ -69,9 +76,9 @@ const Dashboard = () => {
       </CLOCK_WRAPPER>
 
       <TABLE_WRAPPER>
-        <DashboardTable />
+        <DashboardTable submittable={editable}/>
         <TOGGLE_WRAPPER>
-          <EditToggleButton />
+          <EditToggleButton onToggle={toggleEditMode} checked={editable} />
         </TOGGLE_WRAPPER>
       </TABLE_WRAPPER>
       
