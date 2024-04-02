@@ -197,8 +197,8 @@ def get_time_entry(time_entry_id: int,
     Args:
         time_entry_id (int): The time_entry's ID.
     """
-    if not (current_user.is_timesheet_owner(time_entry_id)
-            or current_user.is_manager_of_timesheet(time_entry_id)):
+    if not (current_user.is_time_entry_owner(time_entry_id)
+            or current_user.is_manager_of_time_entry(time_entry_id)):
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
             content={"message": "You do not have permission to view this time entry"}
