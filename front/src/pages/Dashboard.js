@@ -12,6 +12,7 @@ import EditToggleButton from '../components/EditToggleButton';
 // Import icons
 import ClockIcon from '../assets/icons/ClockIcon.svg';
 import CircleArrow from '../assets/icons/CircleArrowIcon.svg';
+import Footer from '../components/Footer';
 
 // Styles
 
@@ -44,6 +45,10 @@ const TOGGLE_WRAPPER = styled.div`
   bottom: -50px;
 `
 
+const FOOTER_WRAPPER = styled.div`
+  margin-top: 4rem;
+`
+
 const Dashboard = () => {
   return (
     <div>
@@ -74,6 +79,10 @@ const Dashboard = () => {
           <EditToggleButton />
         </TOGGLE_WRAPPER>
       </TABLE_WRAPPER>
+
+      <FOOTER_WRAPPER>
+        <Footer />
+      </FOOTER_WRAPPER>
       
     </div>
   )

@@ -8,7 +8,6 @@ import LinkedIn from '../assets/icons/LinkedIn.svg';
 import TikTok from '../assets/icons/Tiktok.svg';
 
 const FOOTER_WRAPPER = styled.div`
-    margin-top: 20px;
     padding: 20px;
     display: flex;
     flex-direction: row;
@@ -16,27 +15,28 @@ const FOOTER_WRAPPER = styled.div`
     align-items: center;
     background-color: #1B143E;
     color: #ffffff;
-    position: fixed;
-    left: 0;
-    bottom: 0;
+
     width: 100%;
 `;
+
 const FDM_COMPONENT = styled.div`
     display: flex;
     flex-direction: column;
 `;
+
 const CONTACT_WRAPPER = styled.div`
     display: flex;
+    min-height: 220px;
     flex-direction: column;
     gap: 20px;
     justify-content: space-between;
     height: 100%;
-
 `;
 const CONTACT_COMPONENT = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
+
     p{
         color: #A9A9A9;
         font-weight: bold;
@@ -47,9 +47,13 @@ const CONTACT_COMPONENT = styled.div`
     a{
         color: white;
         text-decoration: none;
+        transition-duration: 0.5s;
+
     }
     a:hover{
         color: #FFA500;
+        transition-duration: 0.25s;
+
     }
 
 `;
@@ -63,28 +67,36 @@ const SOCIAL_MEDIA_ICON = styled.a`
     img{
         height: 30px;
         width: auto;
+        transition-duration: 0.5s;
+    }
+    img:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 25px 1px rgb(0, 0, 0, 0.5);
+        transition-duration: 0.5s;
     }
 
 `;
 const POLICIES_COMPONENT = styled.div`
-display: flex;
-flex-direction: column;
-gap: 20px;
-p{
-    color: #A9A9A9;
-    font-weight: bold;
-    margin-top: 0;
-    margin-bottom: 0;   
-}
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    p{
+        color: #A9A9A9;
+        font-weight: bold;
+        margin-top: 0;
+        margin-bottom: 0;   
+    }
 
-a{
-    color: white;
-    text-decoration: none;
-}
-a:hover{
-    color: #FFA500;
-}
-
+    a{
+        color: white;
+        text-decoration: none;
+        transition-duration: 0.5s;
+    }
+    a:hover{
+        color: #FFA500;
+        transition-duration: 0.25s;
+    }
 `;
 
 export default function Footer() {
