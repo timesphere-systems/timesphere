@@ -68,21 +68,19 @@ def get_consultant_details(consultant_id: int,
     Returns:
         models.ConsultantUser: The consultant's details.
     """
-    if consultant_id != current_user.consultant_id and \
-        (not current_user.is_manager_of(consultant_id)):
+    if not (consultant_id == current_user.consultant_id or
+            current_user.is_manager_of(consultant_id)):
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
             content={"message": "You do not have permission to view this consultant's details"}
         )
-
     with pool.connection() as connection:
         consultant_details = None
         with connection.cursor(row_factory=class_row(models.ConsultantUser)) as cursor:
             consultant_details = cursor.execute("""
                 SELECT consultants.id AS id, users.firstname AS firstname, users.lastname AS lastname, 
                                                 users.email AS email, contracted_hours,
-                                                managers.firstname AS manager_firstname,
-                                                managers.lastname AS manager_lastname
+                                                managers.id as manager_id, users.id as user_id
                 FROM consultants, users, users AS managers
                 WHERE users.id = consultants.user_id AND managers.id = consultants.manager_id
                 AND consultants.id = %s;""", (consultant_id,)
