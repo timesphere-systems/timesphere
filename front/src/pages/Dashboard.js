@@ -45,7 +45,8 @@ const TOGGLE_WRAPPER = styled.div`
 `
 
 const Dashboard = () => {
-  const [editable, setEditable] = useState(false);   // Variable to store editable state of table
+  const [editable, setEditable] = useState(false);          // Store editable state
+  const [submittable, setSubmittable] = useState(false);    // Store submittable state 
 
   // Function which toggles the edit mode - passed to EditToggleButton component
   let toggleEditMode = () => {
@@ -76,7 +77,7 @@ const Dashboard = () => {
       </CLOCK_WRAPPER>
 
       <TABLE_WRAPPER>
-        <DashboardTable submittable={editable}/>
+        <DashboardTable editable={editable} submittable={submittable}/>
         <TOGGLE_WRAPPER>
           <EditToggleButton onToggle={toggleEditMode} checked={editable} />
         </TOGGLE_WRAPPER>
