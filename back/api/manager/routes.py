@@ -18,7 +18,8 @@ router = APIRouter(
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK, response_model=None)
 def get_manager_details(user_id: int,
-                           pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                           pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                           current_user: Annotated[User, Security(get_current_user)]
                            ) -> JSONResponse | UserDetails:
     """Get the details of a manager.
     
@@ -28,6 +29,11 @@ def get_manager_details(user_id: int,
     Returns:
         models.UserDetails: The consultant's details.
     """
+    if current_user.details.user_id != user_id:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to this managers details"}
+        )
     with pool.connection() as connection:
         manager_details = None
         with connection.cursor(row_factory=class_row(UserDetails)) as cursor:
