@@ -7,6 +7,14 @@ import Timesheet from '../assets/icons/Timesheet.svg';
 import ModalWrapper from './ModalWrapper';
 import SetStatusButton from './SetStatusButton';
 
+const WRAPPER = styled.div`
+    width: 90%;
+    margin-left: 5%;
+    display: flex;
+    flex-direction: column;
+    background-color: antiquewhite;
+`
+
 const TABLE = styled.table`
     margin: auto;
     width: 100%;
@@ -17,10 +25,11 @@ const TABLE = styled.table`
     align-items: center;
     border-collapse: collapse;
     overflow: hidden;
-    border-radius: inherit;
+    border-radius: 16px;
 `
 
 const HEADERS = styled.thead`
+    width: 100%;
     color: white;
     font-weight: bold;
     background-color: rgba(54, 54, 54, 0.95);
@@ -36,8 +45,11 @@ const TR = styled.tr`
 
 const TH = styled.th`
     padding: 10px;
-    width: 200px;
+    width: 100%;
     border-bottom: 1px solid rgba(54, 54, 54, 0.95);
+    font-size: 18px;
+    font-weight: 800;
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -45,7 +57,7 @@ const TH = styled.th`
 
 const TD = styled.td`
     padding: 10px;
-    width: 200px;
+    width: 100%;
     color: white;
     border-bottom: 1px solid rgba(91, 91, 91, 1);
     background-color: rgba(54, 54, 54, 1);
@@ -55,9 +67,14 @@ const TD = styled.td`
     align-items: center;
 
     img{
-        width: 20px;
-        height: 20px;
+        width: 25px;
+        height: 25px;
     }  
+`
+
+const TBODY = styled.tbody`
+    min-width: 800px;
+    width: 100%;
 `
 
 const EDIT = styled.div`
@@ -65,12 +82,13 @@ const EDIT = styled.div`
     display: inline-block;
 
     img{
-        width: 18px;
-        height: 18px;
+        width: 25px;
+        height: 25px;
     }
 `;
 
 const OVERLAY_CONTAINER = styled.div`
+    width: 100%;
     position: relative;
     margin: auto;
     border-radius: 9px;
@@ -94,6 +112,16 @@ const fetchedRequestData = [
       dateSubmitted: new Date('2023-03-20'),
       status: 'Waiting',
     },
+    {
+        id: 4,
+        dateSubmitted: new Date('2023-03-22'),
+        status: 'Approved',
+      },
+      {
+        id: 5,
+        dateSubmitted: new Date('2023-03-22'),
+        status: 'Waiting',
+      },
     // more entries...
   ];
   
@@ -121,7 +149,7 @@ const HolidayRequestsTable = () => {
     };
 
     return (
-        <div style={{display:'flex', flexDirection:'column'}}>
+        <WRAPPER>
             <OVERLAY_CONTAINER>
                 <TABLE>
                     <HEADERS>
@@ -132,7 +160,7 @@ const HolidayRequestsTable = () => {
                                 <TH>Edit</TH>
                             </TR>
                     </HEADERS>
-                    <tbody>
+                    <TBODY>
                     {requestData.map((request) => {
                         const isRowEditable = request.status === 'Denied';
                         return (                        
@@ -152,7 +180,7 @@ const HolidayRequestsTable = () => {
                             </TR>
                         );
                     })}
-                    </tbody>
+                    </TBODY>
                 </TABLE> 
             </OVERLAY_CONTAINER>
             <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} title={'Holiday Request'}>
@@ -164,16 +192,16 @@ const HolidayRequestsTable = () => {
                                         <TH>Date To</TH>
                                     </TR>
                             </HEADERS>
-                            <tbody>
+                            <TBODY>
                                 <TR>
                                     <TD></TD>
                                     <TD></TD>
                                 </TR>
-                            </tbody>
+                            </TBODY>
                         </TABLE> 
                     </OVERLAY_CONTAINER>
             </ModalWrapper>
-        </div>
+        </WRAPPER>
     )
     
 }

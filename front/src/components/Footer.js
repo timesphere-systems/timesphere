@@ -8,7 +8,7 @@ import LinkedIn from '../assets/icons/LinkedIn.svg';
 import TikTok from '../assets/icons/Tiktok.svg';
 
 const FOOTER_WRAPPER = styled.div`
-    padding: 20px;
+    padding: 20px 0;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
