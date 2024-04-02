@@ -141,9 +141,10 @@ class User:
         with self.pool.connection() as connection:
             with connection.cursor() as cursor:
                 time_entry_ids = cursor.execute("""
-                    SELECT id
-                    FROM time_entries
-                    WHERE consultant = %s
+                    SELECT time_entries.id
+                    FROM time_entries, timesheets
+                    WHERE timesheets.id = time_entries.timesheet
+                    AND timesheets.consultant = %s
                     """,
                     (self.consultant_id,)).fetchall()
         time_entries = [time_entry[0] for time_entry in time_entry_ids]
@@ -156,9 +157,10 @@ class User:
         with self.pool.connection() as connection:
             with connection.cursor() as cursor:
                 time_entry_ids = cursor.execute("""
-                    SELECT id
-                    FROM time_entries
-                    WHERE consultant IN (SELECT id FROM consultants WHERE manager_id=%s)
+                    SELECT time_entries.id
+                    FROM time_entries, timesheets
+                    WHERE timesheets.id = time_entries.timesheet
+                    AND timesheets.consultant IN (SELECT id FROM consultants WHERE manager_id=%s)
                     """,
                     (self.details.user_id,)).fetchall()
         time_entries = [time_entry[0] for time_entry in time_entry_ids]
