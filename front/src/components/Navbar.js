@@ -1,9 +1,11 @@
 import React from 'react'
+import { useState } from 'react';
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Logo from '../assets/icons/Logo.svg'
 import Notifications from './Notifications'
 import PageSelector from './PageSelector'
+import ProfileSidebar from './ProfileSidebar'
 
 const NAV = styled.nav`
     display: flex;
@@ -60,27 +62,42 @@ const PFP = styled.img`
 
 
 const Navbar = () => {
-  return (
-    <NAV>
-        <Link to={"/"} style={{textDecoration: 'none', color: 'inherit'}}>
-            <LOGO>
-                <img src={Logo} alt="logo" />
-            </LOGO>
-        </Link>
+    const [isVisible, setIsVisible] = useState(true);
 
-        <SELECTOR_CONTAINER>
-            <PageSelector />
-        </SELECTOR_CONTAINER>
-
-        <R_CONTAINER>
-            <Notifications hasNew={true}/>
-
-            <Link to={"/profile"} style={{textDecoration: 'none', color: 'inherit'}}>
-                <PFP src={"https://clasebcn.com/wp-content/uploads/2020/04/harold-thumb.jpg"} />
+    const hideSidebar = () => {
+        setIsVisible(!isVisible);
+    };
+  
+    return (
+        <>
+        <NAV>
+            <Link to={"/"} style={{textDecoration: 'none', color: 'inherit'}}>
+                <LOGO>
+                    <img src={Logo} alt="logo" />
+                </LOGO>
             </Link>
-        </R_CONTAINER>
-    </NAV>
-  )
+
+            <SELECTOR_CONTAINER>
+                <PageSelector />
+            </SELECTOR_CONTAINER>
+
+            <R_CONTAINER>
+                <Notifications hasNew={true}/>
+
+                <PFP src={"https://clasebcn.com/wp-content/uploads/2020/04/harold-thumb.jpg"} onClick={hideSidebar}/>
+            </R_CONTAINER>
+        </NAV>
+
+        <ProfileSidebar
+        profileImg={"https://clasebcn.com/wp-content/uploads/2020/04/harold-thumb.jpg"}
+        firstname="Harold" 
+        lastname=""
+        email="fullname@example.com"
+        isVisible={isVisible}
+        hideSidebar={hideSidebar}
+        />
+        </>
+    )
 }
 
 export default Navbar;

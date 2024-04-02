@@ -11,7 +11,7 @@ const SUBMITBUTTON = styled.button`
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 18px;
+    gap: 12px;
     font-weight: 700;
     font-size: 26px;
     color: white;
@@ -23,6 +23,13 @@ const SUBMITBUTTON = styled.button`
         return props.isSubmitted ? '#6BD583' : '#1B143E';
     }};
     cursor: ${props => props.clickable ? 'pointer' : 'not-allowed'};
+
+    img {
+        width: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 `
 const SubmitButton = ({onClick, width, height, clickable}) => {
 
@@ -49,12 +56,12 @@ const SubmitButton = ({onClick, width, height, clickable}) => {
             {isSubmitted ? (
                 <>
                     <p>Submitted</p>
-                    <img src={CheckIcon} alt="Check icon" />
+                    <img src={SubmitIcon} alt="Submit icon"/>
                 </>
             ) : (
                 <>
                     <p>Submit</p>
-                    <img src={SubmitIcon} alt="Submit icon" />
+                    <img src={CheckIcon} alt="Check icon"/>
                 </>
             )}
         </SUBMITBUTTON>
