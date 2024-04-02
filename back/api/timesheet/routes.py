@@ -224,13 +224,20 @@ def get_time_entry(time_entry_id: int,
 
 @router.put("/entry/{time_entry_id}", status_code=status.HTTP_200_OK)
 def update_time_entry(time_entry_id: int, request: models.UpdateTimeEntry,
-                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                      current_user: Annotated[User, Security(get_current_user)]
                       ) -> JSONResponse:
     """Update Time Entry Details
     Args: 
         time_entry_id (int): The time_entry's ID.
         request (models.UpdateTimeEntry): model with the details to update the time entry.
     """
+    if not (current_user.is_time_entry_owner(time_entry_id)
+    or current_user.is_manager_of_time_entry(time_entry_id)):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to edit this time entry"}
+        )
     sql_clauses: list[str] = []
     query_params: list[str] = []
     if request.start_time is not None:
