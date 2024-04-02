@@ -95,7 +95,7 @@ class User:
                     FROM holidays
                     WHERE consultant IN %s
                     """,
-                    (tuple(self.managed_consultants),)).fetchall()
+                    (self.managed_consultants,)).fetchall()
         holidays = [holiday[0] for holiday in holiday_ids]
         self.managed_holiday_ids_cache = holidays
         return holidays
@@ -131,7 +131,7 @@ class User:
                     FROM timesheets
                     WHERE consultant IN %s
                     """,
-                    (tuple(self.managed_consultants),)).fetchall()
+                    (self.managed_consultants,)).fetchall()
         timesheets = [timesheet[0] for timesheet in timesheet_ids]
         self.managed_timesheet_ids_cache = timesheets
         return timesheets
