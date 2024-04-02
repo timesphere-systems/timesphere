@@ -7,6 +7,7 @@ from psycopg import sql
 from psycopg.rows import class_row
 from ..dependencies import get_connection_pool
 from ..auth import User, get_current_user
+from ..models import UserDetails
 
 
 # /manager
