@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Layout from './pages/Layout';
 import PageNotFound from './pages/PageNotFound';
 import Profile from './pages/Profile';
+import Timesheets from './pages/Timesheets';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -23,7 +24,7 @@ root.render(
         <Routes>
           <Route path='/' element={<Layout />}>
             <Route index path='/dashboard' element={<Dashboard />} />
-            <Route path='/timesheets' element={<Profile />} />
+            <Route path='/timesheets' element={<Timesheets />} />
             <Route path='/holiday' element={<Profile />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>

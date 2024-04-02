@@ -8,6 +8,14 @@ import ModalWrapper from './ModalWrapper';
 import SetStatusButton from './SetStatusButton';
 
 
+const WRAPPER = styled.div`
+    width: 90%;
+    margin-left: 5%;
+    display: flex;
+    flex-direction: column;
+    background-color: antiquewhite;
+`
+
 const TIMESHEET = styled.table`
     margin: auto;
     width: 100%;
@@ -18,10 +26,11 @@ const TIMESHEET = styled.table`
     align-items: center;
     border-collapse: collapse;
     overflow: hidden;
-    border-radius: inherit;
+    border-radius: 16px;
 `
 
 const HEADERS = styled.thead`
+    width: 100%;
     color: white;
     font-weight: bold;
     background-color: rgba(54, 54, 54, 0.95);
@@ -37,8 +46,12 @@ const TR = styled.tr`
 
 const TH = styled.th`
     padding: 10px;
-    width: 120px;
+    width: 100%;
+    height: 50px;
     border: 1px solid rgba(91, 91, 91, 1); 
+    font-size: 18px;
+    font-weight: 800;
+    
     display: flex;
     justify-content: center;
     align-items: center;
@@ -46,7 +59,7 @@ const TH = styled.th`
 
 const TD = styled.td`
     padding: 10px;
-    width: 120px;
+    width: 100%;
     color: white;
     border: 1px solid rgba(91, 91, 91, 1);
     background-color: rgba(54, 54, 54, 1);
@@ -61,6 +74,11 @@ const TD = styled.td`
     }  
 `
 
+const TBODY = styled.tbody`
+    min-width: 800px;
+    width: 100%;
+`
+
 const EDIT = styled.div`
     cursor: ${({ editable }) => editable ? 'pointer' : 'default'};
     display: inline-block;
@@ -72,6 +90,7 @@ const EDIT = styled.div`
 `;
 
 const OVERLAY_CONTAINER = styled.div`
+    width: 100%;
     position: relative;
     margin: auto;
     border-radius: 9px;
@@ -110,7 +129,7 @@ const WeeklyHoursTable = () => {
     };
 
     return (
-        <div style={{display:'flex', flexDirection:'column'}}>
+        <WRAPPER>
             <OVERLAY_CONTAINER>
                 <TIMESHEET>
                     <HEADERS>
@@ -122,7 +141,7 @@ const WeeklyHoursTable = () => {
                                 <TH>Edit</TH>
                             </TR>
                     </HEADERS>
-                    <tbody>
+                    <TBODY>
                     {timesheetData.map((timesheet) => {
                         const isRowEditable = timesheet.status === 'Denied';
                         return (                        
@@ -143,7 +162,7 @@ const WeeklyHoursTable = () => {
                             </TR>
                         );
                     })}
-                    </tbody>
+                    </TBODY>
                 </TIMESHEET> 
             </OVERLAY_CONTAINER>
             <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} title={'Weekly Timesheet'}>
@@ -159,7 +178,7 @@ const WeeklyHoursTable = () => {
                                         <TH>Hours</TH>
                                     </TR>
                             </HEADERS>
-                            <tbody>
+                            <TBODY>
                                 <TR>
                                     <TD></TD>
                                     <TD></TD>
@@ -168,13 +187,12 @@ const WeeklyHoursTable = () => {
                                     <TD></TD>
                                     <TD></TD>
                                 </TR>
-                            </tbody>
+                            </TBODY>
                         </TIMESHEET> 
                     </OVERLAY_CONTAINER>
             </ModalWrapper>
-        </div>
+        </WRAPPER>
     )
-    
 }
 
 export default WeeklyHoursTable

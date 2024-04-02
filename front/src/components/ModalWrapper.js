@@ -40,7 +40,7 @@ const OVERLAY_CONTENT = styled.div`
     border-radius: 9px;
     border: 1.5px solid black;
     padding: 30px;
-
+    width: max-content;
 `;
 
 
