@@ -8,8 +8,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from './pages/Dashboard';
 import Layout from './pages/Layout';
 import PageNotFound from './pages/PageNotFound';
-import Profile from './pages/Profile';
 import Timesheets from './pages/Timesheets';
+import Holiday from './pages/Holiday';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -25,7 +25,7 @@ root.render(
           <Route path='/' element={<Layout />}>
             <Route index path='/dashboard' element={<Dashboard />} />
             <Route path='/timesheets' element={<Timesheets />} />
-            <Route path='/holiday' element={<Profile />} />
+            <Route path='/holiday' element={<Holiday />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
         </Routes>
