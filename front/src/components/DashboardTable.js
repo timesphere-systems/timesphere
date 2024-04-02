@@ -127,13 +127,15 @@ const OVERLAY_TEXT = styled.p`
 
 
 
-const DashboardTable = ({submittable}) => {
+const DashboardTable = ({ editable, submittable }) => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
-    const [editable, setEditable] = useState(false);   //change to true for testing 
 
+    
     useEffect(() => {
-        setEditable(submittable);
+        // code here 
     }, [submittable]);
+    
+
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
