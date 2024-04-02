@@ -3,9 +3,10 @@ import styled from 'styled-components';
 import ExitIcon from '../assets/icons/ExitIcon.svg';
 import EmailIcon from '../assets/icons/EmailIcon.svg';
 import TimezoneIcon from '../assets/icons/TimezoneIcon.svg';
-
+import LoginButton from './LoginButton';
 
 const SIDEBAR = styled.nav`
+    z-index: 99;
     position: fixed;
     top: 0;
     right: ${({ isVisible }) => (isVisible ? '0' : '-100%')}; 
@@ -61,21 +62,14 @@ const INFO = styled.p`
     margin-bottom: 30px;
 `
 
-
 const ICON = styled.img`
     width:13px;
     height: 13px;
     margin-right: 8px;
 `
 
-
-
-
-
-
 const ProfileSidebar = ({profileImg, firstname, lastname, email, isVisible, hideSidebar}) => {
     const timezone = React.useState("GMT"); // timezone hard coded
-
 
     return (
       <div>
@@ -97,6 +91,9 @@ const ProfileSidebar = ({profileImg, firstname, lastname, email, isVisible, hide
                 <INFO_HEADER><ICON src={TimezoneIcon} alt=""/>Timezone</INFO_HEADER>
                 <INFO>{timezone}</INFO>
             </div>
+            <LoginButton 
+            width={'120px'}
+            height={'60px'}/>
         </SIDEBAR>
       </div>
     )
