@@ -193,11 +193,6 @@ const DashboardTable = ({submittable}) => {
         return totalHours % 1 === 0 ? parseInt(totalHours) : parseFloat(totalHours);
     };
 
-    // Function for edit button 
-    // let toggleEditMode = () => {
-    //     setEditable(!editable);
-    // };
-    
     // Function to check if the current date is a weekend or holiday (needed for the overlay)
     let isWeekendOrHoliday = (row) => {
         const currentDate = new Date();
