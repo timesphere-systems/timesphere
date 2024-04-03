@@ -13,6 +13,7 @@ const Overlay = styled.div`
     justify-content: center;
     align-items: center;
     visibility: ${({ isVisible }) => isVisible ? 'visible' : 'hidden'};
+    z-index: 100;
 `;
 
 const OVERLAY_HEADER = styled.div`

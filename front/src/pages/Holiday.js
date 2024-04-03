@@ -1,10 +1,11 @@
-import React from 'react'
+import React, {useState} from 'react'
 import styled from 'styled-components'
 import Selector from '../components/Selector'
 import HolidayRequestsTable from '../components/HolidayRequestsTable'
 import Footer from '../components/Footer'
 import ActionButton from '../components/ActionButton'
 import PlusIcon from '../assets/icons/PlusIcon.svg'
+import NewHolidayRequestModal from '../components/NewHolidayRequestModal'
 
 const HEADING = styled.div`
     margin-top: 2rem;
@@ -35,6 +36,7 @@ const FOOTER_WRAPPER = styled.div`
 `
 
 const Holiday = () => {
+    const [visible, setVisible] = useState(false);             // Store modal visibility state
   return (
     <div>
         <HEADING>
@@ -45,7 +47,7 @@ const Holiday = () => {
             clickable={true}
             text={"New"}
             icon={PlusIcon}
-            onClick={() => {console.log("New holiday")}}/>
+            onClick={() => setVisible(true)}/>
         </HEADING>
         <SELECTOR_CONTAINER>
             <Selector/>
@@ -56,6 +58,7 @@ const Holiday = () => {
         <FOOTER_WRAPPER>
             <Footer />
         </FOOTER_WRAPPER>
+        <NewHolidayRequestModal overlayVisible={visible} setOverlayVisible={setVisible} />
     </div>
   )
 }
