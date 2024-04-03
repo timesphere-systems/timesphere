@@ -20,6 +20,13 @@ root.render(
       redirect_uri: window.location.origin
     }}
   >
+    {/* <Auth0Provider
+    domain={"dev-ix6nt3x32jxvquyz.us.auth0.com"}
+    clientId={"PIg9pxjlhr8Fg8FUhjjdq2mfjMbIzEWJ"}
+    authorizationParams={{
+      redirect_uri: window.location.origin
+    }}
+    > */}
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Layout />}>

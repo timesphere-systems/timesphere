@@ -1,7 +1,8 @@
 import React from 'react'
 import { useState } from 'react';
-import styled from 'styled-components'
+import { useAuth0 } from "@auth0/auth0-react";
 import { Link } from 'react-router-dom'
+import styled from 'styled-components'
 import Logo from '../assets/icons/Logo.svg'
 import Notifications from './Notifications'
 import PageSelector from './PageSelector'
@@ -63,6 +64,7 @@ const PFP = styled.img`
 
 const Navbar = () => {
     const [isVisible, setIsVisible] = useState(false);
+    const { isAuthenticated, user } = useAuth0();
 
     const hideSidebar = () => {
         setIsVisible(!isVisible);
@@ -84,7 +86,11 @@ const Navbar = () => {
             <R_CONTAINER>
                 <Notifications hasNew={true}/>
 
-                <PFP src={"https://clasebcn.com/wp-content/uploads/2020/04/harold-thumb.jpg"} onClick={hideSidebar}/>
+                {isAuthenticated ? 
+                    <PFP src={user.picture} onClick={hideSidebar}/>
+                    :
+                    <PFP src={"https://clasebcn.com/wp-content/uploads/2020/04/harold-thumb.jpg"} onClick={hideSidebar}/>
+                }
             </R_CONTAINER>
         </NAV>
 

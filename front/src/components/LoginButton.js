@@ -44,17 +44,10 @@ function getCookie(cname) {
 }
 
 const LoginButton = ({width, height}) => {
-    const [isLoggedIn, setIsLoggedIn] = React.useState(() => getCookie("auth0.PIg9pxjlhr8Fg8FUhjjdq2mfjMbIzEWJ.is.authenticated"))
-    const { loginWithRedirect } = useAuth0();
+    const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
 
-    let logout = async () => {
-        const res = await fetch(`https://${process.env.REACT_APP_AUTHZERO_DOMAIN}/v2/logout`)
-    }
-
-    let handleClick = (e) => {
-        getCookie("auth0.PIg9pxjlhr8Fg8FUhjjdq2mfjMbIzEWJ.is.authenticated") ? setIsLoggedIn(true) : setIsLoggedIn(false)
-
-        isLoggedIn ? logout() : loginWithRedirect()
+    let handleClick = () => {
+        isAuthenticated ? logout() : loginWithRedirect()
     }
     
     return (
@@ -63,7 +56,7 @@ const LoginButton = ({width, height}) => {
             height={height}
             onClick={handleClick}
         >
-            {isLoggedIn ? 
+            {isAuthenticated ? 
             <>
                 <img src={LogoutIcon} alt="logout icon" />
                 <p>Logout</p>
