@@ -32,6 +32,7 @@ class User:
         self.time_entries_cache = []
         self.managed_time_entries_cache = []
         self.consultant_id_cache: int | None = None
+        self.manager_id_cache: int | None = None
 
     @property
     def managed_consultants(self) -> list[int]:
@@ -65,6 +66,23 @@ class User:
         consultant_id = consultant_id[0] if consultant_id is not None else None
         self.consultant_id_cache = consultant_id
         return consultant_id
+    @property
+    def manager_id(self) -> int | None:
+        """Get the manager ID for this user."""
+        if self.manager_id_cache is not None:
+            return self.manager_id_cache
+
+        with self.pool.connection() as connection:
+            with connection.cursor() as cursor:
+                manager_id = cursor.execute("""
+                    SELECT manager_id
+                    FROM consultants
+                    WHERE user_id = %s
+                    """,
+                    (self.details.user_id,)).fetchone()
+        manager_id = manager_id[0] if manager_id is not None else None
+        self.manager_id_cache = manager_id
+        return manager_id
 
     @property
     def holiday_ids(self) -> list[int]:
