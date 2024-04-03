@@ -230,6 +230,9 @@ def create_time_entry(request: models.CreateTimeEntry,
                       ) -> JSONResponse:
     """Create Time Entry
 
+    Requires to be the owner of the timesheet (the time entry is for) or 
+        the manager of the consultant
+
     Args:
         request (models.CreateTimeEntry): JSON Model with the details to create a time entry
     """
