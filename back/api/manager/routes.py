@@ -16,7 +16,6 @@ router = APIRouter(
 
 @router.get("/{user_id}/consultants", status_code=status.HTTP_200_OK, response_model=None)
 def get_assigned_consultants(user_id: int,
-                             pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
                              current_user: Annotated[User, Security(get_current_user)]
                              ) -> JSONResponse:
     """Returns a list of consultants ID's of the consultants assigned to the specified manager
@@ -29,7 +28,6 @@ def get_assigned_consultants(user_id: int,
     Returns:
         list[int]: the list of ID's of consultants
     """
-    # TODO: it's doubtful the permissions are correct here.
     if current_user.details.user_id != user_id:
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -40,14 +38,6 @@ def get_assigned_consultants(user_id: int,
         status_code=status.HTTP_200_OK,
         content={"consultants": current_user.managed_consultants}
     )
-    # consultants: list[int] = []
-    # with pool.connection() as connection:
-    #     with connection.cursor() as cursor:
-    #         rows = cursor.execute(
-    #             """SELECT id FROM consultants
-    #                      WHERE manager_id = %s""", (user_id,)).fetchall()
-    #         consultants = [cast(int, row[0]) for row in rows]
-    # return consultants
 
 @router.get("/{user_id}/timesheets", status_code=status.HTTP_200_OK, response_model=None)
 def get_waiting_timesheets(user_id: int,
