@@ -1,6 +1,5 @@
 """Module providing JSON models for the consultant API."""
 # pylint: disable=too-few-public-methods
-from datetime import datetime
 from pydantic import BaseModel
 from ..user.models import User
 from ..models import UserDetails
@@ -24,10 +23,3 @@ class ConsultantUser(UserDetails):
     contracted_hours: float
     manager_id: int
     user_id: int
-
-class Entry(BaseModel):
-    """Model for displaying an entry (as an inital list on the consultant page)"""
-    entry_id: int
-    created: datetime
-    submitted: datetime | None
-    approval_status: str
