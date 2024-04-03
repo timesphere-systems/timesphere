@@ -225,13 +225,20 @@ def get_time_entry(time_entry_id: int,
 
 @router.post("/entry", status_code=status.HTTP_200_OK)
 def create_time_entry(request: models.CreateTimeEntry,
-                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)]
+                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                      current_user: Annotated[User, Security(get_current_user)]
                       ) -> JSONResponse:
     """Create Time Entry
 
     Args:
         request (models.CreateTimeEntry): JSON Model with the details to create a time entry
     """
+    if not (current_user.is_timesheet_owner(request.timesheet_id)
+    or current_user.is_manager_of_timesheet(request.timesheet_id)):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to create this time entry"}
+        )
     with pool.connection() as connection:
         time_entry_id: int = 0
         try:
