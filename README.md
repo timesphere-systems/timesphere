@@ -76,6 +76,8 @@ To install all necessary dependencies run `npm install`
 
 To run the app, make sure you are in the `/front` directory, then run the `npm run start` command.
 
+In VSCode, to make it easier to work with Docker you can do `command+shift+P`
+
 ## Backend
 
 Source in `/back`

@@ -17,7 +17,9 @@ root.render(
     domain={process.env.REACT_APP_AUTHZERO_DOMAIN}
     clientId={process.env.REACT_APP_AUTHZERO_CLIENT_ID}
     authorizationParams={{
-      redirect_uri: window.location.origin
+      redirect_uri: window.location.origin,
+      audience: "https://dev-ix6nt3x32jxvquyz.us.auth0.com/api/v2/",
+      scope: "read:current_user update:current_user_metadata timesphere:admin"
     }}
   >
     {/* <Auth0Provider
