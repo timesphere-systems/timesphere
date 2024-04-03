@@ -1,6 +1,5 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
-import { useState } from 'react'
 import EditIcon from '../assets/icons/Edit.svg';
 import unEditIcon from '../assets/icons/unEdit.svg';
 import Timesheet from '../assets/icons/Timesheet.svg';
@@ -96,62 +95,65 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-const fetchedTimesheetData = [
-    {
-      id: 1,
-      dateCreated: new Date('2023-03-01'),
-      dateSubmitted: new Date('2023-03-05'),
-      status: 'Approved',
-    },
-    {
-      id: 2,
-      dateCreated: new Date('2023-03-08'),
-      dateSubmitted: new Date('2023-03-12'),
-      status: 'Denied',
-    },
-    {
-      id: 3,
-      dateCreated: new Date('2023-03-15'),
-      dateSubmitted: new Date('2023-03-20'),
-      status: 'Waiting',
-    },
-    // more entries...
-];
-  
-
 const WeeklyHoursTable = () => {
-    const [timesheetData, setTimesheetData] = useState(fetchedTimesheetData);
+    const [timesheetData, setTimesheetData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
+
+    useEffect(() => {
+        const fetchTimesheetData = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/timesheet/{timesheet_id}', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Include other headers like Authorization if needed
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch timesheet data');
+                }
+
+                const data = await response.json();
+                setTimesheetData(data);
+            } catch (error) {
+                console.error('Error fetching timesheet data:', error);
+            }
+        };
+
+        fetchTimesheetData();
+    }, []);
 
     const toggleOverlay = () => {
         setOverlayVisible(!overlayVisible);
     };
+
 
     return (
         <WRAPPER>
             <OVERLAY_CONTAINER>
                 <TIMESHEET>
                     <HEADERS>
-                            <TR>
-                                <TH>Timesheet</TH>
-                                <TH>Date Created</TH>
-                                <TH>Date Submitted</TH>
-                                <TH>Status</TH>
-                                <TH>Edit</TH>
-                            </TR>
+                        <TR>
+                            <TH>Timesheet</TH>
+                            <TH>Date Created</TH>
+                            <TH>Date Submitted</TH>
+                            <TH>Status</TH>
+                            <TH>Edit</TH>
+                        </TR>
                     </HEADERS>
                     <TBODY>
                     {timesheetData.map((timesheet) => {
                         const isRowEditable = timesheet.status === 'Denied';
-                        return (                        
+                        return (
                             <TR key={timesheet.id}>
                                 <TD>
-                                    <button onClick={toggleOverlay} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
+                                    <button onClick={toggleOverlay} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                                     <img src={Timesheet} alt="Timesheet Icon"/>
                                     </button>
                                 </TD>
-                                <TD>{timesheet.dateCreated.toLocaleDateString()}</TD>
-                                <TD>{timesheet.dateSubmitted.toLocaleDateString()}</TD>
+                                <TD>{new Date(timesheet.dateCreated).toLocaleDateString()}</TD>
+                                <TD>{timesheet.dateSubmitted ? new Date(timesheet.dateSubmitted).toLocaleDateString() : 'N/A'}</TD>
                                 <TD><SetStatusButton status={timesheet.status} isActive={false} /></TD>
                                 <TD>
                                     <EDIT editable={isRowEditable}>
