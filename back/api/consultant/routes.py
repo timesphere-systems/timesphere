@@ -216,7 +216,7 @@ def get_timesheets(consultant_id: int,
                      current_user: Annotated[User,
                                                    Security(get_current_user)],
                      approval_status: ApprovalStatus | None = None
-                     ) -> JSONResponse | list[models.Entry]:
+                     ) -> JSONResponse | list[int]:
     """Returns all consultants submitted timesheets filtered by approval_status.
     
     Requires you to be the consultant themselves, their manager, or an admin.
@@ -243,7 +243,7 @@ def get_holidays(consultant_id: int,
                      current_user: Annotated[User,
                                                    Security(get_current_user)],
                      approval_status: ApprovalStatus | None = None
-                     ) -> JSONResponse | list[models.Entry]:
+                     ) -> JSONResponse | list[int]:
     """Returns all consultants submitted holidays filtered by approval_status.
     
     Requires you to be the consultant themselves, their manager, or an admin.
@@ -268,7 +268,7 @@ def get_entries(consultant_id: int,
                  table: str,
                  pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
                  approval_status: ApprovalStatus | None = None
-                 ) -> list[models.Entry]:
+                 ) -> list[int]:
     """Returns all consultants submitted entries filtered by approval_status.
 
     Args:
@@ -277,11 +277,9 @@ def get_entries(consultant_id: int,
         table (str): The table to update.
         approval_status: (ApprovalStatus) The new status_type of the entry
     Returns:
-        list[models.Entry]
+        list[int]
     """
-    base_query = sql.SQL("""SELECT {table}.id AS entry_id, {table}.created AS created,
-                                                {table}.submitted AS email, submitted,
-                                                approval_status.status_type AS approval_status
+    base_query = sql.SQL("""SELECT {table}.id
                 FROM {table}, approval_status
                 WHERE approval_status.id = {table}.approval_status
                 AND {table}.consultant = %s""").format(
@@ -298,9 +296,10 @@ def get_entries(consultant_id: int,
         exclude_incomplete_status = sql.SQL(" AND approval_status.status_type != 'INCOMPLETE'")
         query = base_query + exclude_incomplete_status
         parameters = (consultant_id,)
-
+    entries: list[int] = []
     with pool.connection() as connection:
         entries = []
-        with connection.cursor(row_factory=class_row(models.Entry)) as cursor:
-            entries = cursor.execute(query, parameters).fetchall()
+        with connection.cursor() as cursor:
+            rows = cursor.execute(query, parameters).fetchall()
+            entries = [cast(int, row[0]) for row in rows]
         return entries
