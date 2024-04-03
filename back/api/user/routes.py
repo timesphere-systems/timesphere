@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_user(request: models.User,
+def create_user(request: models.UserCreate,
                 pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
                 _current_user:
                     Annotated[User, Security(get_current_user, scopes=["timesphere:admin"])]
