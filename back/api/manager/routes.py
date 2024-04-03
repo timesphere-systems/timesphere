@@ -29,8 +29,7 @@ def get_manager_details(user_id: int,
     Returns:
         models.UserDetails: The consultant's details.
     """
-    if not (current_user.details.user_id == user_id or
-            current_user.manager_id == user_id):
+    if user_id not in ((current_user.details.user_id, current_user.manager_id)):
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
             content={"message": "You do not have permission to this managers details"}
