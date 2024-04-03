@@ -216,7 +216,7 @@ def get_timesheets(consultant_id: int,
                      current_user: Annotated[User,
                                                    Security(get_current_user)],
                      approval_status: ApprovalStatus | None = None
-                     ) -> JSONResponse | list[int]:
+                     ) -> JSONResponse:
     """Returns all consultants submitted timesheets filtered by approval_status.
     
     Requires you to be the consultant themselves, their manager, or an admin.
@@ -226,7 +226,7 @@ def get_timesheets(consultant_id: int,
         pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
         approval_status: (ApprovalStatus) The new status_type of the entry
     Returns:
-        list[int]
+        JSONResponse
     """
     if consultant_id != current_user.consultant_id and \
         (not current_user.is_manager_of(consultant_id)):
@@ -235,7 +235,11 @@ def get_timesheets(consultant_id: int,
             content={"message":
                      "You do not have permission to view this consultant's timesheets"}
         )
-    return get_entries(consultant_id, 'timesheets', pool, approval_status)
+    entries =  get_entries(consultant_id, 'timesheets', pool, approval_status)
+    return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"timesheets": entries}
+    )
 
 @router.get("/{consultant_id}/holidays", status_code=status.HTTP_200_OK, response_model=None)
 def get_holidays(consultant_id: int,
@@ -243,7 +247,7 @@ def get_holidays(consultant_id: int,
                      current_user: Annotated[User,
                                                    Security(get_current_user)],
                      approval_status: ApprovalStatus | None = None
-                     ) -> JSONResponse | list[int]:
+                     ) -> JSONResponse:
     """Returns all consultants submitted holidays filtered by approval_status.
     
     Requires you to be the consultant themselves, their manager, or an admin.
@@ -253,7 +257,7 @@ def get_holidays(consultant_id: int,
         pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
         approval_status: (ApprovalStatus) The new status_type of the entry
     Returns:
-        list[int]
+        JSONResponse
     """
     if consultant_id != current_user.consultant_id and \
         (not current_user.is_manager_of(consultant_id)):
@@ -262,7 +266,11 @@ def get_holidays(consultant_id: int,
             content={"message":
                      "You do not have permission to view this consultant's timesheets"}
         )
-    return get_entries(consultant_id, 'holidays', pool, approval_status)
+    entries =  get_entries(consultant_id, 'holidays', pool, approval_status)
+    return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"holidays": entries}
+    )
 
 def get_entries(consultant_id: int,
                  table: str,
