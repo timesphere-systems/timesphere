@@ -298,7 +298,6 @@ def get_entries(consultant_id: int,
         parameters = (consultant_id,)
     entries: list[int] = []
     with pool.connection() as connection:
-        entries = []
         with connection.cursor() as cursor:
             rows = cursor.execute(query, parameters).fetchall()
             entries = [cast(int, row[0]) for row in rows]
