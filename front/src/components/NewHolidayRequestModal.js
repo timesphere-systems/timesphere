@@ -30,6 +30,21 @@ const HOLIDAY_DATE = styled.input`
 const SUBMIT_BUTTON = styled.button`
     border: none;
     background-color: transparent;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    padding: 0;
+
+    button{
+        font-size: 18px;
+        border-radius: 9px;
+
+        img{
+            width: 20px;
+        
+        }
+    }
+    
 `;
 
 const INPUT_CONTAINER = styled.div`
@@ -42,7 +57,7 @@ const HOLIDAY_CONTAINER = styled.div`
     display: flex;
     flex-direction: column;
     gap: 15px;
-    align-items: end;
+    align-items: flex-end;
 
 `;
 
@@ -75,7 +90,7 @@ function NewHolidayRequestModal({overlayVisible, setOverlayVisible}) {
                     </DATE_CONTAINER>
                 </INPUT_CONTAINER>
                 <SUBMIT_BUTTON type="submit">
-                    <SubmitButton clickable={isClickable} onClick={() => console.log("Submitted")} width={148} height={20} />
+                    <SubmitButton clickable={isClickable} onClick={() => console.log("Submitted")} width={"145px"} height={"50px"} />
                 </SUBMIT_BUTTON>
             </HOLIDAY_CONTAINER>
         </HOLIDAY_FORM>
