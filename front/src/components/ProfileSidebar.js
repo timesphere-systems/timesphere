@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useAuth0 } from "@auth0/auth0-react";
 import ExitIcon from '../assets/icons/ExitIcon.svg';
 import EmailIcon from '../assets/icons/EmailIcon.svg';
 import TimezoneIcon from '../assets/icons/TimezoneIcon.svg';
@@ -70,31 +71,45 @@ const ICON = styled.img`
 
 const ProfileSidebar = ({profileImg, firstname, lastname, email, isVisible, hideSidebar}) => {
     const timezone = React.useState("GMT"); // timezone hard coded
+    const { isAuthenticated, user } = useAuth0();
 
     return (
       <div>
-        <SIDEBAR isVisible={isVisible}>
+        {isAuthenticated ?
+            <SIDEBAR isVisible={isVisible}>
+                <div>
+                    <ExitButton src={ExitIcon} alt="exit" onClick={hideSidebar}/> 
+                </div>
+
+                <div>
+                    <PFP src={user.picture} alt="profile pic" />
+                </div>
+                <div>
+                    <NAME>{user.name}</NAME>
+                </div>
+                <div>
+                    <INFO_HEADER><ICON src={EmailIcon} alt=""/>Email Address</INFO_HEADER>
+                    <INFO>{user.email}</INFO>
+                </div>
+                <div>
+                    <INFO_HEADER><ICON src={TimezoneIcon} alt=""/>Timezone</INFO_HEADER>
+                    <INFO>{timezone}</INFO>
+                </div>
+                <LoginButton 
+                width={'200px'}
+                height={'60px'}/>
+            </SIDEBAR>
+            :
+            <SIDEBAR isVisible={isVisible}>
             <div>
                 <ExitButton src={ExitIcon} alt="exit" onClick={hideSidebar}/> 
-            </div>
-            <div>
-                <PFP src={profileImg} alt="profile pic" />
-            </div>
-            <div>
-                <NAME>{firstname} {lastname}</NAME>
-            </div>
-            <div>
-                <INFO_HEADER><ICON src={EmailIcon} alt=""/>Email Address</INFO_HEADER>
-                <INFO>{email}</INFO>
-            </div>
-            <div>
-                <INFO_HEADER><ICON src={TimezoneIcon} alt=""/>Timezone</INFO_HEADER>
-                <INFO>{timezone}</INFO>
             </div>
             <LoginButton 
             width={'200px'}
             height={'60px'}/>
         </SIDEBAR>
+        
+    }
       </div>
     )
   }
