@@ -12,7 +12,6 @@ const WRAPPER = styled.div`
     margin-left: 5%;
     display: flex;
     flex-direction: column;
-    background-color: antiquewhite;
 `
 
 const TABLE = styled.table`
