@@ -107,35 +107,44 @@ const OVERLAY_CONTAINER = styled.div`
 
 const OVERLAY = styled.div`
     position: absolute;
-    top: 0;
+    top: ${props => props.topPos};
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 74px;
     background-color: rgba(0, 0, 0, 0.5);
-    filter: blur(5px);
-    border-radius: 9px;
+    backdrop-filter: blur(2px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1;
 `
 
+const WEEKEND_OVERLAY = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+`
+
 const OVERLAY_TEXT = styled.p`
     color: white;
     font-size: 18px;
+    font-weight: 600;
 `
-
-
 
 const DashboardTable = ({ editable, submittable }) => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
 
-    
     useEffect(() => {
         // code here 
     }, [submittable]);
-    
-
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
@@ -195,13 +204,11 @@ const DashboardTable = ({ editable, submittable }) => {
         return totalHours % 1 === 0 ? parseInt(totalHours) : parseFloat(totalHours);
     };
 
-    // Function to check if the current date is a weekend or holiday (needed for the overlay)
-    let isWeekendOrHoliday = (row) => {
+    // Function to check if the current date is a weekend (needed for the overlay)
+    let isWeekend = () => {
         const currentDate = new Date();
-        const currentDayStatus = row.status;
-
         // Check if current day is a weekend (Saturday/Sunday) or has holiday status
-        if (currentDate.getDay() === 6 || currentDate.getDay() === 0 || currentDayStatus === 'Holiday') {
+        if (currentDate.getDay() === 6 || currentDate.getDay() === 0) {
             return true;
         }
         return false;
@@ -250,14 +257,24 @@ const DashboardTable = ({ editable, submittable }) => {
                                         />
                                     </TD>
                                     <TD>{row.hours}</TD>
+                                    {!editable && row.status === "Holiday" && (
+                                        <OVERLAY topPos={["71px", "143px", "215px", "287px", "359px"][index]}>
+                                            <OVERLAY_TEXT>Holiday</OVERLAY_TEXT>
+                                        </OVERLAY>
+                                    )}
+                                    {!editable && row.status === "Sick" && (
+                                        <OVERLAY topPos={["71px", "143px", "215px", "287px", "359px"][index]}>
+                                            <OVERLAY_TEXT>Sick</OVERLAY_TEXT>
+                                        </OVERLAY>
+                                    )}
                                 </TR>
                             ))}
                     </tbody>
                 </TIMESHEET> 
-                {!editable && weekDates.some((row) => isWeekendOrHoliday(row)) && (
-                    <OVERLAY>
-                        <OVERLAY_TEXT>Holiday / Weekend</OVERLAY_TEXT>     
-                    </OVERLAY>
+                {!editable && isWeekend() && (
+                    <WEEKEND_OVERLAY>
+                        <OVERLAY_TEXT>Weekend 😴</OVERLAY_TEXT>     
+                    </WEEKEND_OVERLAY>
                 )}
             </OVERLAY_CONTAINER>
         </div>
