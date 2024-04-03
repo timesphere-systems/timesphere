@@ -226,7 +226,7 @@ def get_timesheets(consultant_id: int,
         pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
         approval_status: (ApprovalStatus) The new status_type of the entry
     Returns:
-        list[models.Entry]
+        list[int]
     """
     if consultant_id != current_user.consultant_id and \
         (not current_user.is_manager_of(consultant_id)):
@@ -253,7 +253,7 @@ def get_holidays(consultant_id: int,
         pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
         approval_status: (ApprovalStatus) The new status_type of the entry
     Returns:
-        list[models.Entry]
+        list[int]
     """
     if consultant_id != current_user.consultant_id and \
         (not current_user.is_manager_of(consultant_id)):
