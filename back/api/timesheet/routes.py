@@ -264,7 +264,7 @@ def update_time_entry(time_entry_id: int, request: models.UpdateTimeEntry,
                 if cursor.rowcount == 1:
                     return JSONResponse(
                         status_code = status.HTTP_200_OK,
-                        content = {"message":"Sucessfully updated time entry"}
+                        content = {"message": "Sucessfully updated time entry"}
                     )
             except CheckViolation:
                 return JSONResponse(
