@@ -22,6 +22,8 @@ def get_manager_details(user_id: int,
                            current_user: Annotated[User, Security(get_current_user)]
                            ) -> JSONResponse | UserDetails:
     """Get the details of a manager.
+
+    Requires to be the manager themselves or the consultant assigned to the manager
     
     Args:
         user_id (int): The managers user ID.
