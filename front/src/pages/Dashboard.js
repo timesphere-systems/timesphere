@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components';
+import { useAuth0 } from "@auth0/auth0-react";
 
 // Import components
 import Greeting from '../components/Greeting';
@@ -52,6 +53,22 @@ const FOOTER_WRAPPER = styled.div`
 const Dashboard = () => {
   const [editable, setEditable] = useState(false);          // Store editable state
   const [submittable, setSubmittable] = useState(false);    // Store submittable state 
+  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+
+  React.useEffect(() => {
+    let getToken = async () => {
+        if (isAuthenticated) {
+            let token = await getAccessTokenSilently(
+                {authorizationParams: {        
+                    audience: "https://timesphere.systems/api",
+                    redirect_uri: "http://localhost:3000",
+                    scope: "timesphere:admin"
+                }});
+            console.log(token);
+        }
+    }
+    getToken();
+  }, [getAccessTokenSilently, isAuthenticated])
 
   // Function which toggles the edit mode - passed to EditToggleButton component
   let toggleEditMode = () => {
@@ -61,7 +78,11 @@ const Dashboard = () => {
   return (
     <div>
       <G_WRAPPER>
-        <Greeting name={'Amal'}/>
+        {isAuthenticated ?
+          <Greeting name={user.given_name}/>
+          :
+          <Greeting name={"User"}/>
+        }
       </G_WRAPPER>
 
       <CLOCK_WRAPPER>
