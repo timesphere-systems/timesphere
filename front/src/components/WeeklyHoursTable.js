@@ -100,13 +100,36 @@ const WeeklyHoursTable = () => {
     const [overlayVisible, setOverlayVisible] = useState(false);
 
     useEffect(() => {
-        const fetchTimesheetData = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/timesheet/{timesheet_id}', {
+        /* Returns a list of timesheet IDs */
+        const fetchTimesheets = async (consultant_id, approval_status) => {
+            try{
+                let url = `http://localhost:8080/consultant/${consultant_id}/timesheets`;
+                if(approval_status !== null){
+                    url += `?approval_status=${approval_status}`;
+                }
+                const response = await fetch(url, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        // Include other headers like Authorization if needed
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch timesheet data');
+                }
+
+                const data = await response.json();
+                console.log(data);
+            } catch(error){
+                console.error('Error fetching timesheets:', error);
+            }
+        }
+        const fetchTimesheetData = async (timesheet_id) => {
+            try {
+                const response = await fetch(`http://localhost:8080/timesheets/${timesheet_id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
                     },
                 });
 
@@ -120,6 +143,7 @@ const WeeklyHoursTable = () => {
                 console.error('Error fetching timesheet data:', error);
             }
         };
+        let list_timesheets = fetchTimesheets();
 
         fetchTimesheetData();
     }, []);
