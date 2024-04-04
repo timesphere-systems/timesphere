@@ -338,24 +338,18 @@ def get_current_week_timesheet(consultant_id: int,
     week_start_date = today_date - timedelta(days= today_date.weekday())
     timesheet_id: int = 0
     with pool.connection() as connection:
-        try:
-            row = connection.execute("""
-                SELECT id 
-                FROM timesheets
-                WHERE consultant = %s
-                AND start = %s""",
-                (consultant_id, week_start_date)).fetchone()
-            if row is None:
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"message": "No current week timesheet assigned to consultant"}
-                )
-            timesheet_id = cast(int, row[0])
-        except ForeignKeyViolation:
+        row = connection.execute("""
+            SELECT id 
+            FROM timesheets
+            WHERE consultant = %s
+            AND start = %s""",
+            (consultant_id, week_start_date)).fetchone()
+        if row is None:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "Failed to get current week timesheet, invalid consultant ID"}
+                content={"message": "No current week timesheet assigned to consultant"}
             )
+        timesheet_id = cast(int, row[0])
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"id": timesheet_id}
