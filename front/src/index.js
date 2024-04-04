@@ -13,15 +13,16 @@ import Holiday from './pages/Holiday';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  // <Auth0Provider
-  //   domain={process.env.REACT_APP_AUTHZERO_DOMAIN}
-  //   clientId={process.env.REACT_APP_AUTHZERO_CLIENT_ID}
-  //   authorizationParams={{
-  //     redirect_uri: window.location.origin,
-  //     audience: "https://dev-ix6nt3x32jxvquyz.us.auth0.com/api/v2/",
-  //   }}
-  // >
-    <Auth0Provider
+  <Auth0Provider
+    domain={process.env.REACT_APP_AUTHZERO_DOMAIN}
+    clientId={process.env.REACT_APP_AUTHZERO_CLIENT_ID}
+    authorizationParams={{
+      redirect_uri: window.location.origin,
+      audience: "https://timesphere.systems/api",
+      scope: "openid profile timesphere:admin"
+    }}
+  >
+    {/* <Auth0Provider
     domain={"dev-ix6nt3x32jxvquyz.us.auth0.com"}
     clientId={"PIg9pxjlhr8Fg8FUhjjdq2mfjMbIzEWJ"}
     authorizationParams={{
@@ -29,11 +30,11 @@ root.render(
       audience: "https://timesphere.systems/api",
       scope: "openid profile timesphere:admin"
     }}
-    >
+    > */}
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Layout />}>
-            <Route index path='/dashboard' element={<Dashboard />} />
+            <Route index element={<Dashboard />} />
             <Route path='/timesheets' element={<Timesheets />} />
             <Route path='/holiday' element={<Holiday />} />
             <Route path="*" element={<PageNotFound />} />
