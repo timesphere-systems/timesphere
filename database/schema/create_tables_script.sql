@@ -72,3 +72,13 @@ CREATE TABLE holidays(
   FOREIGN KEY (consultant) REFERENCES consultants(id),
   FOREIGN KEY (approval_status) REFERENCES approval_status(id)
 );
+
+CREATE TABLE issues(
+  id SERIAL PRIMARY KEY,
+  submitted DATE NOT NULL,
+  title VARCHAR(50) NOT NULL,
+  description text NOT NULL,
+  solved BOOLEAN NOT NULL,
+  user_id INT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+)
