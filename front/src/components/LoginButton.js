@@ -26,30 +26,28 @@ const LOGINBUTTON = styled.button`
     }
 `
 
-// Function taken from https://www.w3schools.com/js/js_cookies.asp
-function getCookie(cname) {
-    let name = cname + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for(let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-        c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-        return c.substring(name.length, c.length);
-        }
-    }
-    return "";
-}
-
 const LoginButton = ({width, height}) => {
-    const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
+    const { isAuthenticated, loginWithRedirect, logout, getAccessTokenSilently } = useAuth0();
+
+    React.useEffect(() => {
+        let getToken = async () => {
+            if (isAuthenticated) {
+                let token = await getAccessTokenSilently(
+                    {authorizationParams: {        
+                        audience: "https://timesphere.systems/api",
+                        redirect_uri: "http://localhost:3000",
+                        scope: "timesphere:admin"
+                    }});
+                console.log(token);
+            }
+        }
+        getToken()
+    }, [getAccessTokenSilently, isAuthenticated])
 
     let handleClick = () => {
         isAuthenticated ? logout() : loginWithRedirect()
     }
-    
+
     return (
         <LOGINBUTTON
             width={width}
