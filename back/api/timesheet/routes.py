@@ -47,7 +47,7 @@ def get_timesheet(timesheet_id: int,
                        timesheets.submitted AS submitted, 
                        timesheets.start AS start, timesheets.consultant AS consultant_id,
                        approval_status.status_type AS approval_status, entries_list.entries as entries
-                FROM (SELECT timesheets.id, ARRAY_AGG(time_entries.id) as entries
+                FROM (SELECT timesheets.id, ARRAY_REMOVE(ARRAY_AGG(time_entries.id), NULL) as entries
                       FROM timesheets
                       LEFT JOIN time_entries
                       ON time_entries.timesheet = timesheets.id
