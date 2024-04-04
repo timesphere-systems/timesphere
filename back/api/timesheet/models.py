@@ -46,6 +46,6 @@ class Timesheet(BaseModel):
     created: datetime
     submitted: datetime | None
     start: datetime
-    entries: list[int] | list[None]
+    entries: list[int]
     consultant_id: int
     approval_status: ApprovalStatus
