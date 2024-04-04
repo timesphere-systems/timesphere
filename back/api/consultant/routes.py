@@ -1,5 +1,5 @@
 """Consultant router and routes, data belonging to a particular consultant."""
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from typing import Annotated, cast
 from fastapi import APIRouter, status, Depends, Security
 from fastapi.responses import JSONResponse
@@ -310,3 +310,53 @@ def get_entries(consultant_id: int,
             rows = cursor.execute(query, parameters).fetchall()
             entries = [cast(int, row[0]) for row in rows]
         return entries
+
+@router.get("/{consultant_id}/timesheet/current", status_code=status.HTTP_200_OK)
+def get_current_week_timesheet(consultant_id: int,
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     current_user: Annotated[User,
+                                                   Security(get_current_user)]
+                     ) -> JSONResponse:
+    """Returns the current week timesheet to the consultant
+
+    Requires you to be the consultant themselves
+    
+    Args:
+        id (int): The consultant's ID.
+        pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
+    Returns:
+        JSONResponse
+    """
+
+    if consultant_id != current_user.consultant_id:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message":
+                     "You do not have permission to view this consultant's timesheets"}
+        )
+    today_date = date.today()
+    week_start_date = today_date - timedelta(days= today_date.weekday())
+    timesheet_id: int = 0
+    with pool.connection() as connection:
+        try:
+            row = connection.execute("""
+                SELECT id 
+                FROM timesheets
+                WHERE consultant = %s
+                AND start = %s""",
+                (consultant_id, week_start_date)).fetchone()
+            if row is None:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "No current week timesheet assigned to consultant"}
+                )
+            timesheet_id = cast(int, row[0])
+        except ForeignKeyViolation:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"message": "Failed to get current week timesheet, invalid consultant ID"}
+            )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"id": timesheet_id}
+    )
