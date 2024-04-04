@@ -314,8 +314,7 @@ def get_entries(consultant_id: int,
 @router.get("/{consultant_id}/timesheet/current", status_code=status.HTTP_200_OK)
 def get_current_week_timesheet(consultant_id: int,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
-                     current_user: Annotated[User,
-                                                   Security(get_current_user)]
+                     current_user: Annotated[User, Security(get_current_user)]
                      ) -> JSONResponse:
     """Returns the current week timesheet to the consultant
 
@@ -327,7 +326,6 @@ def get_current_week_timesheet(consultant_id: int,
     Returns:
         JSONResponse
     """
-
     if consultant_id != current_user.consultant_id:
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
