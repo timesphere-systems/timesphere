@@ -16,3 +16,8 @@ class User(BaseModel):
     lastname: str
     email: str
     user_role: int
+
+class CreateIssue(BaseModel):
+    """Model for creating issue."""
+    title: str
+    description: str
