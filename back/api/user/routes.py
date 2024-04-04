@@ -55,7 +55,7 @@ def create_issue(user_id: int, request: models.CreateIssue,
                 ) -> JSONResponse:
     """Creates a new issue
 
-    Requires for user_id to be the current user
+    Requires for user_id to be the current users user_id
 
     Args:
         request (models.CreateIssue): The issues details
