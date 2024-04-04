@@ -76,7 +76,9 @@ To install all necessary dependencies run `npm install`
 
 To run the app, make sure you are in the `/front` directory, then run the `npm run start` command.
 
-In VSCode, to make it easier to work with Docker you can do `command+shift+P`
+If you want to run the app with Auth and Backend, you must run it using Docker.
+
+In VSCode, to make it easier to work with Docker you can do `command+shift+P`, then search `Run Task` and then run the Docker tasks from there. The `Build and Restart` task makes it easier to rebuild Docker if you just made changes to your code while working.
 
 ## Backend
 
