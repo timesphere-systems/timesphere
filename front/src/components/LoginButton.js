@@ -13,7 +13,7 @@ const LOGINBUTTON = styled.button`
     justify-content: center;
     gap: 8px;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 130%;
     color: white;
     background-color: #1B143E;
     cursor: pointer;

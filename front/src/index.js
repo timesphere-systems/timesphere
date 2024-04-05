@@ -10,6 +10,7 @@ import Layout from './pages/Layout';
 import PageNotFound from './pages/PageNotFound';
 import Timesheets from './pages/Timesheets';
 import Holiday from './pages/Holiday';
+import Homepage from './pages/Homepage';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -22,19 +23,11 @@ root.render(
       scope: "openid profile timesphere:admin"
     }}
   >
-    {/* <Auth0Provider
-    domain={"dev-ix6nt3x32jxvquyz.us.auth0.com"}
-    clientId={"PIg9pxjlhr8Fg8FUhjjdq2mfjMbIzEWJ"}
-    authorizationParams={{
-      redirect_uri: window.location.origin,
-      audience: "https://timesphere.systems/api",
-      scope: "openid profile timesphere:admin"
-    }}
-    > */}
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Layout />}>
-            <Route index element={<Dashboard />} />
+            <Route index element={<Homepage />} />
+            <Route path='/dashboard' element={<Dashboard />} />
             <Route path='/timesheets' element={<Timesheets />} />
             <Route path='/holiday' element={<Holiday />} />
             <Route path="*" element={<PageNotFound />} />
