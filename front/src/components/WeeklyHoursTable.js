@@ -95,12 +95,12 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-const WeeklyHoursTable = () => {
+const WeeklyHoursTable = ({token}) => {
     const [timesheetData, setTimesheetData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
 
     useEffect(() => {
-        /* Returns a list of timesheet IDs */
+        
         const fetchTimesheets = async (consultant_id, approval_status) => {
             try{
                 let url = `http://localhost:8080/consultant/${consultant_id}/timesheets`;
@@ -111,6 +111,7 @@ const WeeklyHoursTable = () => {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
 
@@ -146,7 +147,7 @@ const WeeklyHoursTable = () => {
         let list_timesheets = fetchTimesheets();
 
         fetchTimesheetData();
-    }, []);
+    }, [token]);
 
     const toggleOverlay = () => {
         setOverlayVisible(!overlayVisible);

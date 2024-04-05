@@ -1,4 +1,5 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
+import {useAuth0} from '@auth0/auth0-react';
 import styled from 'styled-components';
 import Selector from '../components/Selector';
 import WeeklyHoursTable from '../components/WeeklyHoursTable';
@@ -28,15 +29,33 @@ const FOOTER_WRAPPER = styled.div`
     margin-top: 4rem;
 `
 
+
 const Timesheets = () => {
-  return (
+    const {getAccessTokenSilently, isAuthenticated} = useAuth0();
+    const [token, setToken] = useState(null);
+    useEffect(() => {
+        const getToken = async () => {
+            if (isAuthenticated) {
+                const token = await getAccessTokenSilently(
+                    {authorizationParams:{
+                        audience: "https://timesphere.systems/api",
+                        redirect_uri: "http://localhost:3000/timesheets",
+                        scope: "timesphere:admin"
+                    }});
+                    console.log(token);
+                    setToken(token);
+            }
+        }
+        getToken();
+    }, [getAccessTokenSilently, isAuthenticated]);
+    return (
     <div>
         <HEADING>Weekly Timesheets</HEADING>
         <SELECTOR_CONTAINER>
             <Selector/>
         </SELECTOR_CONTAINER>
         <TABLE_WRAPPER>
-            <WeeklyHoursTable />
+            <WeeklyHoursTable token={token}/>
         </TABLE_WRAPPER>
         <FOOTER_WRAPPER>
             <Footer />
@@ -46,3 +65,4 @@ const Timesheets = () => {
 }
 
 export default Timesheets;
+
