@@ -31,10 +31,14 @@ services:
       deploy_on_push: true
       repo: timesphere-systems/timesphere
     envs:
-      BACKEND_URL: "https://timesphere.systems/api"
-      REACT_APP_AUTHZERO_DOMAIN: "dev-ix6nt3x32jxvquyz.us.auth0.com"
-      REACT_APP_AUTHZERO_CLIENT_ID: "PIg9pxjlhr8Fg8FUhjjdq2mfjMbIzEWJ"
-      REACT_APP_AUTHZERO_AUDIENCE: "https://timesphere.systems/api"
+      - key: BACKEND_URL
+        value: https://timesphere.systems/api
+      - key: REACT_APP_AUTHZERO_DOMAIN
+        value: dev-ix6nt3x32jxvquyz.us.auth0.com
+      - key: REACT_APP_AUTHZERO_CLIENT_ID
+        value: PIg9pxjlhr8Fg8FUhjjdq2mfjMbIzEWJ
+      - key: REACT_APP_AUTHZERO_AUDIENCE
+        value: https://timesphere.systems/api
     http_port: 8080
     instance_count: 1
     instance_size_slug: basic-xs
@@ -57,9 +61,9 @@ services:
       - key: POSTGRES_PORT
         value: ${db-postgresql-oxinar-london.PORT}
       - key: AUTHZERO_DOMAIN
-        value: "dev-ix6nt3x32jxvquyz.us.auth0.com"
+        value: dev-ix6nt3x32jxvquyz.us.auth0.com
       - key: AUTHZERO_AUDIENCE
-        value: "https://timesphere.systems/api"
+        value: https://timesphere.systems/api
     environment_slug: python
     name: timesphere-fastapi
     source_dir: /back
