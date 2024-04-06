@@ -42,6 +42,7 @@ const Holiday = () => {
     const [visible, setVisible] = useState(false);   // Store modal visibility state
     const { isAuthenticated, getAccessTokenSilently } = useAuth0();
     const [token, setToken] = useState(null);
+    const [consultantId, setConsultantId] = useState(null);
 
     React.useEffect(() => {
         let getToken = async () => {
@@ -61,6 +62,7 @@ const Holiday = () => {
         getToken();
     }, [getAccessTokenSilently, isAuthenticated]);
 
+
     return (
         <div>
             <HEADING>
@@ -77,7 +79,7 @@ const Holiday = () => {
                 <Selector />
             </SELECTOR_CONTAINER>
             <TABLE_WRAPPER>
-                <HolidayRequestsTable token={token} />
+                <HolidayRequestsTable token={token} consultantId={consultantId} />
             </TABLE_WRAPPER>
             <FOOTER_WRAPPER>
                 <Footer />
