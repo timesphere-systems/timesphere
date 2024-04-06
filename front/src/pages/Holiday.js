@@ -79,7 +79,6 @@ const Holiday = () => {
     }, [getAccessTokenSilently, isAuthenticated]);
 
 
-
     return (
         <div>
             <HEADING>
