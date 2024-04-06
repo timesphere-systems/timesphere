@@ -58,7 +58,7 @@ const LoginButton = ({width, height, setConsultantId}) => {
                 createConsultant().catch(console.error);
             }
         };
-    }, [getaccesstokensilently]);
+    }, [getAccessTokenSilently]);
     return (
         <LOGINBUTTON
             width={width}
