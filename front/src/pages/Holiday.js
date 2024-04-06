@@ -56,6 +56,7 @@ const Holiday = () => {
     };
 
 
+
     React.useEffect(() => {
         let getToken = async () => {
             if (isAuthenticated) {
@@ -74,7 +75,9 @@ const Holiday = () => {
 
         getToken();
 
+
     }, [getAccessTokenSilently, isAuthenticated]);
+
 
 
     return (
