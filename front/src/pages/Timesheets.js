@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import {useAuth0} from '@auth0/auth0-react';
 import styled from 'styled-components';
 import Selector from '../components/Selector';
@@ -33,10 +33,10 @@ const FOOTER_WRAPPER = styled.div`
 const Timesheets = () => {
     const {getAccessTokenSilently, isAuthenticated} = useAuth0();
     const [token, setToken] = useState(null);
-    useEffect(() => {
-        const getToken = async () => {
+    React.useEffect(() => {
+        let getToken = async () => {
             if (isAuthenticated) {
-                const token = await getAccessTokenSilently(
+                let token = await getAccessTokenSilently(
                     {authorizationParams:{
                         audience: "https://timesphere.systems/api",
                         redirect_uri: "http://localhost:3000/timesheets",
