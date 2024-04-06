@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { useState } from 'react'
 import EditIcon from '../assets/icons/Edit.svg';
@@ -94,56 +94,109 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-// set the holiday request data to be displayed 
-const fetchedRequestData = [
+// test holiday request data to be displayed 
+const fetchedTestData = [
     {
-      id: 1,
-      dateSubmitted: new Date('2023-03-05'),
-      status: 'Approved',
+        id: 1,
+        dateSubmitted: new Date('2023-03-05'),
+        status: 'Approved',
     },
     {
-      id: 2,
-      dateSubmitted: new Date('2023-03-12'),
-      status: 'Denied',
+        id: 2,
+        dateSubmitted: new Date('2023-03-12'),
+        status: 'Denied',
     },
     {
-      id: 3,
-      dateSubmitted: new Date('2023-03-20'),
-      status: 'Waiting',
+        id: 3,
+        dateSubmitted: new Date('2023-03-20'),
+        status: 'Waiting',
     },
     {
         id: 4,
         dateSubmitted: new Date('2023-03-22'),
         status: 'Approved',
-      },
-      {
+    },
+    {
         id: 5,
         dateSubmitted: new Date('2023-03-22'),
         status: 'Waiting',
-      },
+    },
     // more entries...
-  ];
-  
-  // function which uses the SetStatusButton component
-  let SetStatus = (status) => {
+];
+
+// function which uses the SetStatusButton component
+let SetStatus = (status) => {
     switch (status) {
         case 'Approved':
-            return <SetStatusButton status='Approved' isActive='true'/>;
+            return <SetStatusButton status='Approved' isActive='true' />;
         case 'Denied':
-            return <SetStatusButton status='Denied' isActive='true'/>;
+            return <SetStatusButton status='Denied' isActive='true' />;
         case 'Waiting':
-            return <SetStatusButton status='Waiting' isActive='true'/>
+            return <SetStatusButton status='Waiting' isActive='true' />
         default:
-            return <SetStatusButton status='Waiting' isActive='true'/>;
+            return <SetStatusButton status='Waiting' isActive='true' />;
     }
 
 };
 
-const HolidayRequestsTable = () => {
-    const [requestData, setRequestData] = useState(fetchedRequestData);
+const HolidayRequestsTable = ({ token }) => {
+    const [holidayData, setHolidayData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
+    const [selectedHoliday, setSelectedHoliday] = useState(null);
 
-    let toggleOverlay = () => {
+    useEffect(() => {
+        const fetchHolidays = async (consultant_id, approval_status) => {
+            try {
+                let url = `https://localhost:8080/consultants/${consultant_id}/holidays`;
+                if (approval_status !== null) {
+                    url += `?approval_status=${approval_status}`;
+                }
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch holiday data');
+                }
+
+                const data = await response.json();
+                console.log(data);
+                setHolidayData(data);
+            } catch (error) {
+                console.error('Error fetching holidays:', error);
+            }
+        }
+        const fetchHolidayData = async (holiday_id) => {
+            try {
+                const response = await fetch(`http://localhost:8080/holiday/${holiday_id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Holiday data');
+                }
+
+                const data = await response.json();
+                console.log(data);
+            } catch (error) {
+                console.error('Error fetching holiday data:', error);
+            }
+        };
+        fetchHolidays(1, null);
+        fetchHolidayData(1);
+    }, [token]);
+
+
+    let toggleOverlay = (holiday) => {
+        setSelectedHoliday(holiday);
         setOverlayVisible(!overlayVisible);
     };
 
@@ -152,57 +205,57 @@ const HolidayRequestsTable = () => {
             <OVERLAY_CONTAINER>
                 <TABLE>
                     <HEADERS>
-                            <TR>
-                                <TH>Request</TH>
-                                <TH>Date Submitted</TH>
-                                <TH>Status</TH>
-                                <TH>Edit</TH>
-                            </TR>
+                        <TR>
+                            <TH>Request</TH>
+                            <TH>Date Submitted</TH>
+                            <TH>Status</TH>
+                            <TH>Edit</TH>
+                        </TR>
                     </HEADERS>
                     <TBODY>
-                    {requestData.map((request) => {
-                        const isRowEditable = request.status === 'Denied';
-                        return (                        
-                            <TR key={request.id}>
-                                <TD>
-                                    <button onClick={toggleOverlay} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
-                                    <img src={Timesheet} alt="File Icon"/>
-                                    </button>
-                                </TD>
-                                <TD>{request.dateSubmitted.toLocaleDateString()}</TD>
-                                <TD>{SetStatus(request.status)}</TD>
-                                <TD>
-                                    <EDIT editable={isRowEditable}>
-                                        {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
-                                    </EDIT>
-                                </TD>
-                            </TR>
-                        );
-                    })}
+                        {holidayData.map((holiday) => {
+                            const isRowEditable = holiday.approval_status === "DENIED";
+                            return (
+                                <TR key={holiday.id}>
+                                    <TD>
+                                        <button onClick={toggleOverlay} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                            <img src={Timesheet} alt="File Icon" />
+                                        </button>
+                                    </TD>
+                                    <TD>{holiday.submitted.toLocaleDateString()}</TD>
+                                    <TD>{SetStatus(holiday.approval_status)}</TD>
+                                    <TD>
+                                        <EDIT editable={isRowEditable}>
+                                            {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
+                                        </EDIT>
+                                    </TD>
+                                </TR>
+                            );
+                        })}
                     </TBODY>
-                </TABLE> 
+                </TABLE>
             </OVERLAY_CONTAINER>
             <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} title={'Holiday Request'}>
                 <OVERLAY_CONTAINER>
-                        <TABLE>
-                            <HEADERS>
-                                    <TR>
-                                        <TH>Date From</TH>
-                                        <TH>Date To</TH>
-                                    </TR>
-                            </HEADERS>
-                            <TBODY>
-                                <TR>
-                                    <TD></TD>
-                                    <TD></TD>
-                                </TR>
-                            </TBODY>
-                        </TABLE> 
-                    </OVERLAY_CONTAINER>
+                    <TABLE>
+                        <HEADERS>
+                            <TR>
+                                <TH>Date From</TH>
+                                <TH>Date To</TH>
+                            </TR>
+                        </HEADERS>
+                        <TBODY>
+                            <TR>
+                                <TD>{selectedHoliday.start_date}</TD>
+                                <TD>{selectedHoliday.end_date}</TD>
+                            </TR>
+                        </TBODY>
+                    </TABLE>
+                </OVERLAY_CONTAINER>
             </ModalWrapper>
         </WRAPPER>
     )
-    
+
 }
 
 export default HolidayRequestsTable
