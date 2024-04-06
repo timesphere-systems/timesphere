@@ -138,7 +138,7 @@ let SetStatus = (status) => {
 
 };
 
-const HolidayRequestsTable = ({ token, consultant_id }) => {
+const HolidayRequestsTable = ({ token, consultantId }) => {
     const [holidayData, setHolidayData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
     const [selectedHoliday, setSelectedHoliday] = useState(null);
@@ -146,7 +146,7 @@ const HolidayRequestsTable = ({ token, consultant_id }) => {
     useEffect(() => {
         const fetchHolidays = async () => {
             try {
-                const response = await fetch(`https://localhost:8080/consultants/${consultant_id}/holidays`, {
+                const response = await fetch(`https://localhost:8080/consultants/${consultantId}/holidays`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -166,7 +166,7 @@ const HolidayRequestsTable = ({ token, consultant_id }) => {
         };
 
         fetchHolidays();
-    }, [consultant_id, token]);
+    }, [consultantId, token]);
 
 
     const fetchHolidayData = async (holiday_id) => {
@@ -216,7 +216,7 @@ const HolidayRequestsTable = ({ token, consultant_id }) => {
                             return (
                                 <TR key={holiday.id}>
                                     <TD>
-                                        <button onClick={toggleOverlay(holiday)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                        <button onClick={() => toggleOverlay(holiday)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                                             <img src={Timesheet} alt="File Icon" />
                                         </button>
                                     </TD>
@@ -245,8 +245,8 @@ const HolidayRequestsTable = ({ token, consultant_id }) => {
                             </HEADERS>
                             <TBODY>
                                 <TR>
-                                    <TD>{new Date(selectedHoliday.start_date).toLocaleDateString}</TD>
-                                    <TD>{new Date(selectedHoliday.end_date).toLocaleDateString}</TD>
+                                    <TD>{new Date(selectedHoliday.start_date).toLocaleDateString()}</TD>
+                                    <TD>{new Date(selectedHoliday.end_date).toLocaleDateString()}</TD>
                                 </TR>
                             </TBODY>
                         </TABLE>
