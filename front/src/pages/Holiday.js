@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import Selector from '../components/Selector'
 import HolidayRequestsTable from '../components/HolidayRequestsTable'
@@ -27,7 +27,7 @@ const SELECTOR_CONTAINER = styled.div`
     margin-top: 2rem;
 `
 
-const TABLE_WRAPPER = styled.div `
+const TABLE_WRAPPER = styled.div`
     margin-top: 2rem;
 `
 
@@ -35,32 +35,52 @@ const FOOTER_WRAPPER = styled.div`
     margin-top: 4rem;
 `
 
+
+
 const Holiday = () => {
-    const [visible, setVisible] = useState(false);             // Store modal visibility state
-  return (
-    <div>
-        <HEADING>
-            <p>Holiday Requests</p>
-            <ActionButton 
-            width={"130px"}
-            height={"65px"}
-            clickable={true}
-            text={"New"}
-            icon={PlusIcon}
-            onClick={() => setVisible(true)}/>
-        </HEADING>
-        <SELECTOR_CONTAINER>
-            <Selector/>
-        </SELECTOR_CONTAINER>
-        <TABLE_WRAPPER>
-            <HolidayRequestsTable />
-        </TABLE_WRAPPER>
-        <FOOTER_WRAPPER>
-            <Footer />
-        </FOOTER_WRAPPER>
-        <NewHolidayRequestModal overlayVisible={visible} setOverlayVisible={setVisible} />
-    </div>
-  )
+    const [visible, setVisible] = useState(false);   // Store modal visibility state
+
+    React.useEffect(() => {
+        let getToken = async () => {
+            if (isAuthenticated) {
+                let token = await getAccessTokenSilently(
+                    {
+                        authorizationParams: {
+                            audience: "https://timesphere.systems/api",
+                            redirect_uri: "http://localhost:3000",
+                            scope: "timesphere:admin"
+                        }
+                    });
+                console.log(token);
+            }
+        }
+        getToken();
+    }, [getAccessTokenSilently, isAuthenticated])
+
+    return (
+        <div>
+            <HEADING>
+                <p>Holiday Requests</p>
+                <ActionButton
+                    width={"130px"}
+                    height={"65px"}
+                    clickable={true}
+                    text={"New"}
+                    icon={PlusIcon}
+                    onClick={() => setVisible(true)} />
+            </HEADING>
+            <SELECTOR_CONTAINER>
+                <Selector />
+            </SELECTOR_CONTAINER>
+            <TABLE_WRAPPER>
+                <HolidayRequestsTable />
+            </TABLE_WRAPPER>
+            <FOOTER_WRAPPER>
+                <Footer />
+            </FOOTER_WRAPPER>
+            <NewHolidayRequestModal overlayVisible={visible} setOverlayVisible={setVisible} />
+        </div>
+    )
 }
 
 export default Holiday;
