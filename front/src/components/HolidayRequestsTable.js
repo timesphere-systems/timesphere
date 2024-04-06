@@ -106,9 +106,11 @@ const SUBMIT_BUTTON = styled.div`
             width: 20px;
         }
     
+
     }
 
 `;
+
 
 
 
@@ -126,6 +128,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
 
     let toggleEditMode = () => {
         setIsEditing(!isEditing);
+
     };
 
 
@@ -314,6 +317,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                                                 <img src={unEditIcon} alt="Not Editable" />
                                             </EDIT>
                                         )}
+
                                     </TD>
                                 </TR>
                             );
