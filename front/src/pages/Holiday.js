@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import styled from 'styled-components'
 import Selector from '../components/Selector'
 import HolidayRequestsTable from '../components/HolidayRequestsTable'
@@ -39,6 +40,8 @@ const FOOTER_WRAPPER = styled.div`
 
 const Holiday = () => {
     const [visible, setVisible] = useState(false);   // Store modal visibility state
+    const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+    const [token, setToken] = useState(null);
 
     React.useEffect(() => {
         let getToken = async () => {
@@ -52,10 +55,11 @@ const Holiday = () => {
                         }
                     });
                 console.log(token);
+                setToken(token);
             }
         }
         getToken();
-    }, [getAccessTokenSilently, isAuthenticated])
+    }, [getAccessTokenSilently, isAuthenticated]);
 
     return (
         <div>
@@ -73,7 +77,7 @@ const Holiday = () => {
                 <Selector />
             </SELECTOR_CONTAINER>
             <TABLE_WRAPPER>
-                <HolidayRequestsTable />
+                <HolidayRequestsTable token={token} />
             </TABLE_WRAPPER>
             <FOOTER_WRAPPER>
                 <Footer />
