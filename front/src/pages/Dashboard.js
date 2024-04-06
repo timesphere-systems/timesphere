@@ -53,6 +53,9 @@ const FOOTER_WRAPPER = styled.div`
 const Dashboard = () => {
   const [editable, setEditable] = useState(false);          // Store editable state
   const [submittable, setSubmittable] = useState(false);    // Store submittable state 
+  const [buttonText, setButtonText] = useState("Clock-In"); // Store clock in/out button text
+  const time = new Date();                                  // time for timer 
+  const [startTimer, setTimer] = useState(false);                        // Store timer state
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
   React.useEffect(() => {
@@ -75,6 +78,13 @@ const Dashboard = () => {
     setEditable(!editable);
   };
 
+  //function to change text for clock in/out button
+  let change = () => {
+    console.log("Locked in 🤫🧏🏼‍♂️");
+    setButtonText(buttonText === "Clock-In" ? "Clock-Out" : "Clock-In");
+    setTimer(startTimer ? false : true);
+  };
+
   return (
     <div>
       <G_WRAPPER>
@@ -91,9 +101,13 @@ const Dashboard = () => {
         width={'700px'}
         clickable={true}
         icon={ClockIcon}
-        text={'Clock-In'}
-        onClick={() => console.log("Locked in 🤫🧏🏼‍♂️")}/>
-        <Timer />
+        text={buttonText}
+        onClick= {change}/>
+        {startTimer ?
+          <Timer startTime={new Date()} />
+          :
+          <Timer />
+        }
         <SubmitButton
         height={'100px'}
         width={'250px'}
