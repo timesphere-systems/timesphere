@@ -94,7 +94,7 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-// test holiday request data to be displayed 
+// test data for styling
 const fetchedTestData = [
     {
         id: 1,
@@ -121,82 +121,80 @@ const fetchedTestData = [
         dateSubmitted: new Date('2023-03-22'),
         status: 'Waiting',
     },
-    // more entries...
 ];
 
 // function which uses the SetStatusButton component
 let SetStatus = (status) => {
     switch (status) {
         case 'Approved':
-            return <SetStatusButton status='Approved' isActive='true' />;
+            return <SetStatusButton status='Approved' isActive='false' />;
         case 'Denied':
-            return <SetStatusButton status='Denied' isActive='true' />;
+            return <SetStatusButton status='Denied' isActive='false' />;
         case 'Waiting':
-            return <SetStatusButton status='Waiting' isActive='true' />
+            return <SetStatusButton status='Waiting' isActive='false' />
         default:
-            return <SetStatusButton status='Waiting' isActive='true' />;
+            return <SetStatusButton status='Waiting' isActive='false' />;
     }
 
 };
 
-const HolidayRequestsTable = ({ token }) => {
+const HolidayRequestsTable = ({ token, consultant_id }) => {
     const [holidayData, setHolidayData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
     const [selectedHoliday, setSelectedHoliday] = useState(null);
 
     useEffect(() => {
-        const fetchHolidays = async (consultant_id, approval_status) => {
+        const fetchHolidays = async () => {
             try {
-                let url = `https://localhost:8080/consultants/${consultant_id}/holidays`;
-                if (approval_status !== null) {
-                    url += `?approval_status=${approval_status}`;
-                }
-
-                const response = await fetch(url, {
+                const response = await fetch(`https://localhost:8080/consultants/${consultant_id}/holidays`, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
                     },
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch holiday data');
+                    throw new Error('Failed to fetch consultant holidays');
                 }
 
                 const data = await response.json();
-                console.log(data);
                 setHolidayData(data);
             } catch (error) {
-                console.error('Error fetching holidays:', error);
-            }
-        }
-        const fetchHolidayData = async (holiday_id) => {
-            try {
-                const response = await fetch(`http://localhost:8080/holiday/${holiday_id}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch Holiday data');
-                }
-
-                const data = await response.json();
-                console.log(data);
-            } catch (error) {
-                console.error('Error fetching holiday data:', error);
+                console.error('Error fetching consultant holidays:', error);
             }
         };
-        fetchHolidays(1, null);
-        fetchHolidayData(1);
-    }, [token]);
+
+        fetchHolidays();
+    }, [consultant_id, token]);
+
+
+    const fetchHolidayData = async (holiday_id) => {
+        try {
+            const response = await fetch(`http://localhost:8080/holiday/${holiday_id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch Holiday data');
+            }
+
+            const data = await response.json();
+            setSelectedHoliday(data);
+            setOverlayVisible(true);
+        } catch (error) {
+            console.error('Error fetching holiday data:', error);
+        }
+    };
 
 
     let toggleOverlay = (holiday) => {
-        setSelectedHoliday(holiday);
+        //setSelectedHoliday(holiday);
+        fetchHolidayData(holiday.id)
         setOverlayVisible(!overlayVisible);
     };
 
@@ -218,11 +216,11 @@ const HolidayRequestsTable = ({ token }) => {
                             return (
                                 <TR key={holiday.id}>
                                     <TD>
-                                        <button onClick={toggleOverlay} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                        <button onClick={toggleOverlay(holiday)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                                             <img src={Timesheet} alt="File Icon" />
                                         </button>
                                     </TD>
-                                    <TD>{holiday.submitted.toLocaleDateString()}</TD>
+                                    <TD>{new Date(holiday.submitted).toLocaleDateString()}</TD>
                                     <TD>{SetStatus(holiday.approval_status)}</TD>
                                     <TD>
                                         <EDIT editable={isRowEditable}>
@@ -235,23 +233,25 @@ const HolidayRequestsTable = ({ token }) => {
                     </TBODY>
                 </TABLE>
             </OVERLAY_CONTAINER>
-            <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} title={'Holiday Request'}>
-                <OVERLAY_CONTAINER>
-                    <TABLE>
-                        <HEADERS>
-                            <TR>
-                                <TH>Date From</TH>
-                                <TH>Date To</TH>
-                            </TR>
-                        </HEADERS>
-                        <TBODY>
-                            <TR>
-                                <TD>{selectedHoliday.start_date}</TD>
-                                <TD>{selectedHoliday.end_date}</TD>
-                            </TR>
-                        </TBODY>
-                    </TABLE>
-                </OVERLAY_CONTAINER>
+            <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => setOverlayVisible(!overlayVisible)} title={'Holiday Request'}>
+                {selectedHoliday && (
+                    <OVERLAY_CONTAINER>
+                        <TABLE>
+                            <HEADERS>
+                                <TR>
+                                    <TH>Date From</TH>
+                                    <TH>Date To</TH>
+                                </TR>
+                            </HEADERS>
+                            <TBODY>
+                                <TR>
+                                    <TD>{new Date(selectedHoliday.start_date).toLocaleDateString}</TD>
+                                    <TD>{new Date(selectedHoliday.end_date).toLocaleDateString}</TD>
+                                </TR>
+                            </TBODY>
+                        </TABLE>
+                    </OVERLAY_CONTAINER>
+                )}
             </ModalWrapper>
         </WRAPPER>
     )
