@@ -121,6 +121,7 @@ const WeeklyHoursTable = ({token}) => {
 
                 const data = await response.json();
                 console.log(data);
+                setTimesheetData(data);
             } catch(error){
                 console.error('Error fetching timesheets:', error);
             }
@@ -139,14 +140,13 @@ const WeeklyHoursTable = ({token}) => {
                 }
 
                 const data = await response.json();
-                setTimesheetData(data);
+                console.log(data);
             } catch (error) {
                 console.error('Error fetching timesheet data:', error);
             }
         };
-        let list_timesheets = fetchTimesheets();
-
-        fetchTimesheetData();
+        fetchTimesheets(1); // Testing
+        fetchTimesheetData(1);
     }, [token]);
 
     const toggleOverlay = () => {
