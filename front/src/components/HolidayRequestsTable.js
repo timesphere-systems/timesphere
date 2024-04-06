@@ -114,6 +114,7 @@ const SUBMIT_BUTTON = styled.div`
 
 
 
+
 const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) => {
     const [listHolidayData, setListHolidayData] = useState([{}]);
     const [selectedHoliday, setSelectedHoliday] = useState(null);
@@ -328,6 +329,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                     </TBODY>
                 </TABLE>
             </OVERLAY_CONTAINER>
+
             <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => setOverlayVisible(false)} title={'Holiday Request'}>
                 <OVERLAY_CONTAINER>
                     {selectedHoliday && (
@@ -364,6 +366,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                         </>
                     )}
                     
+
                 </OVERLAY_CONTAINER>
             </ModalWrapper>
         </WRAPPER>
