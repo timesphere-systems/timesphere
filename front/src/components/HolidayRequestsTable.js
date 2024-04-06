@@ -115,7 +115,6 @@ const SUBMIT_BUTTON = styled.div`
 
 
 
-
 const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) => {
     const [listHolidayData, setListHolidayData] = useState([{}]);
     const [selectedHoliday, setSelectedHoliday] = useState(null);
@@ -266,6 +265,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
         fetchConsultantHolidays();
 
     }, [consultantId, token, approval_status]);
+
 
 
     const Entry = ({holidayEntry}) => {
