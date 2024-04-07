@@ -68,7 +68,7 @@ const DATE_CONTAINER = styled.div`
 
 `;
 
-function NewHolidayRequestModal({overlayVisible, setOverlayVisible}) {
+function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlayVisible}) {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     

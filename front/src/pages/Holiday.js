@@ -1,4 +1,5 @@
 import React, {useState} from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import styled from 'styled-components'
 import Selector from '../components/Selector'
 import HolidayRequestsTable from '../components/HolidayRequestsTable'
@@ -36,7 +37,30 @@ const FOOTER_WRAPPER = styled.div`
 `
 
 const Holiday = () => {
-    const [visible, setVisible] = useState(false);             // Store modal visibility state
+    const [visible, setVisible] = useState(false);   // Store modal visibility state
+    const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+    const [token, setToken] = useState(null);
+    const [consultantId, setConsultantId] = useState(null);
+
+    React.useEffect(() => {
+        let getToken = async () => {
+            if (isAuthenticated) {
+                let token = await getAccessTokenSilently(
+                    {
+                        authorizationParams: {
+                            audience: "https://timesphere.systems/api",
+                            redirect_uri: "http://localhost:3000",
+                            scope: "timesphere:admin"
+                        }
+                    });
+                console.log(token);
+                setToken(token);
+            }
+        }
+        getToken();
+    }, [getAccessTokenSilently, isAuthenticated]);
+
+
   return (
     <div>
         <HEADING>
@@ -58,7 +82,7 @@ const Holiday = () => {
         <FOOTER_WRAPPER>
             <Footer />
         </FOOTER_WRAPPER>
-        <NewHolidayRequestModal overlayVisible={visible} setOverlayVisible={setVisible} />
+        <NewHolidayRequestModal token={token} consultantId={consultantId} overlayVisible={visible} setOverlayVisible={setVisible} />
     </div>
   )
 }
