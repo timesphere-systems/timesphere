@@ -16,7 +16,3 @@ class User(BaseModel):
     lastname: str
     email: str
     user_role: int
-
-class UserDetails(User):
-    """Model for returning user details"""
-    consultant_id: int | None
