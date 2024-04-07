@@ -339,6 +339,7 @@ def get_current_week_timesheet(consultant_id: int,
     current_timesheet = None
     with pool.connection() as connection:
         with connection.cursor(row_factory=class_row(Timesheet)) as cursor:
+            # pylint: disable=duplicate-code
             current_timesheet = cursor.execute("""
                     SELECT timesheets.id as id, timesheets.created AS created,
                         timesheets.submitted AS submitted, 
