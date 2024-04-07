@@ -1,5 +1,5 @@
 """Consultant router and routes, data belonging to a particular consultant."""
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 from typing import Annotated, cast
 from fastapi import APIRouter, status, Depends, Security
 from fastapi.responses import JSONResponse
@@ -11,6 +11,8 @@ from ..dependencies import get_connection_pool
 from ..models import ApprovalStatus, HolidayTimes
 from ..auth import User, get_current_user
 from . import models
+from ..timesheet.models import Timesheet
+
 
 
 # /consultant
@@ -311,11 +313,12 @@ def get_entries(consultant_id: int,
             entries = [cast(int, row[0]) for row in rows]
         return entries
 
-@router.get("/{consultant_id}/timesheet/current", status_code=status.HTTP_200_OK)
+@router.get("/{consultant_id}/timesheet/current", status_code=status.HTTP_200_OK,
+            response_model=None)
 def get_current_week_timesheet(consultant_id: int,
                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
                      current_user: Annotated[User, Security(get_current_user)]
-                     ) -> JSONResponse:
+                     ) -> JSONResponse | Timesheet:
     """Returns the current week timesheet to the consultant
 
     Requires you to be the consultant themselves
@@ -333,22 +336,30 @@ def get_current_week_timesheet(consultant_id: int,
                      "You do not have permission to view this consultant's timesheets"}
         )
     today_date = date.today()
-    week_start_date = today_date - timedelta(days= today_date.weekday())
-    timesheet_id: int = 0
+    current_timesheet = None
     with pool.connection() as connection:
-        row = connection.execute("""
-            SELECT id 
-            FROM timesheets
-            WHERE consultant = %s
-            AND start = %s""",
-            (consultant_id, week_start_date)).fetchone()
-        if row is None:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message": "No current week timesheet assigned to consultant"}
-            )
-        timesheet_id = cast(int, row[0])
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"id": timesheet_id}
-    )
+        with connection.cursor(row_factory=class_row(Timesheet)) as cursor:
+            current_timesheet = cursor.execute("""
+                    SELECT timesheets.id as id, timesheets.created AS created,
+                        timesheets.submitted AS submitted, 
+                        timesheets.start AS start, timesheets.consultant AS consultant_id,
+                        approval_status.status_type AS approval_status, entries_list.entries as entries
+                    FROM (SELECT timesheets.id, ARRAY_REMOVE(ARRAY_AGG(time_entries.id), NULL) as entries
+                        FROM timesheets
+                        LEFT JOIN time_entries
+                        ON time_entries.timesheet = timesheets.id
+                        GROUP BY timesheets.id) as entries_list, timesheets, approval_status
+                    WHERE timesheets.id = entries_list.id
+                    AND timesheets.approval_status = approval_status.id
+                    AND timesheets.consultant = %(consultant_id)s
+                    AND timesheets.start <= %(current_date)s
+                    AND timesheets.start >= (%(current_date)s - 7)
+                    ORDER BY start DESC
+                    LIMIT 1""",
+                {'consultant_id': consultant_id, 'current_date': today_date}).fetchone()
+            if current_timesheet is None:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "No current week timesheet assigned to consultant"}
+                )
+    return current_timesheet
