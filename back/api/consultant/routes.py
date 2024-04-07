@@ -36,7 +36,7 @@ def search_consultant(search_query: str,
     Returns:
         JSONResponse
     """
-    if current_user.details.user_role != 3 and current_user.details.user_role != 2:
+    if current_user.details.user_role not in (3, 2):
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
             content={"message": "You do not have permission to search for a consultant"}
