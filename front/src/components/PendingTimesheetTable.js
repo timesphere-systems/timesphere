@@ -310,8 +310,7 @@ const PendingTimesheetTable = ( {token} ) => {
     const getPeopleData = async (personID) => {
         console.log("getting person data");
         return (fetchConsData(personID));
-    }
-
+    };
 
     const toggleOverlay = () => {
         setOverlayVisible(!overlayVisible);
