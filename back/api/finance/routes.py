@@ -41,8 +41,8 @@ def search_consultant(search_query: str,
                 """SELECT users.id
                    FROM users, consultants
                    WHERE consultants.user_id = users.id
-                   AND (CONCAT(users.firstname, ' ', users.lastname) LIKE %s
-                   OR users.email LIKE %s)""", (search_query, search_query)).fetchall()
+                   AND (CONCAT(users.firstname, ' ', users.lastname) LIKE %(search_query)s
+                   OR users.email LIKE %(search_query)s)""", {'search_query': search_query}).fetchall()
             consultants = [consultant[0] for consultant in row]
     return JSONResponse(
         status_code=status.HTTP_200_OK,
