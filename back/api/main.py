@@ -7,6 +7,7 @@ from .user.routes import router as user
 from .manager.routes import router as manager
 from .issue.routes import router as issue
 
+
 app = FastAPI()
 
 app.include_router(consultant)
