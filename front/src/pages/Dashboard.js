@@ -106,7 +106,10 @@ const Dashboard = () => {
     try {
       const response = await fetch('http://localhost:3000/timesheet/entry', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', Authorization: {token},},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          },
         body: JSON.stringify(requestBody),
       })
       if (!response.ok) throw new Error('Network response was not ok.');
