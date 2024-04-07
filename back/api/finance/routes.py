@@ -97,10 +97,8 @@ def generate_report(consultant_id: int, time: str,
                     FROM(SELECT SUM(time_entries.end_time - time_entries.start_time) AS hours, 
                                 timesheets.consultant AS consultant_id
                             FROM time_entries, timesheets
-                            WHERE ((EXTRACT(MONTH FROM time_entries.start_time) = %(month)s) OR
-                                (EXTRACT(MONTH FROM time_entries.end_time) = %(month)s))
-                            AND ((EXTRACT(YEAR FROM time_entries.start_time) = %(year)s) OR
-                                (EXTRACT(YEAR FROM time_entries.end_time) = %(year)s))
+                            WHERE EXTRACT(MONTH FROM timesheets.start) = %(month)s
+                            AND EXTRACT(YEAR FROM timesheets.start) = %(year)s
                             AND timesheets.id = time_entries.timesheet
                             AND time_entries.entry_type = (SELECT id FROM time_entry_type
                                                              WHERE entry_type ='WORK')
