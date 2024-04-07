@@ -95,13 +95,15 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-const WeeklyHoursTable = ({token}) => {
+const WeeklyHoursTable = ({token, consultant_id, sort, approval_status, entryIds}) => {
     const [timesheetData, setTimesheetData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
+    const [selectedTimesheet, setSelectedTimesheet] = useState(null);
+    const [detailedTimeEntries, setDetailedTimeEntries] = useState([]); 
+    const [sortedData, setSortedData] = useState([]);
 
     useEffect(() => {
-        
-        const fetchTimesheets = async (consultant_id, approval_status) => {
+        const fetchTimesheets = async () => {
             try{
                 let url = `http://localhost:8080/consultant/${consultant_id}/timesheets`;
                 if(approval_status !== null){
@@ -126,33 +128,58 @@ const WeeklyHoursTable = ({token}) => {
                 console.error('Error fetching timesheets:', error);
             }
         }
-        const fetchTimesheetData = async (timesheet_id) => {
+    }, [consultant_id, token, approval_status]);
+
+    useEffect(() => {
+        const sortData = () => {
+            const dataToSort = [...timesheetData];
+            if (sort === 'Latest') {
+                dataToSort.sort((a, b) => new Date(b.submitted) - new Date(a.submitted));
+            } else if (sort === 'Oldest') {
+                dataToSort.sort((a, b) => new Date(a.submitted) - new Date(b.submitted));
+            }
+            setSortedData(dataToSort);
+        };
+
+        sortData();
+    }, [sort, timesheetData]);
+
+
+    useEffect(() => {
+        if (selectedTimesheet && selectedTimesheet.entries) {
+            fetchTimeEntriesDetails(selectedTimesheet.entries);
+        }
+    }, [selectedTimesheet, token]);    
+
+    const toggleOverlay = async(timesheet = null) => {
+        setSelectedTimesheet(timesheet);
+        setOverlayVisible(!overlayVisible);
+    };
+
+    const fetchTimeEntriesDetails = async () => {
+        const entriesDetails = [];
+        for (let entryId of entryIds) {
             try {
-                const response = await fetch(`http://localhost:8080/timesheets/${timesheet_id}`, {
+                const response = await fetch(`http://localhost:8080/timesheet/entry/${entryId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch timesheet data');
+                    throw new Error(`Failed to fetch time entry details for entry ID ${entryId}`);
                 }
 
                 const data = await response.json();
-                console.log(data);
+                entriesDetails.push(data);
             } catch (error) {
-                console.error('Error fetching timesheet data:', error);
+                console.error('Error fetching time entry details:', error);
             }
-        };
-        fetchTimesheets(1); // Testing
-        fetchTimesheetData(1);
-    }, [token]);
-
-    const toggleOverlay = () => {
-        setOverlayVisible(!overlayVisible);
+        }
+        setDetailedTimeEntries(entriesDetails);
     };
-
 
     return (
         <WRAPPER>
@@ -168,8 +195,8 @@ const WeeklyHoursTable = ({token}) => {
                         </TR>
                     </HEADERS>
                     <TBODY>
-                    {timesheetData.map((timesheet) => {
-                        const isRowEditable = timesheet.status === 'Denied';
+                    {sortedData.map((timesheet) => {
+                        const isRowEditable = timesheet.approval_status === 'Denied';
                         return (
                             <TR key={timesheet.id}>
                                 <TD>
@@ -177,9 +204,9 @@ const WeeklyHoursTable = ({token}) => {
                                     <img src={Timesheet} alt="Timesheet Icon"/>
                                     </button>
                                 </TD>
-                                <TD>{new Date(timesheet.dateCreated).toLocaleDateString()}</TD>
-                                <TD>{timesheet.dateSubmitted ? new Date(timesheet.dateSubmitted).toLocaleDateString() : 'N/A'}</TD>
-                                <TD><SetStatusButton status={timesheet.status} isActive={false} /></TD>
+                                <TD>{new Date(timesheet.created).toLocaleDateString()}</TD>
+                                <TD>{timesheet.submitted ? new Date(timesheet.submitted).toLocaleDateString() : 'N/A'}</TD>
+                                <TD><SetStatusButton status={timesheet.approval_status} isActive={false} /></TD>
                                 <TD>
                                     <EDIT editable={isRowEditable}>
                                         {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
@@ -191,28 +218,30 @@ const WeeklyHoursTable = ({token}) => {
                     </TBODY>
                 </TIMESHEET> 
             </OVERLAY_CONTAINER>
-            <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} title={'Weekly Timesheet'}>
+            <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => toggleOverlay()} title={'Weekly Timesheet'}>
                 <OVERLAY_CONTAINER>
                         <TIMESHEET>
                             <HEADERS>
-                                    <TR>
-                                        <TH></TH>
-                                        <TH>Date</TH>
-                                        <TH>Status</TH>
-                                        <TH>Clock-In</TH>
-                                        <TH>Clock-Out</TH>
-                                        <TH>Hours</TH>
-                                    </TR>
+                                <TR>
+                                    <TH></TH>
+                                    <TH>Date</TH>
+                                    <TH>Status</TH>
+                                    <TH>Clock-In</TH>
+                                    <TH>Clock-Out</TH>
+                                    <TH>Hours</TH>
+                                </TR>
                             </HEADERS>
                             <TBODY>
-                                <TR>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                </TR>
+                                {detailedTimeEntries.map((entry, index) => (
+                                    <TR key={index}>
+                                        <TD>{["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(entry.start_time).getDay()]}</TD>
+                                        <TD>{new Date(entry.end_time).toLocaleTimeString()}</TD>
+                                        <TD>{entry.entry_type}</TD>
+                                        <TD>{new Date(entry.start_time).toLocaleDateString()}</TD>
+                                        <TD>{new Date(entry.end_time).toLocaleTimeString()}</TD>
+                                        <TD>{(Math.round(((new Date(entry.end_time) - new Date(entry.start_time)) / 3600000) * 2) / 2).toFixed(1)}</TD> {/* Hours in 30 minute increments */}
+                                    </TR>
+                                ))}
                             </TBODY>
                         </TIMESHEET> 
                     </OVERLAY_CONTAINER>

@@ -90,9 +90,9 @@ const Label = styled.p`
     padding-top: 9pt;
 `;
 
-function Selector() {
-    const [sortBySelectedItem, setSortBySelectedItem] = useState('Latest');
-    const [statusSelectedItem, setStatusSelectedItem] = useState('Select Status');
+function Selector({onSortChange, onStatusChange, selectedSort, selectedStatus}) {
+    const [sortBySelectedItem, setSortBySelectedItem] = useState(selectedSort);
+    const [statusSelectedItem, setStatusSelectedItem] = useState(selectedStatus);
     const [sortByMenuOpen, setSortByMenuOpen] = useState(false);
     const [statusMenuOpen, setStatusMenuOpen] = useState(false);
 
@@ -113,11 +113,15 @@ function Selector() {
 
     const handleSortByItemClick = (item) => {
         setSortBySelectedItem(item);
+        onSortChange(item);
+        console.log(item);
         closeMenus();
     };
 
     const handleStatusItemClick = (item) => {
         setStatusSelectedItem(item);
+        onStatusChange(item);
+        console.log(item);
         closeMenus();
     };
 

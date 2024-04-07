@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import { useAuth0 } from "@auth0/auth0-react";
 import LoginIcon from '../assets/icons/LoginIcon.svg';
@@ -26,39 +26,13 @@ const LOGINBUTTON = styled.button`
     }
 `
 
-const LoginButton = ({width, height, setConsultantId}) => {
-    const { isAuthenticated, loginWithRedirect, logout, getAccessTokenSilently } = useAuth0();
-    const [isCreating, setIsCreating] = useState(false);
+const LoginButton = ({width, height}) => {
+    const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
 
     let handleClick = () => {
         isAuthenticated ? logout() : loginWithRedirect()
     }
 
-    useEffect(() => {
-        const createConsultant = async () => {
-            const token = await getAccessTokenSilently();
-            const response = await fetch('http://localhost:8080/consultants', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-            if (!response.ok) {
-                console.log('Failed to create consultant');
-            }
-
-            const data = await response.json();
-            console.log(data.user_id);
-            setConsultantId(data.user_id);
-            setIsCreating(false);
-
-            if (isAuthenticated && !isCreating){
-                setIsCreating(true);
-                createConsultant().catch(console.error);
-            }
-        };
-    }, [getAccessTokenSilently]);
     return (
         <LOGINBUTTON
             width={width}
