@@ -1,6 +1,5 @@
-import React from 'react'
-import styled from 'styled-components';
-import { useState } from 'react'
+import React, {useState, useEffect} from 'react'
+import styled from 'styled-components'
 import FileIcon from "../assets/icons/FileIcon.svg";
 import PeopleIcon from "../assets/icons/PeopleIcon.svg";
 import SetStatusButton from "./SetStatusButton";
@@ -267,78 +266,85 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-// set the holiday request data to be displayed 
-const fetchedRequestData = [
-    {
-        id: 1,
-        firstName: "Ava",
-        lastName: "Nguyen",
-        dateStart: new Date('01/05/2025'),
-        dateEnd: new Date('01/10/2025'),
-    },
-    {
-        id: 2,
-        firstName: "William",
-        lastName: "Wilson",
-        dateStart: new Date('01/05/2025'),
-        dateEnd: new Date('01/24/2025'),
-    },
-    {
-        id: 3,
-        firstName: "Isabella",
-        lastName: "Anderson",
-        dateStart: new Date('08/23/2024'),
-        dateEnd: new Date('09/15/2024'),
-    },
-    {
-        id: 4,
-        firstName: "Jacob",
-        lastName: "Thomas",
-        dateStart: new Date('07/13/2024'),
-        dateEnd: new Date('07/23/2024'),
-    },
-    {
-        id: 5,
-        firstName: "Mia",
-        lastName: "Taylor",
-        dateStart: new Date('01/06/2025'),
-        dateEnd: new Date('01/16/2025'),
-    },
-    {
-        id: 6,
-        firstName: "Noah",
-        lastName: "Hernandez",
-        dateStart: new Date('12/12/2024'),
-        dateEnd: new Date('12/16/2024'),
-    },
-    {
-        id: 7,
-        firstName: "Emily",
-        lastName: "Moore",
-        dateStart: new Date('02/07/2025'),
-        dateEnd: new Date('12/14/2025'),
-    },
-    {
-        id: 8,
-        firstName: "Liam",
-        lastName: "Jackson",
-        dateStart: new Date('06/26/2025'),
-        dateEnd: new Date('06/27/2025'),
-    },
-    {
-        id: 9,
-        firstName: "Charlotte",
-        lastName: "Kim",
-        dateStart: new Date('07/07/2024'),
-        dateEnd: new Date('07/15/2024'),
-    },
-    
-  ];
-
-const PendingHolidayRequestsTable = () => {
-    const [requestData, setRequestData] = useState(fetchedRequestData);
-    const [requestData2, setRequestData2] = useState(fetchedRequestData);
+const PendingHolidayRequestsTable = ( {token} ) => {
+    const [requestData, setRequestData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
+
+    useEffect(() => {
+        const fetchHolidays= async (user_id) => {
+            try{
+                let url = `http://localhost:8080/manager/${user_id}/holidays`;
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch holiday data');
+                }
+
+                const data = await response.json();
+                console.log(data);
+                setRequestData(data);
+            } catch(error){
+                console.error('Error fetching holidays:', error);
+            }
+        }
+    }, [token]);
+        
+    const fetchHolidaydata = async (holiday_id) => {
+        try{
+            let url = `http://localhost:8080/holiday/${holiday_id}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch holiday data');
+            }
+
+            const data = await response.json();
+            console.log(data);
+        } catch(error){
+            console.error('Error fetching holidays:', error);
+        }
+    };
+    const fetchConsData = async (consultant_id) => {
+        try{
+            const response = await fetch(`http://localhost:8080/consultant/${consultant_id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch consultant data');
+            }
+
+            const data = await response.json();
+            console.log(data);
+        } catch (error) {
+            console.error('Error fetching consultant data:', error);
+        }
+    };
+
+    const getHolidayData = async (holidayID) => {
+        console.log("getting timesheet data");
+        return (fetchHolidaydata(holidayID));
+    };
+
+    const getPeopleData = async (personID) => {
+        console.log("getting person data");
+        return (fetchConsData(personID));
+    };
 
     const toggleOverlay = () => {
         setOverlayVisible(!overlayVisible);
@@ -365,7 +371,7 @@ const PendingHolidayRequestsTable = () => {
                     
                     {requestData.map((request) => {
                         return (
-                            <NORMROW key={request.id}>  
+                            <NORMROW key={request}>  
                                 <FILEBOX>
                                     <button onClick={toggleOverlay} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
                                     <FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC>
@@ -373,10 +379,10 @@ const PendingHolidayRequestsTable = () => {
                                 </FILEBOX>
                                 <PEOPLEBOX>
                                     <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                                    <PEOPLETEXT>{request.firstName.concat(" ", request.lastName)}</PEOPLETEXT>
+                                    <PEOPLETEXT>{getPeopleData(getHolidayData(request).consultant_id).firstname.concat(" ", getPeopleData(getHolidayData(request).consultant_id).lastName)}</PEOPLETEXT>
                                 </PEOPLEBOX>
                                 <DATEBOX>
-                                    <DATETEXT>{request.dateStart.toLocaleDateString('en-GB').concat(" - ", request.dateEnd.toLocaleDateString())}</DATETEXT>
+                                    <DATETEXT>{getHolidayData(request).start_date.toLocaleDateString('en-GB').concat(" - ", getHolidayData(request).end_date.toLocaleDateString())}</DATETEXT>
                                 </DATEBOX>
                                 <BUTTONBOX>
                                     <SetStatusButton status='Approved' isActive={true} />
@@ -399,14 +405,10 @@ const PendingHolidayRequestsTable = () => {
                             </HEADERS>
 
                             <TBODY>
-                                {requestData2.map((request) => {
-                                    return (
-                                    <TR key={request.id}>
-                                        <TD>{request.dateStart.toLocaleDateString()}</TD>
-                                        <TD>{request.dateEnd.toLocaleDateString()}</TD>
-                                    </TR>
-                                    );
-                                })}
+                                <TR>
+                                    <TD></TD>
+                                    <TD></TD>
+                                </TR>
                             </TBODY>
                         </LITTLETABLE> 
                     </OVERLAY_CONTAINER>
