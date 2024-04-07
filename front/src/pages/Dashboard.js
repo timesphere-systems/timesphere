@@ -56,7 +56,7 @@ const Dashboard = () => {
   const [buttonText, setButtonText] = useState("Clock-In"); // Store clock in/out button text
   const [startTimer, setTimer] = useState(false);           // Store timer state
   const [time, setTime] = React.useState(new Date());       // Store clock-in time
-  const [timeEntries, setTimeEntries] = useState([]);       // Store clock in and out time fore backend
+  const [timeEntries, setTimeEntries] = useState([]);       // Store clock in and out time for backend
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
   React.useEffect(() => {
@@ -81,7 +81,6 @@ const Dashboard = () => {
 
   //function to change text for clock in/out button
   let change = () => {
-    console.log("Locked in 🤫🧏🏼‍♂️");
     setButtonText(buttonText === "Clock-In" ? "Clock-Out" : "Clock-In");
     setTimer(startTimer ? false : true);
     if (startTimer) {
@@ -104,7 +103,7 @@ const Dashboard = () => {
       timesheet_id: 0
     };
     try {
-      const response = await fetch('http://localhost:3000/timesheet/entry', {
+      const response = await fetch('http://localhost:8080/timesheet/entry', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
