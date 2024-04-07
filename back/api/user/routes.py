@@ -59,12 +59,11 @@ def get_user_details(current_user: Annotated[User, Security(get_current_user)]
     Returns:
         JSONResponse
     """
-    details = current_user.details.model_dump()
-    details.update({"consultant_id": None})
-    user_details = models.UserDetails.model_validate(details)
-    if user_details.user_role == 1:
-        user_details.consultant_id = current_user.consultant_id
+    user_details = current_user.details.model_dump()
+    if user_details["user_role"]== 1:
+        user_details.update({"consultant_id": current_user.consultant_id})
+    user_details.pop("user_role")
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=user_details.model_dump(exclude={'user_role'})
+        content=user_details
     )
