@@ -68,7 +68,7 @@ def search_consultant(search_query: str,
         content={"consultants": consultants}
     )
 
-@router.get("/report", status_code=status.HTTP_200_OK)
+@router.get("/report", status_code=status.HTTP_200_OK, response_model=None)
 def generate_report(consultant_id: int, time: str,
                       pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
                       current_user: Annotated[User, Security(get_current_user)]
@@ -145,8 +145,7 @@ def generate_report(consultant_id: int, time: str,
     _ = pdf.cell(0, 10, f"Contracted Hours: {hours_report.month_contracted_hours}", 0, 1)
     _ = pdf.cell(0, 10, f"Overtime Hours: {hours_report.overtime_hours}", 0, 1)
 
-    byte_string = bytes(pdf.output())
     return Response(
-        content=byte_string,
+        content=bytes(pdf.output()),
         media_type='application/pdf',
     )
