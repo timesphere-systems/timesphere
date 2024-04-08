@@ -96,15 +96,36 @@ const OVERLAY_CONTAINER = styled.div`
 `;
 
 const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
-    const [timesheetData, setTimesheetData] = useState([]);
+    const [timesheetIDs, setTimesheetIDs] = useState([]);
+    const [timesheetsData, setTimesheetsData] = useState([]);
+    const [timesheetData, setTimesheetData] = useState([{}]);
     const [overlayVisible, setOverlayVisible] = useState(false);
-    const [selectedTimesheet, setSelectedTimesheet] = useState(null);
-    const [detailedTimeEntries, setDetailedTimeEntries] = useState([]); 
-    const [sortedData, setSortedData] = useState([]);
 
     const toggleOverlay = () => {
         setOverlayVisible(!overlayVisible);
     };
+
+    const fetchTimesheetData = async (timesheet_id) => {
+        try {
+            const response = await fetch(`api/timesheet/${timesheet_id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch timesheet data');
+            }
+
+            let data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching timesheet data:', error);
+        }
+    }
+
 
     useEffect(() => {
         const fetchTimesheets = async () => {
@@ -126,67 +147,20 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                 }
     
                 let data = await response.json();
-                setTimesheetData(data.timesheets);
-                console.log(data.timesheets);
+                const timesheetDataPromises = data.timesheets.map(timesheet_id => 
+                    fetchTimesheetData(timesheet_id).then(timesheet => ({ [timesheet_id]: timesheet }))
+                );
+
+                const resolvedTimesheetDataArray = await Promise.all(timesheetDataPromises);
+                const resolvedTimesheetData = Object.assign({}, ...resolvedTimesheetDataArray);
+                setTimesheetData(resolvedTimesheetData);
+                console.log(resolvedTimesheetData);
             } catch (error) {
                 console.error('Error fetching timesheets:', error);
             }
         }
         fetchTimesheets();
-    }, [consultant_id, token, approval_status, fetchTimesheets]);
-
-
-    /* const fetchTimeEntriesDetails = useCallback(async () => {
-        const entriesDetails = [];
-        for (let entryId of entryIds) {
-            try {
-                const response = await fetch(`/api/timesheet/entry/${entryId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch time entry details for entry ID ${entryId}`);
-                }
-
-                const data = await response.json();
-                entriesDetails.push(data);
-            } catch (error) {
-                console.error('Error fetching time entry details:', error);
-            }
-        }
-        setDetailedTimeEntries(entriesDetails);
-    }, [entryIds, token]);
- */
-
-    /* useEffect(() => {
-        const sortData = () => {
-            if (!Array.isArray(timesheetData)) {
-                console.error('timesheetData is not an array:', timesheetData);
-                return;
-            }
-
-            const dataToSort = [...timesheetData];
-            if (sort === 'Latest') {
-                dataToSort.sort((a, b) => new Date(b.submitted) - new Date(a.submitted));
-            } else if (sort === 'Oldest') {
-                dataToSort.sort((a, b) => new Date(a.submitted) - new Date(b.submitted));
-            }
-            setSortedData(dataToSort);
-        };
-
-        sortData();
-    }, [timesheetData, sort, ]);
-
-    useEffect(() => {
-        if (selectedTimesheet && selectedTimesheet.entries) {
-            fetchTimeEntriesDetails(selectedTimesheet.entries);
-        }
-    }, [selectedTimesheet, fetchTimeEntriesDetails]);
- */
+    }, [consultant_id, token, approval_status, fetchTimesheetData]);
 
     return (
         <WRAPPER>
@@ -202,20 +176,18 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                         </TR>
                     </HEADERS>
                     <TBODY>
-                    {timesheetData.map((timesheet) => {
+                    {Object.entries(timesheetData).map(([timesheetId, timesheet]) => {
                         const isRowEditable = timesheet.approval_status === 'Denied';
                         return (
-                            <TR key={timesheet.id}>
+                            <TR key={timesheetId}>
                                 <TD>
                                     <button onClick={toggleOverlay} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                                     <img src={Timesheet} alt="Timesheet Icon"/>
                                     </button>
                                 </TD>
                                 <TD>{new Date(timesheet.created).toLocaleDateString()}</TD>
-                                {console.log(timesheet.submitted)}
                                 <TD>{timesheet.submitted ? new Date(timesheet.submitted).toLocaleDateString() : 'N/A'}</TD>
                                 <TD><SetStatusButton status={timesheet.approval_status} isActive={false} /></TD>
-                                {console.log(timesheet.approval_status)}
                                 <TD>
                                     <EDIT editable={isRowEditable}>
                                         {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
@@ -240,18 +212,20 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                                     <TH>Hours</TH>
                                 </TR>
                             </HEADERS>
+
                             <TBODY>
-                                {detailedTimeEntries.map((entry, index) => (
+                                {[].map((entry, index) => (
                                     <TR key={index}>
-                                        <TD>{["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(entry.start_time).getDay()]}</TD>
-                                        <TD>{new Date(entry.end_time).toLocaleTimeString()}</TD>
-                                        <TD>{entry.entry_type}</TD>
-                                        <TD>{new Date(entry.start_time).toLocaleDateString()}</TD>
-                                        <TD>{new Date(entry.end_time).toLocaleTimeString()}</TD>
-                                        <TD>{(Math.round(((new Date(entry.end_time) - new Date(entry.start_time)) / 3600000) * 2) / 2).toFixed(1)}</TD> {/* Hours in 30 minute increments */}
+                                        <TD>{/* {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(entry.start_time).getDay()]} */}</TD>
+                                        <TD>{/* {new Date(entry.end_time).toLocaleTimeString()} */}</TD>
+                                        <TD>{/* {entry.entry_type} */}</TD>
+                                        <TD>{/* {new Date(entry.start_time).toLocaleDateString()} */}</TD>
+                                        <TD>{/* {new Date(entry.end_time).toLocaleTimeString()} */}</TD>
+                                        <TD>{/* {(Math.round(((new Date(entry.end_time) - new Date(entry.start_time)) / 3600000) * 2) / 2).toFixed(1)} */}</TD> {/* Hours in 30 minute increments */}
                                     </TR>
                                 ))}
                             </TBODY>
+                            
                         </TIMESHEET> 
                     </OVERLAY_CONTAINER>
             </ModalWrapper>
