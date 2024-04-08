@@ -177,7 +177,7 @@ const Dashboard = () => {
         getCurrentWeekTimesheet();
       }
     }
-  }, [getAccessTokenSilently, isAuthenticated, JWTtoken, consultantID])
+  }, [getAccessTokenSilently, isAuthenticated, JWTtoken, consultantID, currentTimesheet])
   // Function which toggles the edit mode - passed to EditToggleButton component
   let toggleEditMode = () => {
     setEditable(!editable);
