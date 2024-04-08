@@ -20,7 +20,9 @@ root.render(
     authorizationParams={{
       redirect_uri: window.location.origin,
       audience: "https://timesphere.systems/api",
-      scope: "openid profile timesphere:admin"
+      scope: "openid profile timesphere:admin",
+      useRefreshTokens: true,
+      cacheLocation: "localstorage"
     }}
   >
       <BrowserRouter>
