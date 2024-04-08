@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Security, status
 from fastapi.responses import JSONResponse, Response
 from psycopg_pool import ConnectionPool
 from psycopg.rows import class_row
-from ..auth import User, get_current_user
+from ..auth import User, get_current_user, FINANCE_USER_ROLE
 from ..dependencies import get_connection_pool
 from . import models
 from ..timesheet.models import TimeEntry
@@ -48,7 +48,7 @@ def generate_report(consultant_id: int, time: str,
     Returns:
         JSONResponse
     """
-    if current_user.details.user_role != 3:
+    if current_user.details.user_role != FINANCE_USER_ROLE:
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
             content={"message": "You do not have permission to generate a work report"}

@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg.errors import ForeignKeyViolation
 from ..dependencies import get_connection_pool
-from ..auth import User, get_current_user
+from ..auth import User, get_current_user, CONSULTANT_USER_ROLE
 from . import models
 
 
@@ -60,7 +60,7 @@ def get_user_details(current_user: Annotated[User, Security(get_current_user)]
         JSONResponse
     """
     user_details = current_user.details.model_dump()
-    if user_details["user_role"]== 1:
+    if user_details["user_role"] == CONSULTANT_USER_ROLE:
         user_details.update({"consultant_id": current_user.consultant_id})
     user_details.pop("user_role")
     return JSONResponse(
