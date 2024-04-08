@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
 import {useAuth0} from '@auth0/auth0-react';
 import styled from 'styled-components';
 import Selector from '../components/Selector';
@@ -32,9 +32,8 @@ const FOOTER_WRAPPER = styled.div`
 
 const Timesheets = () => {
     const {getAccessTokenSilently, isAuthenticated} = useAuth0();
-    const [token, setToken] = useState(null);
-    const [consultantId, setConsultantId] = useState(null);
-    const [entryIds, setEntryIds] = useState([]);
+    const [JWTtoken, setToken] = useState(null);
+    const [consultantID, setConsultantID] = useState(1);
     const [sortBy, setSortBy] = useState('Latest');
     const [approval_status, setApprovalStatus] = useState('Select Status');
 
@@ -58,41 +57,24 @@ const Timesheets = () => {
     
     }
 
-    useEffect(() => {
-        const getTokenAndCreateConsultant = async () => {
+    React.useEffect(() => {
+        let getToken = async () => {
             if (isAuthenticated) {
-                const accessToken = await getAccessTokenSilently({
-                    authorizationParams: {
+                let token = await getAccessTokenSilently(
+                    {authorizationParams: {        
                         audience: "https://timesphere.systems/api",
-                        redirect_uri: "http://localhost:3000/timesheets",
-                        scope: "timesphere:admin",
-                    },
-                });
-                setToken(accessToken);
-                console.log(accessToken);
-
-                const response = await fetch('http://localhost:8080/consultants', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`,
-                    },
-                    body: JSON.stringify({ }),
-                });
-
-                if (!response.ok) {
-                    console.log('Failed to create consultant');
-                    return;
-                }
-
-                const data = await response.json();
-                console.log(data.user_id);
-                setConsultantId(data.user_id);
+                        redirect_uri: "/api",
+                        scope: "timesphere:admin"
+                    }});
+                console.log(token);
+                setToken(JWTtoken);
+                console.log("User Details: ");
             }
-        };
+        }
 
-        getTokenAndCreateConsultant();
-    }, [getAccessTokenSilently, isAuthenticated]);
+        getToken();
+        
+    }, [getAccessTokenSilently, isAuthenticated])
 
     return (
     <div>
@@ -102,11 +84,11 @@ const Timesheets = () => {
         </SELECTOR_CONTAINER>
         <TABLE_WRAPPER>
             <WeeklyHoursTable
-            token={token}
-            consultant_id={consultantId}
+            token={JWTtoken}
+            consultant_id={consultantID}
             sort={sortBy}
             status={approval_status === 'Approved' ? 'APPROVED' : approval_status === 'Denied' ? 'DENIED' : 'WAITING'}
-            entryIds={entryIds}
+            entryIds={consultantID.entryIds} /* CHANGE THIS */
             />
 
         </TABLE_WRAPPER>

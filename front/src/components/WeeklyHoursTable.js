@@ -102,10 +102,11 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status, entryIds
     const [detailedTimeEntries, setDetailedTimeEntries] = useState([]); 
     const [sortedData, setSortedData] = useState([]);
 
+    
     useEffect(() => {
         const fetchTimesheets = async () => {
             try{
-                let url = `http://localhost:8080/consultant/${consultant_id}/timesheets`;
+                let url = `api/consultant/${consultant_id}/timesheets`;
                 if(approval_status !== null){
                     url += `?approval_status=${approval_status}`;
                 }
@@ -128,6 +129,7 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status, entryIds
                 console.error('Error fetching timesheets:', error);
             }
         }
+        fetchTimesheets();
     }, [consultant_id, token, approval_status]);
 
     useEffect(() => {
@@ -160,7 +162,7 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status, entryIds
         const entriesDetails = [];
         for (let entryId of entryIds) {
             try {
-                const response = await fetch(`http://localhost:8080/timesheet/entry/${entryId}`, {
+                const response = await fetch(`/api/timesheet/entry/${entryId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
