@@ -2,6 +2,23 @@
 
 --CREATE DATABASE Timesphere_DB
 
+CREATE OR REPLACE FUNCTION check_existing_open_time_entry()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check if there's an existing entry for the same timesheet without an end time
+    IF EXISTS (
+        SELECT 1
+        FROM time_entries
+        WHERE timesheet = NEW.timesheet
+          AND end_time IS NULL
+          AND id != NEW.id  -- Exclude the current record in case of update
+    ) THEN
+        RAISE EXCEPTION 'There is already an open time entry for this timesheet.';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 --Status for both TimeSheets and HolidayRequests
 CREATE TABLE approval_status (
   id  SERIAL PRIMARY KEY,
@@ -81,4 +98,8 @@ CREATE TABLE issues(
   solved BOOLEAN NOT NULL,
   user_id INT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id)
-)
+);
+
+CREATE TRIGGER trg_before_insert_or_update_time_entry
+BEFORE INSERT OR UPDATE ON time_entries
+FOR EACH ROW EXECUTE FUNCTION check_existing_open_time_entry();
