@@ -264,7 +264,7 @@ const DashboardTable = ({ editable, submittable, token, consultantID}) => {
             setWeekDates(tableDates);
             console.log(weekDates);
         }
-    if(token !== undefined){
+    if(token !== null && consultantID !== null){
         if(currentTimesheet === null){
             getCurrentWeekTimesheet();
         }
@@ -275,7 +275,7 @@ const DashboardTable = ({ editable, submittable, token, consultantID}) => {
             setTimeEntriesTable();
         }
     }
-    }, [token, currentTimesheet, currentTimeEntries]);
+    }, [token, consultantID, currentTimesheet, currentTimeEntries]);
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
