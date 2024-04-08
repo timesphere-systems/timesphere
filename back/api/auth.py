@@ -24,15 +24,6 @@ class User:
         super().__init__()
         self.details = details
         self.pool = pool
-        self.managed_consultants_cache = []
-        self.holidays_cache = []
-        self.managed_holiday_ids_cache = []
-        self.timesheets_cache = []
-        self.managed_timesheet_ids_cache = []
-        self.time_entries_cache = []
-        self.managed_time_entries_cache = []
-        self.consultant_id_cache: int | None = None
-        self.manager_id_cache: int | None = None
 
     @property
     def managed_consultants(self) -> list[int]:
@@ -46,42 +37,31 @@ class User:
                     """,
                     (self.details.user_id,)).fetchall()
         managed_consultants = [consultant[0] for consultant in managed_consultants]
-        self.managed_consultants_cache = managed_consultants
         return managed_consultants
 
     @property
     def consultant_id(self) -> int | None:
         """Get the consultant ID for this user."""
-        if self.consultant_id_cache is not None:
-            return self.consultant_id_cache
-
         with self.pool.connection() as connection:
-            with connection.cursor() as cursor:
-                consultant_id = cursor.execute("""
-                    SELECT id
-                    FROM consultants
-                    WHERE user_id = %s
-                    """,
-                    (self.details.user_id,)).fetchone()
+            consultant_id = connection.execute("""
+                SELECT id
+                FROM consultants
+                WHERE user_id = %s
+                """,
+                (self.details.user_id,)).fetchone()
         consultant_id = consultant_id[0] if consultant_id is not None else None
-        self.consultant_id_cache = consultant_id
         return consultant_id
     @property
     def manager_id(self) -> int | None:
         """Get the manager ID for this user."""
-        if self.manager_id_cache is not None:
-            return self.manager_id_cache
-
         with self.pool.connection() as connection:
-            with connection.cursor() as cursor:
-                manager_id = cursor.execute("""
-                    SELECT manager_id
-                    FROM consultants
-                    WHERE user_id = %s
-                    """,
-                    (self.details.user_id,)).fetchone()
+            manager_id = connection.execute("""
+                SELECT manager_id
+                FROM consultants
+                WHERE user_id = %s
+                """,
+                (self.details.user_id,)).fetchone()
         manager_id = manager_id[0] if manager_id is not None else None
-        self.manager_id_cache = manager_id
         return manager_id
 
     @property
@@ -91,30 +71,26 @@ class User:
             return []
 
         with self.pool.connection() as connection:
-            with connection.cursor() as cursor:
-                holiday_ids = cursor.execute("""
-                    SELECT id
-                    FROM holidays
-                    WHERE consultant = %s
-                    """,
-                    (self.consultant_id,)).fetchall()
+            holiday_ids = connection.execute("""
+                SELECT id
+                FROM holidays
+                WHERE consultant = %s
+                """,
+                (self.consultant_id,)).fetchall()
         holidays = [holiday[0] for holiday in holiday_ids]
-        self.holidays_cache = holidays
         return holidays
 
     @property
     def managed_holiday_ids(self) -> list[int]:
         """Get the holiday IDs for the consultants managed by this user."""
         with self.pool.connection() as connection:
-            with connection.cursor() as cursor:
-                holiday_ids = cursor.execute("""
-                    SELECT id
-                    FROM holidays
-                    WHERE consultant IN (SELECT id FROM consultants WHERE manager_id=%s)
-                    """,
-                    (self.details.user_id,)).fetchall()
+            holiday_ids = connection.execute("""
+                SELECT id
+                FROM holidays
+                WHERE consultant IN (SELECT id FROM consultants WHERE manager_id=%s)
+                """,
+                (self.details.user_id,)).fetchall()
         holidays = [holiday[0] for holiday in holiday_ids]
-        self.managed_holiday_ids_cache = holidays
         return holidays
 
     @property
@@ -124,30 +100,26 @@ class User:
             return []
 
         with self.pool.connection() as connection:
-            with connection.cursor() as cursor:
-                timesheet_ids = cursor.execute("""
-                    SELECT id
-                    FROM timesheets
-                    WHERE consultant = %s
-                    """,
-                    (self.consultant_id,)).fetchall()
+            timesheet_ids = connection.execute("""
+                SELECT id
+                FROM timesheets
+                WHERE consultant = %s
+                """,
+                (self.consultant_id,)).fetchall()
         timesheets = [timesheet[0] for timesheet in timesheet_ids]
-        self.timesheets_cache = timesheets
         return timesheets
 
     @property
     def managed_timesheet_ids(self) -> list[int]:
         """Get the timesheet IDs for the consultants managed by this user."""
         with self.pool.connection() as connection:
-            with connection.cursor() as cursor:
-                timesheet_ids = cursor.execute("""
-                    SELECT id
-                    FROM timesheets
-                    WHERE consultant IN (SELECT id FROM consultants WHERE manager_id=%s)
-                    """,
-                    (self.details.user_id,)).fetchall()
+            timesheet_ids = connection.execute("""
+                SELECT id
+                FROM timesheets
+                WHERE consultant IN (SELECT id FROM consultants WHERE manager_id=%s)
+                """,
+                (self.details.user_id,)).fetchall()
         timesheets = [timesheet[0] for timesheet in timesheet_ids]
-        self.managed_timesheet_ids_cache = timesheets
         return timesheets
 
     @property
@@ -157,32 +129,28 @@ class User:
             return []
 
         with self.pool.connection() as connection:
-            with connection.cursor() as cursor:
-                time_entry_ids = cursor.execute("""
-                    SELECT time_entries.id
-                    FROM time_entries, timesheets
-                    WHERE timesheets.id = time_entries.timesheet
-                    AND timesheets.consultant = %s
-                    """,
-                    (self.consultant_id,)).fetchall()
+            time_entry_ids = connection.execute("""
+                SELECT time_entries.id
+                FROM time_entries, timesheets
+                WHERE timesheets.id = time_entries.timesheet
+                AND timesheets.consultant = %s
+                """,
+                (self.consultant_id,)).fetchall()
         time_entries = [time_entry[0] for time_entry in time_entry_ids]
-        self.time_entries_cache = time_entries
         return time_entries
 
     @property
     def managed_time_entries(self) -> list[int]:
         """Get the time entry IDs for the consultants managed by this user."""
         with self.pool.connection() as connection:
-            with connection.cursor() as cursor:
-                time_entry_ids = cursor.execute("""
-                    SELECT time_entries.id
-                    FROM time_entries, timesheets
-                    WHERE timesheets.id = time_entries.timesheet
-                    AND timesheets.consultant IN (SELECT id FROM consultants WHERE manager_id=%s)
-                    """,
-                    (self.details.user_id,)).fetchall()
+            time_entry_ids = connection.execute("""
+                SELECT time_entries.id
+                FROM time_entries, timesheets
+                WHERE timesheets.id = time_entries.timesheet
+                AND timesheets.consultant IN (SELECT id FROM consultants WHERE manager_id=%s)
+                """,
+                (self.details.user_id,)).fetchall()
         time_entries = [time_entry[0] for time_entry in time_entry_ids]
-        self.managed_time_entries_cache = time_entries
         return time_entries
 
     def is_manager_of_timesheet(self, timesheet_id: int) -> bool:
@@ -191,8 +159,7 @@ class User:
         Args:
             timesheet_id (int): The timesheet ID to check
         """
-        return timesheet_id in self.managed_timesheet_ids_cache \
-            or timesheet_id in self.managed_timesheet_ids
+        return timesheet_id in self.managed_timesheet_ids
 
     def is_timesheet_owner(self, timesheet_id: int) -> bool:
         """Check if the user is the owner of the timesheet.
@@ -200,8 +167,7 @@ class User:
         Args:
             timesheet_id (int): The timesheet ID to check
         """
-        return timesheet_id in self.timesheets_cache \
-            or timesheet_id in self.timesheet_ids
+        return timesheet_id in self.timesheet_ids
 
     def is_manager_of_time_entry(self, time_entry_id: int) -> bool:
         """Check if the user is the manager of the time entry.
@@ -209,8 +175,7 @@ class User:
         Args:
             time_entry_id (int): The time entry ID to check
         """
-        return time_entry_id in self.managed_time_entries_cache \
-            or time_entry_id in self.managed_time_entries
+        return time_entry_id in self.managed_time_entries
 
     def is_time_entry_owner(self, time_entry_id: int) -> bool:
         """Check if the user is the owner of the time entry.
@@ -218,8 +183,7 @@ class User:
         Args:
             time_entry_id (int): The time entry ID to check
         """
-        return time_entry_id in self.time_entries_cache \
-            or time_entry_id in self.time_entry_ids
+        return time_entry_id in self.time_entry_ids
 
 
     def is_manager_of_holiday(self, holiday_id: int) -> bool:
@@ -228,8 +192,7 @@ class User:
         Args:
             holiday_id (int): The holiday ID to check
         """
-        return holiday_id in self.managed_holiday_ids_cache \
-            or holiday_id in self.managed_holiday_ids
+        return holiday_id in self.managed_holiday_ids
 
     def is_holiday_owner(self, holiday_id: int) -> bool:
         """Check if the user is the owner of the holiday.
@@ -237,8 +200,7 @@ class User:
         Args:
             holiday_id (int): The holiday ID to check
         """
-        return holiday_id in self.holidays_cache \
-            or holiday_id in self.holiday_ids
+        return holiday_id in self.holiday_ids
 
     def is_manager_of(self, consultant_id: int) -> bool:
         """Check if the user is the manager of the consultant.
@@ -248,8 +210,7 @@ class User:
         Args:
             consultant_id (int): The consultant ID to check
         """
-        return consultant_id in self.managed_consultants_cache \
-             or consultant_id in self.managed_consultants
+        return consultant_id in self.managed_consultants
 
 
 class TokenPayload(BaseModel):
