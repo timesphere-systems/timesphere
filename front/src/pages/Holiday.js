@@ -79,7 +79,7 @@ const Holiday = () => {
                 <Selector />
             </SELECTOR_CONTAINER>
             <TABLE_WRAPPER>
-                <HolidayRequestsTable token={token} consultantId={consultantId} />
+                <HolidayRequestsTable token={token} consultantId={1} />
             </TABLE_WRAPPER>
             <FOOTER_WRAPPER>
                 <Footer />
