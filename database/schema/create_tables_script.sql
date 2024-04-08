@@ -5,16 +5,36 @@
 CREATE OR REPLACE FUNCTION check_existing_open_time_entry()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Check if there's an existing entry for the same timesheet without an end time
-    IF EXISTS (
-        SELECT 1
-        FROM time_entries
-        WHERE timesheet = NEW.timesheet
-          AND end_time IS NULL
-          AND id != NEW.id  -- Exclude the current record in case of update
-    ) THEN
-        RAISE EXCEPTION 'There is already an open time entry for this timesheet.';
+    -- Check for overlap with open-ended time entries
+    IF NEW.end_time IS NULL THEN
+        IF EXISTS (
+            SELECT 1
+            FROM time_entries
+            WHERE timesheet = NEW.timesheet
+              AND id != NEW.id
+              AND (
+                  NEW.start_time < end_time
+                  OR end_time IS NULL  -- Overlap with another open-ended entry
+              )
+        ) THEN
+            RAISE EXCEPTION 'New or updated time entry overlaps with an existing time entry.';
+        END IF;
+    ELSE
+        -- Check for overlap with any time entry, considering both start and end times
+        IF EXISTS (
+            SELECT 1
+            FROM time_entries
+            WHERE timesheet = NEW.timesheet
+              AND id != NEW.id
+              AND (
+                  NEW.start_time < COALESCE(end_time, 'infinity'::timestamp)
+                  AND NEW.end_time > start_time
+              )
+        ) THEN
+            RAISE EXCEPTION 'New or updated time entry overlaps with an existing time entry.';
+        END IF;
     END IF;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
