@@ -139,14 +139,15 @@ let SetStatus = (status) => {
 };
 
 const HolidayRequestsTable = ({ token, consultantId }) => {
-    const [holidayData, setHolidayData] = useState([]);
+    const [holidayIDs, setHolidayIDs] = useState([]);
+    const [listHolidayData, setListHolidayData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
     const [selectedHoliday, setSelectedHoliday] = useState(null);
 
     useEffect(() => {
         const fetchHolidays = async () => {
             try {
-                const response = await fetch(`https://localhost:8080/consultants/${consultantId}/holidays`, {
+                const response = await fetch(`api/consultant/${consultantId}/holidays`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -159,19 +160,34 @@ const HolidayRequestsTable = ({ token, consultantId }) => {
                 }
 
                 const data = await response.json();
-                setHolidayData(data);
+                console.log(data);
+
+                const holidayDataPromises = data.holidays.map(holiday_id => fetchHolidayData(holiday_id));
+                const resolvedHolidayData = await Promise.all(holidayDataPromises);
+                console.log(resolvedHolidayData);
+                //setHolidayIDs(data.holidays);
+                setHolidayIDs(resolvedHolidayData)
+
             } catch (error) {
                 console.error('Error fetching consultant holidays:', error);
             }
         };
 
         fetchHolidays();
-    }, [consultantId, token]);
+        let holidays = []
+        if(holidayIDs.length !==0){
+            holidayIDs.forEach(ID => {
+                holidays.push(fetchHolidayData(ID));
+            });
+        }
+        setListHolidayData(holidays);
+        console.log(listHolidayData);
 
+    }, [consultantId, token, holidayIDs]);
 
     const fetchHolidayData = async (holiday_id) => {
         try {
-            const response = await fetch(`http://localhost:8080/holiday/${holiday_id}`, {
+            const response = await fetch(`api/consultant/holiday/${holiday_id}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -184,8 +200,7 @@ const HolidayRequestsTable = ({ token, consultantId }) => {
             }
 
             const data = await response.json();
-            setSelectedHoliday(data);
-            setOverlayVisible(true);
+            return data;
         } catch (error) {
             console.error('Error fetching holiday data:', error);
         }
@@ -211,7 +226,7 @@ const HolidayRequestsTable = ({ token, consultantId }) => {
                         </TR>
                     </HEADERS>
                     <TBODY>
-                        {holidayData.map((holiday) => {
+                        {listHolidayData.map((holiday) => {
                             const isRowEditable = holiday.approval_status === "DENIED";
                             return (
                                 <TR key={holiday.id}>
