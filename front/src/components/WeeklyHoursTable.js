@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import styled from 'styled-components'
 import EditIcon from '../assets/icons/Edit.svg';
 import unEditIcon from '../assets/icons/unEdit.svg';
@@ -105,7 +105,7 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
         setOverlayVisible(!overlayVisible);
     };
 
-    const fetchTimesheetData = async (timesheet_id) => {
+    const fetchTimesheetData = useCallback(async (timesheet_id) => {
         try {
             const response = await fetch(`api/timesheet/${timesheet_id}`, {
                 method: 'GET',
@@ -124,7 +124,7 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
         } catch (error) {
             console.error('Error fetching timesheet data:', error);
         }
-    }
+    }, [token]);
 
 
     useEffect(() => {
@@ -154,13 +154,12 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                 const resolvedTimesheetDataArray = await Promise.all(timesheetDataPromises);
                 const resolvedTimesheetData = Object.assign({}, ...resolvedTimesheetDataArray);
                 setTimesheetData(resolvedTimesheetData);
-                console.log(resolvedTimesheetData);
             } catch (error) {
                 console.error('Error fetching timesheets:', error);
             }
         }
         fetchTimesheets();
-    }, [consultant_id, token, approval_status, fetchTimesheetData]);
+    }, [consultant_id, token, approval_status]);
 
     return (
         <WRAPPER>
