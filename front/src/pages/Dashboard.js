@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components';
 import { useAuth0 } from "@auth0/auth0-react";
-
 // Import components
 import Greeting from '../components/Greeting';
 import DashboardTable from '../components/DashboardTable';
@@ -9,14 +8,11 @@ import SubmitButton from '../components/SubmitButton';
 import ActionButton from '../components/ActionButton';
 import Timer from '../components/Timer';
 import EditToggleButton from '../components/EditToggleButton';
-
 // Import icons
 import ClockIcon from '../assets/icons/ClockIcon.svg';
 import CircleArrow from '../assets/icons/CircleArrowIcon.svg';
 import Footer from '../components/Footer';
-
 // Styles
-
 const G_WRAPPER = styled.div`
   margin-top: 3rem;
   width: 100%;
@@ -24,7 +20,6 @@ const G_WRAPPER = styled.div`
   align-items: center;
   justify-content: center;
 `
-
 const CLOCK_WRAPPER = styled.div`
   margin-top: 3rem;
   display: flex;
@@ -34,22 +29,18 @@ const CLOCK_WRAPPER = styled.div`
   gap: 1rem;
   width: 100%;
 `
-
 const TABLE_WRAPPER = styled.div`
   position: relative;
   margin-top: 1rem;
 `
-
 const TOGGLE_WRAPPER = styled.div`
   position: absolute;
   right: 150px;
   bottom: -50px;
 `
-
 const FOOTER_WRAPPER = styled.div`
   margin-top: 4rem;
 `
-
 const Dashboard = () => {
   const [editable, setEditable] = useState(false);          // Store editable state
   const [submittable, setSubmittable] = useState(false);    // Store submittable state 
@@ -58,8 +49,11 @@ const Dashboard = () => {
   const [time, setTime] = React.useState(new Date());       // Store clock-in time
   const [timeEntries, setTimeEntries] = useState([]);       // Store clock in and out time for backend
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-
+  const [JWTtoken, setJWTtoken] = useState();
+  const [consultantID, setConsultantID] = useState();
+  const [currentTimesheet, setCurrentTimesheet] = useState();
   React.useEffect(() => {
+    //function to get Authorization Token
     let getToken = async () => {
         if (isAuthenticated) {
             let token = await getAccessTokenSilently(
@@ -69,16 +63,123 @@ const Dashboard = () => {
                     scope: "timesphere:admin"
                 }});
             console.log(token);
+            setJWTtoken(token);
         }
     }
-    getToken();
-  }, [getAccessTokenSilently, isAuthenticated])
-
+    //function to get consultantID from JWT
+    let getConsultantID = async () => {
+      try {
+        const response = await fetch('api/user', {
+          'method': 'GET',
+          'headers': {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${JWTtoken}`
+          },
+        });
+        if(!response.ok){
+          console.log("Failed to get user details");
+          return
+        }
+        let user_details = await response.json()
+        if(user_details.consultant_id === undefined)
+        {
+          console.log("Current User is not a consultant");
+          return
+        }
+        setConsultantID(user_details.consultant_id);
+      } catch (error) {
+        console.log("Error fetching user details: ", error);
+      }
+    }
+    //function to get consultants current week timesheet
+    let getCurrentWeekTimesheet = async () => {
+      try {
+          const response = await fetch(`api/consultant/${consultantID}/timesheet/current`, {
+              'method': 'GET',
+              'headers': {
+                  'Authorization': `Bearer ${JWTtoken}`
+              }
+          });
+          let data;
+          console.log(response);
+          if(response.status === 400 || response.status === 200){
+              data = await response.json();
+              if(data.id === undefined){
+                  data = await createTimeSheet();
+              }
+          }
+          else{
+              console.log("Failed to get current week timesheet.");
+              return
+          }
+          setCurrentTimesheet(data);
+          console.log(data);
+      } catch (error) {
+          console.log("Failed to get current week timesheet: ", error);
+      }
+    }
+    //function to create a current week timesheet for the consultant
+    let createTimeSheet = async () => {
+        const today = new Date();
+        const monday = new Date(today);
+        monday.setDate(monday.getDate() - monday.getDay() + 1);
+        try {
+            const response = await fetch(`api/consultant/${consultantID}/timesheet?start=${monday.toISOString()}`, {
+                'method': 'POST',
+                'headers': {
+                    'Authorization': `Bearer ${JWTtoken}`
+                }
+            });
+            if(!response.ok){
+                console.log("Failed to create current week timesheet.");
+                return;
+            }
+            let data = await response.json();
+            let timesheetID = data.id;
+            return await getTimesheetDetails(timesheetID);
+        } catch (error) {
+            console.log("Failed to create current week timesheet: ", error);
+        }
+    }
+    //function to get timesheet details specified by `timesheetID`
+    let getTimesheetDetails = async (timesheetID) => {
+        try {
+            const response = await fetch(`api/timesheet/${timesheetID}`, {
+                'method': 'GET',
+                'headers': {
+                    'Authorization': `Bearer ${JWTtoken}`
+                },
+            });
+            if(!response.ok){
+                console.log("Failed to get current week timesheet details.");
+                return;
+            }
+            let data = await response.json();
+            if(data.id === undefined){
+                console.log("Failed to get current week timesheet details.");
+                return;
+            }
+            return data;
+        } catch (error) {
+            console.log("Failed to create current week timesheet details: ", error);
+        }
+    }
+    if(JWTtoken === undefined){
+      getToken();
+    }
+    else if(consultantID === undefined){
+      getConsultantID();
+    }
+    else{
+      if(currentTimesheet === undefined){
+        getCurrentWeekTimesheet();
+      }
+    }
+  }, [getAccessTokenSilently, isAuthenticated, JWTtoken, consultantID])
   // Function which toggles the edit mode - passed to EditToggleButton component
   let toggleEditMode = () => {
     setEditable(!editable);
   };
-
   //function to change text for clock in/out button
   let change = () => {
     setButtonText(buttonText === "Clock-In" ? "Clock-Out" : "Clock-In");
@@ -90,7 +191,6 @@ const Dashboard = () => {
       setTimeEntries([...timeEntries, newTime]);
     }
   };
-
   const sendTimeEntryToBackend = async (startTime, endTime) => {
     const token = await getAccessTokenSilently({
       audience: "https://timesphere.systems/api",
@@ -118,7 +218,6 @@ const Dashboard = () => {
       console.error('There was a problem with your fetch operation:', error);
     }
   };
-
   const handleSubmit = async () => {
     console.log("Submitting timings!!");
     if (timeEntries.length > 0 && !startTimer) {
@@ -128,7 +227,6 @@ const Dashboard = () => {
       console.log("No entry to submit or timer is still running.");
     }
   };
-
   return (
     <div>
       <G_WRAPPER>
@@ -138,7 +236,6 @@ const Dashboard = () => {
           <Greeting name={"User"}/>
         }
       </G_WRAPPER>
-
       <CLOCK_WRAPPER>
         <ActionButton 
         height={'100px'}
@@ -159,14 +256,12 @@ const Dashboard = () => {
         icon={CircleArrow}
         onClick={handleSubmit}/>
       </CLOCK_WRAPPER>
-
       <TABLE_WRAPPER>
-        <DashboardTable editable={editable} submittable={submittable}/>
+        <DashboardTable editable={editable} submittable={submittable} token={JWTtoken} currentTimesheet={currentTimesheet}/>
         <TOGGLE_WRAPPER>
           <EditToggleButton onToggle={toggleEditMode} checked={editable} />
         </TOGGLE_WRAPPER>
       </TABLE_WRAPPER>
-
       <FOOTER_WRAPPER>
         <Footer />
       </FOOTER_WRAPPER>
@@ -174,5 +269,4 @@ const Dashboard = () => {
     </div>
   )
 }
-
 export default Dashboard;
