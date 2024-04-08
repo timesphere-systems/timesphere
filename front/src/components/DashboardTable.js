@@ -261,7 +261,7 @@ const DashboardTable = ({ editable, submittable, token, consultantID}) => {
                     }
                 }
             }
-            setWeekDates(tableDates);
+            setWeekDates([...tableDates]);
             console.log(weekDates);
         }
     if(token !== null && consultantID !== null){
