@@ -93,7 +93,7 @@ def update_holiday_request(holiday_id: int, request: HolidayTimes,
                     status_code=status.HTTP_200_OK,
                     content=
                     {
-                        "message":"Sucessfully updated holiday request"
+                        "message": "Sucessfully updated holiday request"
                     }
                 )
     # If the success condition is not met, an invalid ID was provided

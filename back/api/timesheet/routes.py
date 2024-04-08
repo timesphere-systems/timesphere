@@ -172,8 +172,8 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
                 )
             except CheckViolation:
                 return JSONResponse(
-                    status_code = status.HTTP_400_BAD_REQUEST,
-                    content = {"message": "Invalid end time value"}
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "Invalid end time value"}
                 )
         # Create new time entry
         _ = connection.execute(
@@ -310,16 +310,16 @@ def update_time_entry(time_entry_id: int, request: models.UpdateTimeEntry,
                 # Check number of modified rows to ensure a valid ID was provided
                 if cursor.rowcount == 1:
                     return JSONResponse(
-                        status_code = status.HTTP_200_OK,
-                        content = {"message": "Sucessfully updated time entry"}
+                        status_code=status.HTTP_200_OK,
+                        content={"message": "Sucessfully updated time entry"}
                     )
             except CheckViolation:
                 return JSONResponse(
-                    status_code = status.HTTP_400_BAD_REQUEST,
-                    content = {"message": "Invalid start or end time values"}
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "Invalid start or end time values"}
                 )
     # If the success condition is not met, an invalid ID was provided
     return JSONResponse(
-        status_code = status.HTTP_400_BAD_REQUEST,
-        content = {"message": "Failed to update time entry, invalid ID"}
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"message": "Failed to update time entry, invalid ID"}
     )

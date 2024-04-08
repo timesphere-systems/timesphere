@@ -35,7 +35,7 @@ def submit(submit_id: int,
             if cursor.rowcount == 1:
                 return JSONResponse(
                     status_code=status.HTTP_200_OK,
-                    content={"message":f"{table} submitted sucessfully"}
+                    content={"message": f"{table} submitted sucessfully"}
                 )
     # If the success condition is not met, an invalid ID was provided
     return JSONResponse(
@@ -72,7 +72,7 @@ def update_status(submit_id: int,
                     status_code=status.HTTP_200_OK,
                     content=
                     {
-                        "message":f"Sucessfully updated {table} status to {status_type.value}"
+                        "message": f"Sucessfully updated {table} status to {status_type.value}"
                     }
                 )
     # If the success condition is not met, an invalid ID was provided
