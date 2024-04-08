@@ -46,3 +46,24 @@ def create_user(request: models.UserCreate,
             status_code=status.HTTP_201_CREATED,
             content={"id": user_id}
         )
+
+@router.get("", status_code=status.HTTP_200_OK, response_model=None)
+def get_user_details(current_user: Annotated[User, Security(get_current_user)]
+                     ) -> JSONResponse:
+    """Get the details of a user.
+
+    Requires user to be authenticated (and have there own user entry in the database)
+
+    Args:
+        pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
+    Returns:
+        JSONResponse
+    """
+    user_details = current_user.details.model_dump()
+    if user_details["user_role"]== 1:
+        user_details.update({"consultant_id": current_user.consultant_id})
+    user_details.pop("user_role")
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=user_details
+    )

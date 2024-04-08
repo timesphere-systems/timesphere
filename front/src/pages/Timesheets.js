@@ -33,7 +33,7 @@ const FOOTER_WRAPPER = styled.div`
 const Timesheets = () => {
     const {getAccessTokenSilently, isAuthenticated} = useAuth0();
     const [JWTtoken, setToken] = useState(null);
-    const [consultantID, setConsultantID] = useState(1);
+    const [consultantID, setConsultantID] = useState(11);
     const [sortBy, setSortBy] = useState('Latest');
     const [approval_status, setApprovalStatus] = useState('Select Status');
 
@@ -46,17 +46,6 @@ const Timesheets = () => {
         setApprovalStatus(selectedStatus);
     };
 
-    const approvalStatus = (approval_status) => {
-        if (approval_status === 'Approved') {
-            return 'APPROVED';
-        } else if (approval_status === 'Denied') {
-            return 'DENIED';
-        } else {
-            return 'WAITING';
-        }
-    
-    }
-
     React.useEffect(() => {
         let getToken = async () => {
             if (isAuthenticated) {
@@ -67,14 +56,13 @@ const Timesheets = () => {
                         scope: "timesphere:admin"
                     }});
                 console.log(token);
-                setToken(JWTtoken);
-                console.log("User Details: ");
+                setToken(token);
             }
         }
 
         getToken();
         
-    }, [getAccessTokenSilently, isAuthenticated])
+    }, [getAccessTokenSilently, isAuthenticated, JWTtoken])
 
     return (
     <div>
@@ -87,8 +75,7 @@ const Timesheets = () => {
             token={JWTtoken}
             consultant_id={consultantID}
             sort={sortBy}
-            status={approval_status === 'Approved' ? 'APPROVED' : approval_status === 'Denied' ? 'DENIED' : 'WAITING'}
-            entryIds={consultantID.entryIds} /* CHANGE THIS */
+            status={approval_status === 'Approved' ? 'APPROVED' : approval_status === 'Denied' ? 'DENIED' : approval_status === 'Select Status' ? '' :'WAITING'}
             />
 
         </TABLE_WRAPPER>

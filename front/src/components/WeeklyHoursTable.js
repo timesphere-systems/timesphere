@@ -95,19 +95,22 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-const WeeklyHoursTable = ({token, consultant_id, sort, approval_status, entryIds}) => {
+const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
     const [timesheetData, setTimesheetData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
     const [selectedTimesheet, setSelectedTimesheet] = useState(null);
     const [detailedTimeEntries, setDetailedTimeEntries] = useState([]); 
     const [sortedData, setSortedData] = useState([]);
 
-    
+    const toggleOverlay = () => {
+        setOverlayVisible(!overlayVisible);
+    };
+
     useEffect(() => {
         const fetchTimesheets = async () => {
-            try{
+            try {
                 let url = `api/consultant/${consultant_id}/timesheets`;
-                if(approval_status !== null){
+                if (approval_status && approval_status !== 'Select Status') {
                     url += `?approval_status=${approval_status}`;
                 }
                 const response = await fetch(url, {
@@ -117,48 +120,23 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status, entryIds
                         'Authorization': `Bearer ${token}`,
                     },
                 });
-
+    
                 if (!response.ok) {
                     throw new Error('Failed to fetch timesheet data');
                 }
-
-                const data = await response.json();
-                console.log(data);
-                setTimesheetData(data);
-            } catch(error){
+    
+                let data = await response.json();
+                setTimesheetData(data.timesheets);
+                console.log(data.timesheets);
+            } catch (error) {
                 console.error('Error fetching timesheets:', error);
             }
         }
         fetchTimesheets();
-    }, [consultant_id, token, approval_status]);
-
-    useEffect(() => {
-        const sortData = () => {
-            const dataToSort = [...timesheetData];
-            if (sort === 'Latest') {
-                dataToSort.sort((a, b) => new Date(b.submitted) - new Date(a.submitted));
-            } else if (sort === 'Oldest') {
-                dataToSort.sort((a, b) => new Date(a.submitted) - new Date(b.submitted));
-            }
-            setSortedData(dataToSort);
-        };
-
-        sortData();
-    }, [sort, timesheetData]);
+    }, [consultant_id, token, approval_status, fetchTimesheets]);
 
 
-    useEffect(() => {
-        if (selectedTimesheet && selectedTimesheet.entries) {
-            fetchTimeEntriesDetails(selectedTimesheet.entries);
-        }
-    }, [selectedTimesheet, token]);    
-
-    const toggleOverlay = async(timesheet = null) => {
-        setSelectedTimesheet(timesheet);
-        setOverlayVisible(!overlayVisible);
-    };
-
-    const fetchTimeEntriesDetails = async () => {
+    /* const fetchTimeEntriesDetails = useCallback(async () => {
         const entriesDetails = [];
         for (let entryId of entryIds) {
             try {
@@ -181,7 +159,34 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status, entryIds
             }
         }
         setDetailedTimeEntries(entriesDetails);
-    };
+    }, [entryIds, token]);
+ */
+
+    /* useEffect(() => {
+        const sortData = () => {
+            if (!Array.isArray(timesheetData)) {
+                console.error('timesheetData is not an array:', timesheetData);
+                return;
+            }
+
+            const dataToSort = [...timesheetData];
+            if (sort === 'Latest') {
+                dataToSort.sort((a, b) => new Date(b.submitted) - new Date(a.submitted));
+            } else if (sort === 'Oldest') {
+                dataToSort.sort((a, b) => new Date(a.submitted) - new Date(b.submitted));
+            }
+            setSortedData(dataToSort);
+        };
+
+        sortData();
+    }, [timesheetData, sort, ]);
+
+    useEffect(() => {
+        if (selectedTimesheet && selectedTimesheet.entries) {
+            fetchTimeEntriesDetails(selectedTimesheet.entries);
+        }
+    }, [selectedTimesheet, fetchTimeEntriesDetails]);
+ */
 
     return (
         <WRAPPER>
@@ -197,7 +202,7 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status, entryIds
                         </TR>
                     </HEADERS>
                     <TBODY>
-                    {sortedData.map((timesheet) => {
+                    {timesheetData.map((timesheet) => {
                         const isRowEditable = timesheet.approval_status === 'Denied';
                         return (
                             <TR key={timesheet.id}>
@@ -207,8 +212,10 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status, entryIds
                                     </button>
                                 </TD>
                                 <TD>{new Date(timesheet.created).toLocaleDateString()}</TD>
+                                {console.log(timesheet.submitted)}
                                 <TD>{timesheet.submitted ? new Date(timesheet.submitted).toLocaleDateString() : 'N/A'}</TD>
                                 <TD><SetStatusButton status={timesheet.approval_status} isActive={false} /></TD>
+                                {console.log(timesheet.approval_status)}
                                 <TD>
                                     <EDIT editable={isRowEditable}>
                                         {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}

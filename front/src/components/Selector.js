@@ -114,14 +114,12 @@ function Selector({onSortChange, onStatusChange, selectedSort, selectedStatus}) 
     const handleSortByItemClick = (item) => {
         setSortBySelectedItem(item);
         onSortChange(item);
-        console.log(item);
         closeMenus();
     };
 
     const handleStatusItemClick = (item) => {
         setStatusSelectedItem(item);
         onStatusChange(item);
-        console.log(item);
         closeMenus();
     };
 
