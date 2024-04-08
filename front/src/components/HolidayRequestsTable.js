@@ -114,7 +114,6 @@ const SUBMIT_BUTTON = styled.div`
 
 
 
-
 const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) => {
     const [listHolidayData, setListHolidayData] = useState([{}]);
     const [selectedHoliday, setSelectedHoliday] = useState(null);
@@ -256,6 +255,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
 
                 const resolvedHolidayDataArray = await Promise.all(holidayDataPromises);
                 setListHolidayData(resolvedHolidayDataArray);
+
 
             } catch (error) {
                 console.error('Error fetching consultant holidays:', error);
