@@ -250,14 +250,19 @@ const DashboardTable = ({ editable, submittable, token, consultantID}) => {
             for(const timeEntry of currentTimeEntries){
                 let clockInTime = new Date(timeEntry.start_time);
                 let clockOutTime = new Date(timeEntry.end_time);
+                let openTimeEntryInterval = false;
                 for(let i=0; i < tableDates.length; i++){
                     let dayDate = new Date(tableDates[i].date);
-                    if (dayDate.getDate() == clockInTime.getDate()){
+                    if (dayDate.getDate() === clockInTime.getDate()){
                         tableDates[i].clockIn = clockInTime.toTimeString().split(' ')[0];
-                        tableDates[i].status = timeEntry.entry_type
+                        openTimeEntryInterval = true;
                     }
-                    if (dayDate.getDate() == clockOutTime.getDate()){
+                    if(openTimeEntryInterval){
+                        tableDates[i].status = timeEntry.entry_type;
+                    }
+                    if (dayDate.getDate() === clockOutTime.getDate()){
                         tableDates[i].clockOut = clockOutTime.toTimeString().split(' ')[0];
+                        openTimeEntryInterval = false;
                     }
                 }
             }
