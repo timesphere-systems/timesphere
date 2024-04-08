@@ -30,8 +30,13 @@ const LoginButton = ({width, height}) => {
     const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
 
     let handleClick = () => {
-        isAuthenticated ? logout() : loginWithRedirect()
+        isAuthenticated ? logout({ 
+            logoutParams: {
+              returnTo: window.location.origin
+            }
+          }) : loginWithRedirect()
     }
+
 
     return (
         <LOGINBUTTON
