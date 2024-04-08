@@ -139,12 +139,143 @@ const OVERLAY_TEXT = styled.p`
     font-weight: 600;
 `
 
-const DashboardTable = ({ editable, submittable }) => {
+const DashboardTable = ({ editable, submittable, token, consultantID}) => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
+    const [currentTimesheet, setCurrentTimesheet] = useState(null);
+    const[currentTimeEntries, setCurrentTimeEntries] = useState(null);
 
     useEffect(() => {
         // code here 
     }, [submittable]);
+
+    //Use Effect for getting (or creating current week timesheet)
+    useEffect(() => {
+        let getCurrentWeekTimesheet = async () => {
+            try {
+                const response = await fetch(`api/consultant/${consultantID}/timesheet/current`, {
+                    'method': 'GET',
+                    'headers': {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                let data;
+                console.log(response);
+                if(response.status === 400 || response.status === 200){
+                    data = await response.json();
+                    if(data.id === undefined){
+                        data = await createTimeSheet();
+                    }
+                }
+                else{
+                    console.log("Failed to get current week timesheet.");
+                    return
+                }
+                setCurrentTimesheet(data);
+                console.log(data);
+            } catch (error) {
+                console.log("Failed to get current week timesheet: ", error);
+            }
+        }
+
+        let createTimeSheet = async () => {
+            const today = new Date();
+            const monday = new Date(today);
+            monday.setDate(monday.getDate() - monday.getDay() + 1);
+            try {
+                const response = await fetch(`api/consultant/${consultantID}/timesheet?start=${monday.toISOString()}`, {
+                    'method': 'POST',
+                    'headers': {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if(!response.ok){
+                    console.log("Failed to create current week timesheet.");
+                    return;
+                }
+                let data = await response.json();
+                let timesheetID = data.id;
+                return await getTimesheetDetails(timesheetID);
+            } catch (error) {
+                console.log("Failed to create current week timesheet: ", error);
+            }
+        }
+        let getTimesheetDetails = async (timesheetID) => {
+            try {
+                const response = await fetch(`api/timesheet/${timesheetID}`, {
+                    'method': 'GET',
+                    'headers': {
+                        'Authorization': `Bearer ${token}`
+                    },
+                });
+                if(!response.ok){
+                    console.log("Failed to get current week timesheet details.");
+                    return;
+                }
+                let data = await response.json();
+                if(data.id === undefined){
+                    console.log("Failed to get current week timesheet details.");
+                    return;
+                }
+                return data;
+            } catch (error) {
+                console.log("Failed to create current week timesheet details: ", error);
+            }
+        }
+        let fetchTimeEntryDetails = async () =>{
+            let listTimeEntryIDS = currentTimesheet.entries;
+            let timeEntries = [];
+            for (const ID of listTimeEntryIDS) {
+                try {
+                    const response = await fetch(`api/timesheet/entry/${ID}`, {
+                        'method': 'GET',
+                        'headers': {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if(!response.ok){
+                        console.log("Failed to get time entry details.");
+                        return;
+                    }
+                    let data = await response.json();
+                    timeEntries.push(data);
+                } catch (error) {
+                    console.log("Failed to get time entry details: ", error);
+                }
+            }
+            console.log(timeEntries);
+            setCurrentTimeEntries(timeEntries);
+        }
+        let setTimeEntriesTable = () => {
+            let tableDates = weekDates;
+            for(const timeEntry of currentTimeEntries){
+                let clockInTime = new Date(timeEntry.start_time);
+                let clockOutTime = new Date(timeEntry.end_time);
+                for(let i=0; i < tableDates.length; i++){
+                    let dayDate = new Date(tableDates[i].date);
+                    if (dayDate.getDate() == clockInTime.getDate()){
+                        tableDates[i].clockIn = clockInTime.toTimeString().split(' ')[0];
+                        tableDates[i].status = timeEntry.entry_type
+                    }
+                    if (dayDate.getDate() == clockOutTime.getDate()){
+                        tableDates[i].clockOut = clockOutTime.toTimeString().split(' ')[0];
+                    }
+                }
+            }
+            setWeekDates(tableDates);
+            console.log(weekDates);
+        }
+    if(token !== undefined){
+        if(currentTimesheet === null){
+            getCurrentWeekTimesheet();
+        }
+        else if(currentTimeEntries === null){
+            fetchTimeEntryDetails();
+        }
+        else{
+            setTimeEntriesTable();
+        }
+    }
+    }, [token, currentTimesheet, currentTimeEntries]);
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
@@ -154,7 +285,7 @@ const DashboardTable = ({ editable, submittable }) => {
         const weekDates = [...Array(5)].map((_, index) => {
             const date = new Date(monday);
             date.setDate(date.getDate() + index);
-            return { date, status: 'Working', clockIn: '', clockOut:'', hours: 0};
+            return { date, status: 'WORK', clockIn: '', clockOut:'', hours: 0};
         });
         return weekDates;
     };
@@ -235,9 +366,9 @@ const DashboardTable = ({ editable, submittable }) => {
                                     <TD>{row.date.toLocaleDateString()}</TD>
                                     <TD>
                                         <STATUS value={row.status} onChange={(e) => handleStatusChange(index, e.target.value)} disabled={!editable}>
-                                            <option value="Working">Working</option>
-                                            <option value="Sick">Sick</option>
-                                            <option value="Holiday">Holiday</option>
+                                            <option value="WORK">Working</option>
+                                            <option value="SICK">Sick</option>
+                                            <option value="HOLIDAY">Holiday</option>
                                         </STATUS>
                                     </TD>
                                     <TD>
@@ -257,12 +388,12 @@ const DashboardTable = ({ editable, submittable }) => {
                                         />
                                     </TD>
                                     <TD>{row.hours}</TD>
-                                    {!editable && row.status === "Holiday" && (
+                                    {!editable && row.status === "HOLIDAY" && (
                                         <OVERLAY topPos={["71px", "143px", "215px", "287px", "359px"][index]}>
                                             <OVERLAY_TEXT>Holiday</OVERLAY_TEXT>
                                         </OVERLAY>
                                     )}
-                                    {!editable && row.status === "Sick" && (
+                                    {!editable && row.status === "SICK" && (
                                         <OVERLAY topPos={["71px", "143px", "215px", "287px", "359px"][index]}>
                                             <OVERLAY_TEXT>Sick</OVERLAY_TEXT>
                                         </OVERLAY>
