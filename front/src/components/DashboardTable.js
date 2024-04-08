@@ -161,16 +161,15 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
                         }
                     });
                     if(!response.ok){
-                        console.log("Failed to get time entry details.");
+                        console.error("Failed to get time entry details.");
                         return;
                     }
                     let data = await response.json();
                     timeEntries.push(data);
                 } catch (error) {
-                    console.log("Failed to get time entry details: ", error);
+                    console.error("Failed to get time entry details: ", error);
                 }
             }
-            console.log(timeEntries);
             setCurrentTimeEntries(timeEntries);
         }
         let setTimeEntriesTable = () => {
@@ -195,7 +194,6 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
                 }
             }
             setWeekDates([...tableDates]);
-            console.log(weekDates);
         }
     if(token !== undefined && currentTimesheet !== undefined){
         if(currentTimeEntries === undefined){

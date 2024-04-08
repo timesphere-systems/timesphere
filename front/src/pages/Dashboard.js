@@ -77,18 +77,18 @@ const Dashboard = () => {
           },
         });
         if(!response.ok){
-          console.log("Failed to get user details");
+          console.error("Failed to get user details");
           return
         }
         let user_details = await response.json()
         if(user_details.consultant_id === undefined)
         {
-          console.log("Current User is not a consultant");
+          console.error("Current User is not a consultant");
           return
         }
         setConsultantID(user_details.consultant_id);
       } catch (error) {
-        console.log("Error fetching user details: ", error);
+        console.error("Error fetching user details: ", error);
       }
     }
     //function to get consultants current week timesheet
@@ -101,7 +101,6 @@ const Dashboard = () => {
               }
           });
           let data;
-          console.log(response);
           if(response.status === 400 || response.status === 200){
               data = await response.json();
               if(data.id === undefined){
@@ -109,7 +108,7 @@ const Dashboard = () => {
               }
           }
           else{
-              console.log("Failed to get current week timesheet.");
+              console.error("Failed to get current week timesheet.");
               return
           }
           setCurrentTimesheet(data);
@@ -117,9 +116,8 @@ const Dashboard = () => {
           if(data.approval_status !== "INCOMPLETE"){
             setSubmittable(false);
           }
-          console.log(data);
       } catch (error) {
-          console.log("Failed to get current week timesheet: ", error);
+          console.error("Failed to get current week timesheet: ", error);
       }
     }
     //function to create a current week timesheet for the consultant
@@ -135,14 +133,14 @@ const Dashboard = () => {
                 }
             });
             if(!response.ok){
-                console.log("Failed to create current week timesheet.");
+                console.error("Failed to create current week timesheet.");
                 return;
             }
             let data = await response.json();
             let timesheetID = data.id;
             return await getTimesheetDetails(timesheetID);
         } catch (error) {
-            console.log("Failed to create current week timesheet: ", error);
+            console.error("Failed to create current week timesheet: ", error);
         }
     }
     //function to get timesheet details specified by `timesheetID`
@@ -155,17 +153,17 @@ const Dashboard = () => {
                 },
             });
             if(!response.ok){
-                console.log("Failed to get current week timesheet details.");
+                console.error("Failed to get current week timesheet details.");
                 return;
             }
             let data = await response.json();
             if(data.id === undefined){
-                console.log("Failed to get current week timesheet details.");
+                console.error("Failed to get current week timesheet details.");
                 return;
             }
             return data;
         } catch (error) {
-            console.log("Failed to create current week timesheet details: ", error);
+            console.error("Failed to create current week timesheet details: ", error);
         }
     }
     if(JWTtoken === undefined){
