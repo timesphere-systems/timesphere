@@ -35,7 +35,7 @@ const LoginButton = ({width, height}) => {
                 let token = await getAccessTokenSilently(
                     {authorizationParams: {        
                         audience: "https://timesphere.systems/api",
-                        redirect_uri: "http://localhost:3000",
+                        redirect_uri: window.location.origin,
                         scope: "timesphere:admin"
                     }});
                 console.log(token);
