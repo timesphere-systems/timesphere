@@ -139,10 +139,9 @@ const OVERLAY_TEXT = styled.p`
     font-weight: 600;
 `
 
-const DashboardTable = ({ editable, submittable, token, consultantID}) => {
+const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
-    const [currentTimesheet, setCurrentTimesheet] = useState(null);
-    const[currentTimeEntries, setCurrentTimeEntries] = useState(null);
+    const[currentTimeEntries, setCurrentTimeEntries] = useState();
 
     useEffect(() => {
         // code here 
@@ -150,77 +149,6 @@ const DashboardTable = ({ editable, submittable, token, consultantID}) => {
 
     //Use Effect for getting (or creating current week timesheet)
     useEffect(() => {
-        let getCurrentWeekTimesheet = async () => {
-            try {
-                const response = await fetch(`api/consultant/${consultantID}/timesheet/current`, {
-                    'method': 'GET',
-                    'headers': {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                let data;
-                console.log(response);
-                if(response.status === 400 || response.status === 200){
-                    data = await response.json();
-                    if(data.id === undefined){
-                        data = await createTimeSheet();
-                    }
-                }
-                else{
-                    console.log("Failed to get current week timesheet.");
-                    return
-                }
-                setCurrentTimesheet(data);
-                console.log(data);
-            } catch (error) {
-                console.log("Failed to get current week timesheet: ", error);
-            }
-        }
-
-        let createTimeSheet = async () => {
-            const today = new Date();
-            const monday = new Date(today);
-            monday.setDate(monday.getDate() - monday.getDay() + 1);
-            try {
-                const response = await fetch(`api/consultant/${consultantID}/timesheet?start=${monday.toISOString()}`, {
-                    'method': 'POST',
-                    'headers': {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if(!response.ok){
-                    console.log("Failed to create current week timesheet.");
-                    return;
-                }
-                let data = await response.json();
-                let timesheetID = data.id;
-                return await getTimesheetDetails(timesheetID);
-            } catch (error) {
-                console.log("Failed to create current week timesheet: ", error);
-            }
-        }
-        let getTimesheetDetails = async (timesheetID) => {
-            try {
-                const response = await fetch(`api/timesheet/${timesheetID}`, {
-                    'method': 'GET',
-                    'headers': {
-                        'Authorization': `Bearer ${token}`
-                    },
-                });
-                if(!response.ok){
-                    console.log("Failed to get current week timesheet details.");
-                    return;
-                }
-                let data = await response.json();
-                if(data.id === undefined){
-                    console.log("Failed to get current week timesheet details.");
-                    return;
-                }
-                return data;
-            } catch (error) {
-                console.log("Failed to create current week timesheet details: ", error);
-            }
-        }
         let fetchTimeEntryDetails = async () =>{
             let listTimeEntryIDS = currentTimesheet.entries;
             let timeEntries = [];
@@ -269,18 +197,15 @@ const DashboardTable = ({ editable, submittable, token, consultantID}) => {
             setWeekDates([...tableDates]);
             console.log(weekDates);
         }
-    if(token !== null && consultantID !== null){
-        if(currentTimesheet === null){
-            getCurrentWeekTimesheet();
-        }
-        else if(currentTimeEntries === null){
+    if(token !== undefined && currentTimesheet !== undefined){
+        if(currentTimeEntries === undefined){
             fetchTimeEntryDetails();
         }
         else{
             setTimeEntriesTable();
         }
     }
-    }, [token, consultantID, currentTimesheet, currentTimeEntries]);
+    }, [token, currentTimesheet, currentTimeEntries]);
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
