@@ -43,7 +43,7 @@ const FOOTER_WRAPPER = styled.div`
 `
 const Dashboard = () => {
   const [editable, setEditable] = useState(false);          // Store editable state
-  const [submittable, setSubmittable] = useState(false);    // Store submittable state 
+  const [submittable, setSubmittable] = useState(true);    // Store submittable state 
   const [buttonText, setButtonText] = useState("Clock-In"); // Store clock in/out button text
   const [startTimer, setTimer] = useState(false);           // Store timer state
   const [time, setTime] = React.useState(new Date());       // Store clock-in time
@@ -113,6 +113,10 @@ const Dashboard = () => {
               return
           }
           setCurrentTimesheet(data);
+          // set if the timesheet is editable and submittable
+          if(data.approval_status !== "INCOMPLETE"){
+            setSubmittable(false);
+          }
           console.log(data);
       } catch (error) {
           console.log("Failed to get current week timesheet: ", error);
@@ -259,7 +263,10 @@ const Dashboard = () => {
       <TABLE_WRAPPER>
         <DashboardTable editable={editable} submittable={submittable} token={JWTtoken} currentTimesheet={currentTimesheet}/>
         <TOGGLE_WRAPPER>
-          <EditToggleButton onToggle={toggleEditMode} checked={editable} />
+          <EditToggleButton onToggle={() => {
+            if(submittable === true){
+              toggleEditMode();
+            }}} checked={editable} />
         </TOGGLE_WRAPPER>
       </TABLE_WRAPPER>
       <FOOTER_WRAPPER>
