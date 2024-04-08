@@ -1,14 +1,30 @@
 """Finance router and routes, data belonging to a particular finance user."""
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Annotated
+from typing_extensions import override
+from fpdf import FPDF
 from fastapi import APIRouter, Depends, Security, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from psycopg_pool import ConnectionPool
 from psycopg.rows import class_row
 from ..auth import User, get_current_user
 from ..dependencies import get_connection_pool
 from . import models
+from ..timesheet.models import TimeEntry
 
+
+class PDF(FPDF):
+    """PDF library wrapper"""
+    @override
+    def header(self):
+        self.set_font('Arial', 'B', 12)
+        _ = self.cell(0, 10, 'Work Report', 0, 1, 'C')
+
+    @override
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        _ = self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
 
 # /finance
 router = APIRouter(
@@ -52,11 +68,11 @@ def search_consultant(search_query: str,
         content={"consultants": consultants}
     )
 
-@router.get("/generatereport", status_code=status.HTTP_200_OK, response_model=None)
+@router.get("/report", status_code=status.HTTP_200_OK)
 def generate_report(consultant_id: int, time: str,
                       pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
                       current_user: Annotated[User, Security(get_current_user)]
-                      ) -> JSONResponse | models.HoursReport:
+                      ) -> JSONResponse | Response:
     """Generates Work Report based on a specified consultant and a month and year time.
 
     Requires for the current user to have the finance user role
@@ -84,39 +100,53 @@ def generate_report(consultant_id: int, time: str,
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"message": "Invalid date value, import should be in format Year-Month"}
         )
-    hours_report: models.HoursReport
+    time_entries = []
     with pool.connection() as connection:
-        with connection.cursor(row_factory=class_row(models.HoursReport)) as cursor:
-            row = cursor.execute(
-                """SELECT consultants.id AS consultant_id, 
-                          (consultants.contracted_hours * COUNT(weekly_hours_list.hours)) 
-                            AS month_contracted_hours, 
-                          (EXTRACT(HOUR FROM SUM(weekly_hours_list.hours)) + 
-                            EXTRACT(MINUTE FROM SUM(weekly_hours_list.hours))/60) 
-                            AS total_worked_hours
-                    FROM(SELECT SUM(time_entries.end_time - time_entries.start_time) AS hours, 
-                                timesheets.consultant AS consultant_id
-                            FROM time_entries, timesheets
-                            WHERE EXTRACT(MONTH FROM timesheets.start) = %(month)s
-                            AND EXTRACT(YEAR FROM timesheets.start) = %(year)s
-                            AND timesheets.id = time_entries.timesheet
-                            AND time_entries.entry_type = (SELECT id FROM time_entry_type
-                                                             WHERE entry_type ='WORK')
-                            AND timesheets.approval_status = (SELECT id FROM approval_status 
-                                                                WHERE status_type = 'APPROVED')
-                            AND timesheets.consultant = %(consultant_id)s
-                            GROUP BY timesheets.id) as weekly_hours_list, consultants
-                    WHERE consultants.id = weekly_hours_list.consultant_id
-                    GROUP BY consultants.id
-                """, {'month': month,'year': year, 'consultant_id': consultant_id}).fetchone()
-            if row is None:
+        with connection.cursor(row_factory=class_row(TimeEntry)) as cursor:
+            rows = cursor.execute(
+                """SELECT ts.id AS timesheet_id, te.id, te.start_time,
+                    te.end_time, tet.entry_type, te.timesheet
+                    FROM time_entries te
+                    JOIN time_entry_type tet ON te.entry_type = tet.id
+                    JOIN timesheets ts ON te.timesheet = ts.id
+                    WHERE EXTRACT(MONTH FROM te.start_time) = %s
+                    AND EXTRACT(YEAR FROM te.start_time) = %s
+                    AND ts.consultant = %s
+                    AND te.timesheet = ts.id
+                """, (month, year, consultant_id)).fetchall()
+            if len(rows) == 0:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     content={"message": "Failed to get total work hours," +
                               " consultant has no recorded work for the given time frame"}
                 )
-            hours_report = row
-            if hours_report.total_worked_hours > hours_report.month_contracted_hours:
-                hours_report.overtime_hours = (hours_report.total_worked_hours
-                    - hours_report.month_contracted_hours)
-    return hours_report
+            time_entries = rows
+    hours_report = models.HoursReport(consultant_id=consultant_id,
+                                      month_contracted_hours=160.0,
+                                      total_worked_hours=0.0,
+                                      overtime_hours=0.0)
+    for entry in time_entries:
+        if entry.end_time is None:
+            continue
+        delta: timedelta = entry.end_time - entry.start_time
+        hours_report.total_worked_hours += delta.seconds / 3600
+
+    if hours_report.total_worked_hours > hours_report.month_contracted_hours:
+        hours_report.overtime_hours = (hours_report.total_worked_hours
+            - hours_report.month_contracted_hours)
+
+    # Create a PDF
+    pdf = PDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    _ = pdf.cell(0, 10, f"Consultant ID: {consultant_id}", 0, 1)
+    _ = pdf.cell(0, 10, f"Month: {time_frame.strftime('%B %Y')}", 0, 1)
+    _ = pdf.cell(0, 10, f"Total Worked Hours: {hours_report.total_worked_hours}", 0, 1)
+    _ = pdf.cell(0, 10, f"Contracted Hours: {hours_report.month_contracted_hours}", 0, 1)
+    _ = pdf.cell(0, 10, f"Overtime Hours: {hours_report.overtime_hours}", 0, 1)
+
+    byte_string = bytes(pdf.output())
+    return Response(
+        content=byte_string,
+        media_type='application/pdf',
+    )
