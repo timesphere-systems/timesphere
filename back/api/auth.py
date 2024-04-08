@@ -15,6 +15,10 @@ import jwt
 from .dependencies import get_settings, get_jwk_client, get_connection_pool
 from .user.models import User as UserModel
 
+CONSULTANT_USER_ROLE = 1
+MANAGER_USER_ROLE = 2
+FINANCE_USER_ROLE = 3
+ADMIN_USER_ROLE = 4
 
 class User:
     """Model for a user and their details.
