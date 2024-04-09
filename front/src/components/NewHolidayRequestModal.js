@@ -76,8 +76,11 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
 
     let handleSubmit = async () => {
         try {
+            // Get current timestamp
+            const submittedTime = new Date().toISOString();
+
             // HTTP POST request to backend API
-            let url = `api/consultant/${consultantId}/holiday`;     // create holiday request
+            const url = `api/consultant/${consultantId}/holiday`;     // create holiday request
 
             const response = await fetch (url, {
                 method: 'POST',
@@ -86,15 +89,21 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
                     'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
+                    "submitted": submittedTime,
                     "start_date": dateFrom,
                     "end_date": dateTo,
+                    "approval_status": 2,
+
                 }),
             });
                 
             if (!response.ok) {
-                console.error('Failed to add new holiday with dates:', dateFrom, dateTo );
+                console.error('Failed to add new holiday with dates:', dateFrom);
             } else {
                 console.log('Holiday added successfully. consultant ID:', consultantId);
+
+                setDateFrom('');
+                setDateTo('');
             }
             
         } catch (error) {
@@ -104,7 +113,7 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
 
     return (
         <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => setOverlayVisible(false)} title={'Holiday Request Form'}>
-            <HOLIDAY_FORM>
+            <HOLIDAY_FORM onSubmit={handleSubmit}>
                 <DIVIDER />
                 <HOLIDAY_CONTAINER>
                     <INPUT_CONTAINER>
@@ -118,7 +127,7 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
                         </DATE_CONTAINER>
                     </INPUT_CONTAINER>
                     <SUBMIT_BUTTON type="submit">
-                        <SubmitButton clickable={isClickable} onClick={handleSubmit} width={"145px"} height={"50px"} />
+                        <SubmitButton clickable={isClickable} width={"145px"} height={"50px"} />
                     </SUBMIT_BUTTON>
                 </HOLIDAY_CONTAINER>
             </HOLIDAY_FORM>
