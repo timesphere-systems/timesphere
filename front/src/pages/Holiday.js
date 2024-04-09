@@ -102,7 +102,7 @@ const Holiday = () => {
             <FOOTER_WRAPPER>
                 <Footer />
             </FOOTER_WRAPPER>
-            <NewHolidayRequestModal overlayVisible={visible} setOverlayVisible={setVisible} />
+            <NewHolidayRequestModal token={JWTtoken} consultantId={consultantId} overlayVisible={visible} setOverlayVisible={setVisible} />
         </div>
     )
 }
