@@ -299,28 +299,32 @@ def update_time_entry(time_entry_id: int, request: models.UpdateTimeEntry,
             status_code=status.HTTP_403_FORBIDDEN,
             content={"message": "You do not have permission to edit this time entry"}
         )
-    sql_clauses: list[str] = []
+    sql_clauses: list[sql.SQL] = []
     query_params: list[str] = []
     if request.start_time is not None:
-        sql_clauses.append("start_time = %s")
+        sql_clauses.append(sql.SQL("start_time = %s"))
         query_params.append(request.start_time.strftime('%Y-%m-%d %H:%M:%S'))
     if request.end_time is not None:
-        sql_clauses.append("end_time = %s")
+        sql_clauses.append(sql.SQL("end_time = %s"))
         query_params.append(request.end_time.strftime('%Y-%m-%d %H:%M:%S'))
     if request.entry_type:
-        sql_clauses.append("entry_type = (SELECT id FROM time_entry_type WHERE entry_type = %s)")
+        sql_clauses.append(
+            sql.SQL("entry_type = (SELECT id FROM time_entry_type WHERE entry_type = %s)")
+        )
         query_params.append(request.entry_type.value)
     if not sql_clauses:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"message": "No details provided to update time entry"}
             )
-    sql_query = f"""UPDATE time_entries SET {(", ".join(sql_clauses))} WHERE id = %s"""
+    sql_query = sql.SQL("UPDATE time_entries SET {} WHERE id = %s").format(
+        sql.SQL(", ").join(sql_clauses)
+    )
     query_params.append(str(time_entry_id))
     with pool.connection() as connection:
         with connection.cursor() as cursor:
             try:
-                _ = cursor.execute(cast(sql.SQL, sql_query),  tuple(query_params))
+                _ = cursor.execute(sql_query,  tuple(query_params))
                 # Check number of modified rows to ensure a valid ID was provided
                 if cursor.rowcount == 1:
                     return JSONResponse(
