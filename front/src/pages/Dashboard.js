@@ -56,13 +56,7 @@ const Dashboard = () => {
     //function to get Authorization Token
     let getToken = async () => {
         if (isAuthenticated) {
-            let token = await getAccessTokenSilently(
-                {authorizationParams: {        
-                    audience: "https://timesphere.systems/api",
-                    redirect_uri: "http://localhost:3000",
-                    scope: "timesphere:admin"
-                }});
-            console.log(token);
+            let token = localStorage.getItem("token");
             setJWTtoken(token);
         }
     }
@@ -177,7 +171,7 @@ const Dashboard = () => {
         getCurrentWeekTimesheet();
       }
     }
-  }, [getAccessTokenSilently, isAuthenticated, JWTtoken, consultantID, currentTimesheet])
+  }, [isAuthenticated, JWTtoken, consultantID, currentTimesheet])
   // Function which toggles the edit mode - passed to EditToggleButton component
   let toggleEditMode = () => {
     setEditable(!editable);
