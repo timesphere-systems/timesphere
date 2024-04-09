@@ -113,15 +113,15 @@ const SUBMIT_BUTTON = styled.div`
 
 
 const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) => {
-    const [holidayIDs, setHolidayIDs] = useState([]);
     const [listHolidayData, setListHolidayData] = useState([{}]);
     const [selectedHoliday, setSelectedHoliday] = useState(null);
-
     const [overlayVisible, setOverlayVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [editedEntries, setEditedEntries] = useState([]);
-    const isRowEditable = selectedHoliday?.approval_status === 'DENIED';
     const [entries, setEntries] = useState([]);
+    const [newStartDate, setNewStartDate] = useState('');
+    const [newEndDate, setNewEndDate] = useState('');
+
+    const isRowEditable = selectedHoliday?.approval_status === 'DENIED';
 
 
     let toggleEditMode = () => {
@@ -136,28 +136,33 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
     };
 
     
-    let handleSubmitEdits = async (holiday_id, start_date, end_date) => {
-         
-        const response = await fetch(`api/holiday/${holiday_id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                start_date: start_date,
-                end_date: end_date,
-            }),
-        });
-        
-        if (!response.ok) {
-            console.error('Failed to update holiday with ID:', holiday_id);
-        } else {
-            console.log('Holiday updated successfully. ID:', holiday_id);
-        }
+    let handleSubmitEdits = async () => {
+        try {
+            const response = await fetch(`api/holiday/${selectedHoliday.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    "start_date": newStartDate,
+                    "end_date": newEndDate,
+                    "approval_status": 2,
+                }),
+            });
+            
+            if (!response.ok) {
+                console.error('Failed to update holiday with ID:', selectedHoliday.id);
+            } else {
+                console.log('Holiday updated successfully. ID:', selectedHoliday.id);
+            }
 
-        setOverlayVisible(false);
-        setIsEditing(false);
+            setOverlayVisible(false);
+            setIsEditing(false);
+
+        } catch (error) {
+            console.error('Error updating holiday:', error);
+        }
     };
     
 
@@ -255,17 +260,8 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
 
     }, [consultantId, token, approval_status]);
 
-    const Entry = ({ holidayEntry, isEditable, onEdit}) => {
-        let handleStartDateChange = (e) => {
-            const newStartDate = e.target.value;
-            onEdit();
-        };
 
-        let handleEndDateChange = (e) => {
-            const newEndDate =  e.target.value;
-            onEdit();
-        };
-
+    const Entry = ({holidayEntry}) => {
         return (
             <TABLE>
                 <HEADERS>
@@ -276,20 +272,8 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                 </HEADERS>
                 <TBODY>
                     <TR>
-                        <TD> 
-                            {isEditable ? (
-                                <input type="date" value={holidayEntry.start_date} onChange={handleStartDateChange} />
-                            ) : (
-                                new Date(holidayEntry.start_date).toLocaleDateString()
-                            )}
-                        </TD>
-                        <TD>
-                            {isEditable ? (
-                                <input type="date" value={holidayEntry.end_date} onChange={handleEndDateChange} />
-                            ) : (
-                                new Date(holidayEntry.end_date).toLocaleDateString()
-                            )}
-                        </TD>
+                        <TD> {new Date(holidayEntry.start_date).toLocaleDateString()} </TD>
+                        <TD> {new Date(holidayEntry.end_date).toLocaleDateString()} </TD> 
                     </TR>
                 </TBODY>
             </TABLE>
@@ -321,9 +305,15 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                                     <TD>{new Date(holiday.submitted).toLocaleDateString()}</TD>
                                     <TD><SetStatusButton status={holiday.approval_status} isActive={false} /></TD>
                                     <TD>
-                                        <EDIT editable={isRowEditable} onClick={() => {toggleEditMode(); handleHolidaySelect(holiday)}}>
-                                            {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
-                                        </EDIT>
+                                        {holiday.approval_status === 'DENIED' ? (
+                                            <EDIT editable={true} onClick={() => handleHolidaySelect(holiday)}>
+                                                <img src={EditIcon} alt="Edit" />
+                                            </EDIT>
+                                        ) : (
+                                            <EDIT editable={false}>
+                                                <img src={unEditIcon} alt="Not Editable" />
+                                            </EDIT>
+                                        )}
                                     </TD>
                                 </TR>
                             );
@@ -334,21 +324,39 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
             <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => setOverlayVisible(false)} title={'Holiday Request'}>
                 <OVERLAY_CONTAINER>
                     {selectedHoliday && (
-                        <Entry
-                        holidayEntry={selectedHoliday}
-                        isEditable={isEditing && isRowEditable}
-                        onEdit={handleEntryEdit}
-                        /> 
+                        <>
+                            {selectedHoliday.approval_status === 'DENIED' ? (
+                                <div>
+                                    <input type='date' value={newStartDate} onChange={(e) => setNewStartDate(e.target.value)} />
+                                    <input type='date' value={newEndDate} onChange={(e) => setNewEndDate(e.target.value)} />
+                                    <SUBMIT_BUTTON>
+                                        <SubmitButton 
+                                            onClick={handleSubmitEdits} 
+                                            width={"145px"} height={"50px"} 
+                                            clickable={true} 
+                                        />
+                                    </SUBMIT_BUTTON>
+                                </div>
+                            ) : (
+                                <TABLE>
+                                    <HEADERS>
+                                        <TR>
+                                            <TH>Date From</TH>
+                                            <TH>Date To</TH>
+                                        </TR>
+                                    </HEADERS>
+                                    <TBODY>
+                                        <TR>
+                                            <TD>{new Date(selectedHoliday.start_date).toLocaleDateString()}</TD>
+                                            <TD>{new Date(selectedHoliday.end_date).toLocaleDateString()}</TD> 
+                                        </TR>
+                                    </TBODY>
+                                </TABLE>
+                            )}
+
+                        </>
                     )}
-                    {isEditing && (
-                        <SUBMIT_BUTTON>
-                            <SubmitButton 
-                            onClick={() => handleSubmitEdits(selectedHoliday.id, selectedHoliday.start_date, selectedHoliday.end_date)} 
-                            width={"145px"} height={"50px"} 
-                            clickable={true} 
-                            />
-                        </SUBMIT_BUTTON>
-                    )}
+                    
                 </OVERLAY_CONTAINER>
             </ModalWrapper>
         </WRAPPER>
