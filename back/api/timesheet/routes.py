@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg import sql
 from psycopg.rows import class_row
-from psycopg.errors import ForeignKeyViolation, CheckViolation, RaiseException
+from psycopg.errors import ForeignKeyViolation, CheckViolation
 from ..dependencies import get_connection_pool
 from ..common import submit, update_status
 from . import models
@@ -175,13 +175,6 @@ def toggle_time_entry(timesheet_id: int, time: datetime,
                     status_code=status.HTTP_400_BAD_REQUEST,
                     content={"message": "Invalid end time value"}
                 )
-            except RaiseException:
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"message":
-                             "Failed to update time entry, " \
-                            + "there is already an open time entry for this timesheet"}
-                )
         # Create new time entry
         _ = connection.execute(
             """INSERT INTO time_entries (start_time, timesheet, entry_type)
@@ -271,13 +264,6 @@ def create_time_entry(request: models.CreateTimeEntry,
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"message": "Failed to create time entry, invalid start and end times"}
             )
-        except RaiseException:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"message":
-                            "Failed to update time entry, " \
-                        + "there is already an open time entry for this timesheet"}
-            )
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
             content={"id": time_entry_id}
@@ -331,13 +317,6 @@ def update_time_entry(time_entry_id: int, request: models.UpdateTimeEntry,
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     content={"message": "Invalid start or end time values"}
-                )
-            except RaiseException:
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"message":
-                                "Failed to update time entry, " \
-                            + "there is already an open time entry for this timesheet"}
                 )
     # If the success condition is not met, an invalid ID was provided
     return JSONResponse(
