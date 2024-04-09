@@ -52,7 +52,7 @@ def get_user_details(current_user: Annotated[User, Security(get_current_user)]
                      ) -> JSONResponse:
     """Get the details of a user.
 
-    Requires user to be authenticated (and have there own user entry in the database)
+    Requires user to be authenticated (and have their own user entry in the database)
 
     Args:
         pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
