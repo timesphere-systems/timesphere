@@ -127,7 +127,7 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
                         </DATE_CONTAINER>
                     </INPUT_CONTAINER>
                     <SUBMIT_BUTTON type="submit">
-                        <SubmitButton clickable={isClickable} width={"145px"} height={"50px"} />
+                        <SubmitButton clickable={isClickable} onClick={handleSubmit} width={"145px"} height={"50px"} />
                     </SUBMIT_BUTTON>
                 </HOLIDAY_CONTAINER>
             </HOLIDAY_FORM>
