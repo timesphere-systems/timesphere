@@ -139,12 +139,75 @@ const OVERLAY_TEXT = styled.p`
     font-weight: 600;
 `
 
-const DashboardTable = ({ editable, submittable }) => {
+const DashboardTable = ({ editable, submittable, token, currentTimeEntries}) => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
 
     useEffect(() => {
         // code here 
     }, [submittable]);
+
+    //Use Effect for getting (or creating current week timesheet)
+    useEffect(() => {
+        let setTableRowHours = (clockIn, clockOut, tableDates, index) => {
+            //set hours for each row of the table
+            if (clockIn && clockOut) {
+                const hoursWorked = calculateHours(tableDates[index].clockIn, tableDates[index].clockOut);
+                tableDates[index].hours = hoursWorked;
+            }
+            else if(tableDates[index].clockIn || tableDates[index].clockOut){
+                let hoursWorked = 0;
+                if(tableDates[index].clockIn){
+                    hoursWorked = calculateHours(tableDates[index].clockIn, "24:00");
+                }
+                else{
+                    hoursWorked = calculateHours("00:00", tableDates[index].clockOut);
+                }
+                tableDates[index].hours = hoursWorked;
+            }
+            return;
+        }
+
+        let setTimeEntriesTable = () => {
+            let tableDates = weekDates;
+            for(const timeEntry of currentTimeEntries){
+                let clockInTime = new Date(timeEntry.start_time);
+                let clockOutTime = new Date(timeEntry.end_time);
+                let clockInString = clockInTime.toTimeString().split(' ')[0];
+                let clockOutString = clockOutTime.toTimeString().split(' ')[0];
+                let openTimeEntryInterval = false;
+                for(let index = 0; index < tableDates.length; index++){
+                    let dayDate = new Date(tableDates[index].date);
+                    if (dayDate.getDate() === clockInTime.getDate()){
+                        tableDates[index].clockIn = clockInString;
+                        openTimeEntryInterval = true;
+                        if(timeEntry.end_time === null){
+                            //make sure open time entries hours are zero
+                            tableDates[index].status = timeEntry.entry_type;
+                            tableDates[index].hours = 0;
+                            index = tableDates.length;
+                            continue;
+                        }
+                    }
+                    if(openTimeEntryInterval){
+                        tableDates[index].status = timeEntry.entry_type;
+                    }
+                    if (dayDate.getDate() === clockOutTime.getDate()){
+                        tableDates[index].clockOut = clockOutString;
+                        openTimeEntryInterval = false;
+                    }
+                    setTableRowHours(tableDates[index].clockIn, tableDates[index].clockOut, tableDates, index);
+                    //case for adding 24 hours to days inbetween clock in and out
+                    if(openTimeEntryInterval){
+                        tableDates[index].hours = 24;
+                    }
+                }
+            }
+            setWeekDates([...tableDates]);
+        }
+    if(token !== undefined && currentTimeEntries !== undefined){
+            setTimeEntriesTable();
+    }
+    }, [token, currentTimeEntries]);
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
@@ -154,7 +217,7 @@ const DashboardTable = ({ editable, submittable }) => {
         const weekDates = [...Array(5)].map((_, index) => {
             const date = new Date(monday);
             date.setDate(date.getDate() + index);
-            return { date, status: 'Working', clockIn: '', clockOut:'', hours: 0};
+            return { date, status: 'WORK', clockIn: '', clockOut:'', hours: 0};
         });
         return weekDates;
     };
@@ -182,7 +245,18 @@ const DashboardTable = ({ editable, submittable }) => {
             if (clockIn && clockOut) {
                 const hoursWorked = calculateHours(clockIn, clockOut);
                 newWeekDates[index].hours = hoursWorked;
-            } else {
+            }
+            else if(clockIn || clockOut){
+                let hoursWorked = 0;
+                if(clockIn){
+                    hoursWorked = calculateHours(clockIn, "24:00");
+                }
+                else{
+                    hoursWorked = calculateHours("00:00", clockOut);
+                }
+                newWeekDates[index].hours = hoursWorked;
+            }
+            else {
                 newWeekDates[index].hours = 0;
             }
         }
@@ -235,9 +309,9 @@ const DashboardTable = ({ editable, submittable }) => {
                                     <TD>{row.date.toLocaleDateString()}</TD>
                                     <TD>
                                         <STATUS value={row.status} onChange={(e) => handleStatusChange(index, e.target.value)} disabled={!editable}>
-                                            <option value="Working">Working</option>
-                                            <option value="Sick">Sick</option>
-                                            <option value="Holiday">Holiday</option>
+                                            <option value="WORK">Working</option>
+                                            <option value="SICK">Sick</option>
+                                            <option value="HOLIDAY">Holiday</option>
                                         </STATUS>
                                     </TD>
                                     <TD>
@@ -257,12 +331,12 @@ const DashboardTable = ({ editable, submittable }) => {
                                         />
                                     </TD>
                                     <TD>{row.hours}</TD>
-                                    {!editable && row.status === "Holiday" && (
+                                    {!editable && row.status === "HOLIDAY" && (
                                         <OVERLAY topPos={["71px", "143px", "215px", "287px", "359px"][index]}>
                                             <OVERLAY_TEXT>Holiday</OVERLAY_TEXT>
                                         </OVERLAY>
                                     )}
-                                    {!editable && row.status === "Sick" && (
+                                    {!editable && row.status === "SICK" && (
                                         <OVERLAY topPos={["71px", "143px", "215px", "287px", "359px"][index]}>
                                             <OVERLAY_TEXT>Sick</OVERLAY_TEXT>
                                         </OVERLAY>

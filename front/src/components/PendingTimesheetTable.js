@@ -6,12 +6,15 @@ import ModalWrapper from './ModalWrapper';
 import SetStatusButton from "./SetStatusButton";
 
 const BIGTABLE = styled.div`
+    width: 100%;
     display: flex;
-    width: 1237px;
-    height: 701px;
+    flex-wrap: wrap;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-    flex-shrink: 0;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: 16px;
 `
 
 const TITLEROW = styled.div`
@@ -235,10 +238,11 @@ const OVERLAY_CONTAINER = styled.div`
 `;
 
 const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
-    const [timesheetData, setTimesheetData] = useState([]);
+    const [timesheets, setTimesheets] = useState();
+    const [timesheetData, setTimesheetData] = useState();
+    const [peopleData, setPeopleData] = useState();
     const [overlayVisible, setOverlayVisible] = useState(false);
-    const [userdetails, setUserDetails] = useState(null);
-    const [userID, setUserID] = useState(1);
+    const [userID, setUserID] = useState(userIDInp);
 
     useEffect(() => {
         
@@ -259,74 +263,87 @@ const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
 
                 const data = await response.json();
                 console.log(data);
-                setTimesheetData(data);
+                setTimesheets(data);
             } catch(error){
                 console.error('Error fetching timesheets:', error);
             }
         }
-        if (Jtoken!==undefined && userID!==undefined){
+
+        const fetchTimesheetData = async () => {
+            let timeID = timesheets;
+            let timesheetDatas = [];
+            for (const ID of timeID){
+                try {
+                    const response = await fetch(`api/timesheets/${ID}`, {
+                        'method': 'GET',
+                        'headers':{
+                            'Accept': 'application/json',
+                            'Authorization' : `Bearer ${Jtoken}`
+                        },
+                    });
+        
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch timesheet data');
+                    }
+        
+                    const data = await response.json();
+                    timesheetDatas.push(data);
+                } catch (error) {
+                    console.error('Error fetching timesheet data:', error);
+                }
+            }
+            setTimesheetData(timesheetDatas);
+        };
+    
+        const fetchConsData = async () => {
+            let peepIDS = timesheets;
+            let peopleEntries = [];
+            for (const ID of peepIDS){
+                try{
+                    let usID = timesheetData[ID].consultant_id;
+                    const response = await fetch(`api/consultant/${usID}`, {
+                        'method': 'GET',
+                        'headers':{
+                            'Accept': 'application/json',
+                            'Authorization' : `Bearer ${Jtoken}`
+                        },
+                    });
+        
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch consultant data');
+                    }
+        
+                    let data = await response.json();
+                    peopleEntries.push(data);
+                } catch (error) {
+                    console.error('Error fetching consultant data:', error);
+                }
+            }
+            setPeopleData(peopleEntries)
+        };
+
+        console.log(Jtoken);
+        console.log(userID);
+        console.log(timesheets);
+        if (timesheetData===undefined){
+            console.log("fetched");
             fetchTimesheets();
         }
-    }, [userID, Jtoken]);
-
-    const fetchTimesheetData = async (timesheet_id) => {
-        try {
-            const response = await fetch(`api/timesheets/${timesheet_id}`, {
-                'method': 'GET',
-                'headers':{
-                    'Accept': 'application/json',
-                    'Authorization' : `Bearer ${Jtoken}`
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch timesheet data');
-            }
-
-            const data = await response.json();
-            console.log(data);
-            return data;
-        } catch (error) {
-            console.error('Error fetching timesheet data:', error);
+        if (timesheetData===undefined){
+            fetchTimesheetData();
         }
-    };
-
-    const fetchConsData = async (consultant_id) => {
-        try{
-            const response = await fetch(`api/consultant/${consultant_id}`, {
-                'method': 'GET',
-                'headers':{
-                    'Accept': 'application/json',
-                    'Authorization' : `Bearer ${Jtoken}`
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch consultant data');
-            }
-
-            const data = await response.json();
-            console.log(data);
-            return data;
-        } catch (error) {
-            console.error('Error fetching consultant data:', error);
+        if (peopleData===undefined){
+            fetchConsData();
         }
-    };
-
-    const getTimesheetData = async (timesheetID) => {
-        console.log("getting timesheet data");
-        return (fetchTimesheetData(timesheetID));
-    };
-
-    const getPeopleData = async (personID) => {
-        console.log("getting person data");
-        return (fetchConsData(personID));
-    };
+    }, [userID, Jtoken, timesheets, setTimesheets, timesheetData, setTimesheetData, peopleData, setPeopleData]);
 
     const toggleOverlay = () => {
         setOverlayVisible(!overlayVisible);
     };
     
+    const approve = () => {
+        
+    };
 
     return (
         <WRAPPER>
@@ -349,7 +366,7 @@ const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
                             <TITLETEXT>Approve / Deny</TITLETEXT>
                         </STATUSBOX>
                     </TITLEROW>
-
+                    console.log(timesheetData);
                     {timesheetData.map((request) => {
                         return (
                             <NORMROW key={request}> 
@@ -360,13 +377,13 @@ const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
                                 </FILEBOX>
                                 <PEOPLEBOX>
                                     <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>  
-                                    <PEOPLETEXT>{(getPeopleData((getTimesheetData(request)).consultant_id).firstName).concat(" ", (getPeopleData((getTimesheetData(request)).consultant_id).lastName))}</PEOPLETEXT>
+                                    <PEOPLETEXT>{(peopleData[request.id].first_name).concat(" ", (peopleData[request.id].last_name))}</PEOPLETEXT>
                                 </PEOPLEBOX>
                                 <DATEBOX>
-                                    <DATETEXT>{new Date((getTimesheetData(request).created).toLocaleDateString())}</DATETEXT>
+                                    <DATETEXT>{new Date((request.created).toLocaleDateString())}</DATETEXT>
                                 </DATEBOX>
                                 <DATEBOX>
-                                    <DATETEXT>{new Date((getTimesheetData(request).submitted).toLocaleDateString())}</DATETEXT>
+                                    <DATETEXT>{new Date((request.submitted).toLocaleDateString())}</DATETEXT>
                                 </DATEBOX>
                                 <BUTTONBOX>
                                     <SetStatusButton status='Approved' isActive={true} />

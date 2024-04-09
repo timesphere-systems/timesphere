@@ -54,22 +54,16 @@ const Dashboard = () => {
   const [JWTtoken, setJWTtoken] = useState();
   const [consultantID, setConsultantID] = useState();
   const [currentTimesheet, setCurrentTimesheet] = useState();
-  const[currentTimeEntries, setCurrentTimeEntries] = useState();
-  const[userID, setUserID] = useState();
-  const [timeEntries, setTimeEntries] = useState([]);       // Store clock in and out time for backend
-  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-  const [userID, setUserID] = useState();
-  const [JWTtoken, setToken] = useState();
+  const [currentTimeEntries, setCurrentTimeEntries] = useState();
+  const [userID, setUserId] = useState();
   React.useEffect(() => {
     //function to get Authorization Token
     let getToken = async () => {
         if (isAuthenticated) {
             let token = localStorage.getItem("token");
-            console.log(token);
             setJWTtoken(token);
         }
-    }
-    //function to get consultantID from JWT
+    }//function to get userID from JWT
     let getUserID = async () => {
       try {
         const response = await fetch('api/user', {
@@ -89,32 +83,7 @@ const Dashboard = () => {
           console.error("Current User is not a consultant");
           return
         }
-        setUserID(user_details.user_id);
-      } catch (error) {
-        console.error("Error fetching user details: ", error);
-      }
-    }
-    //function to get consultantID from JWT
-    let getConsultantID = async () => {
-      try {
-        const response = await fetch('api/user', {
-          'method': 'GET',
-          'headers': {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${JWTtoken}`
-          },
-        });
-        if(!response.ok){
-          console.error("Failed to get user details");
-          return
-        }
-        let user_details = await response.json()
-        if(user_details.consultant_id === undefined)
-        {
-          console.error("Current User is not a consultant");
-          return
-        }
-        setConsultantID(user_details.consultant_id);
+        setUserId(user_details.user_id);
       } catch (error) {
         console.error("Error fetching user details: ", error);
       }
@@ -221,14 +190,10 @@ const Dashboard = () => {
     if(JWTtoken === undefined){
       getToken();
     }
-    else if(consultantID === undefined){
-      getConsultantID();
-    }
-    if(userID === undefined){
+    else if(userID === undefined){
       getUserID();
-      console.log(userID);
-      console.log("AAAAA");
     }
+
     else{
       if(currentTimesheet === undefined){
         getCurrentWeekTimesheet();
@@ -237,7 +202,7 @@ const Dashboard = () => {
         fetchTimeEntryDetails();
       }
     }
-  }, [isAuthenticated, JWTtoken, consultantID, currentTimesheet, currentTimeEntries, userID])
+  }, [isAuthenticated, JWTtoken, consultantID, currentTimesheet, currentTimeEntries])
   // Function which toggles the edit mode - passed to EditToggleButton component
   let toggleEditMode = () => {
     setEditable(!editable);
@@ -266,12 +231,7 @@ const Dashboard = () => {
     };
     try {
       const response = await fetch('http://localhost:8080/timesheet/entry', {
-      const response = await fetch('http://localhost:8080/timesheet/entry', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          },
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -333,11 +293,12 @@ const Dashboard = () => {
         </TOGGLE_WRAPPER>
       </TABLE_WRAPPER>
       <TABLE_WRAPPER>
-        <PendingTimesheetTable userIDInp={userID} token={JWTtoken} />
+        <PendingTimesheetTable userIDInp={userID} Jtoken={JWTtoken} />
       </TABLE_WRAPPER>
       <TABLE_WRAPPER>
-        <PendingHolidayRequestsTable userIDInp={userID} token={JWTtoken} />
+        <PendingHolidayRequestsTable userIDInp={userID} Jtoken={JWTtoken} />
       </TABLE_WRAPPER>
+
       <FOOTER_WRAPPER>
         <Footer />
       </FOOTER_WRAPPER>
