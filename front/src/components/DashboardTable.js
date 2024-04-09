@@ -280,7 +280,7 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
     };
 
     // Function to calculate hours worked based on clock in/out times
-    let calculateHours = (clockIn, clockOut, days) => {
+    let calculateHours = (clockIn, clockOut) => {
         const [hoursIn, minutesIn] = clockIn.split(':').map(Number);
         const [hoursOut, minutesOut] = clockOut.split(':').map(Number);
         let hours = hoursOut - hoursIn;
