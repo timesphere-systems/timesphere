@@ -194,7 +194,7 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
 
         let setTimeEntriesTable = () => {
             let tableDates = weekDates;
-            for(const timeEntry of currentTimeEntries.reverse()){
+            for(const timeEntry of currentTimeEntries){
                 let clockInTime = new Date(timeEntry.start_time);
                 let clockOutTime = new Date(timeEntry.end_time);
                 let clockInString = clockInTime.toTimeString().split(' ')[0];
@@ -221,6 +221,10 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
                         openTimeEntryInterval = false;
                     }
                     setTableRowHours(tableDates[index].clockIn, tableDates[index].clockOut, tableDates, index);
+                    //case for adding 24 hours to days inbetween clock in and out
+                    if(openTimeEntryInterval){
+                        tableDates[index].hours = 24;
+                    }
                 }
             }
             setWeekDates([...tableDates]);
