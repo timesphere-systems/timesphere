@@ -282,7 +282,6 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                     <TR>
                         <TD> {new Date(holidayEntry.start_date).toLocaleDateString()} </TD>
                         <TD> {new Date(holidayEntry.end_date).toLocaleDateString()} </TD> 
-
                     </TR>
                 </TBODY>
             </TABLE>
@@ -324,8 +323,6 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                                                 <img src={unEditIcon} alt="Not Editable" />
                                             </EDIT>
                                         )}
-
-
                                     </TD>
                                 </TR>
                             );
@@ -369,6 +366,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
 
                         </>
                     )}
+                    
                 </OVERLAY_CONTAINER>
             </ModalWrapper>
         </WRAPPER>
