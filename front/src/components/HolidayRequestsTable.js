@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
-import { useState } from 'react'
 import EditIcon from '../assets/icons/Edit.svg';
 import unEditIcon from '../assets/icons/unEdit.svg';
 import Timesheet from '../assets/icons/Timesheet.svg';
 import ModalWrapper from './ModalWrapper';
 import SetStatusButton from './SetStatusButton';
+import SubmitButton from './SubmitButton';
 
 const WRAPPER = styled.div`
     width: 90%;
@@ -94,64 +94,130 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-// test data for styling
-const fetchedTestData = [
-    {
-        id: 1,
-        dateSubmitted: new Date('2023-03-05'),
-        status: 'Approved',
-    },
-    {
-        id: 2,
-        dateSubmitted: new Date('2023-03-12'),
-        status: 'Denied',
-    },
-    {
-        id: 3,
-        dateSubmitted: new Date('2023-03-20'),
-        status: 'Waiting',
-    },
-    {
-        id: 4,
-        dateSubmitted: new Date('2023-03-22'),
-        status: 'Approved',
-    },
-    {
-        id: 5,
-        dateSubmitted: new Date('2023-03-22'),
-        status: 'Waiting',
-    },
-];
+const SUBMIT_BUTTON = styled.div`
+    padding: 0;
+    background-color: transparent;
 
-// function which uses the SetStatusButton component
-let SetStatus = (status) => {
-    switch (status) {
-        case 'Approved':
-            return <SetStatusButton status='Approved' isActive='false' />;
-        case 'Denied':
-            return <SetStatusButton status='Denied' isActive='false' />;
-        case 'Waiting':
-            return <SetStatusButton status='Waiting' isActive='false' />
-        default:
-            return <SetStatusButton status='Waiting' isActive='false' />;
+    button {
+        font-size: 18px;
+        border-radius: 9px;
+
+        img {
+            width: 20px;
+        }
+    
     }
 
-};
+`;
 
-const HolidayRequestsTable = ({ token, consultantId }) => {
+
+
+const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) => {
     const [holidayIDs, setHolidayIDs] = useState([]);
-    const [listHolidayData, setListHolidayData] = useState([]);
-    const [overlayVisible, setOverlayVisible] = useState(false);
+    const [listHolidayData, setListHolidayData] = useState([{}]);
     const [selectedHoliday, setSelectedHoliday] = useState(null);
 
+    const [overlayVisible, setOverlayVisible] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedEntries, setEditedEntries] = useState([]);
+    const isRowEditable = selectedHoliday?.approval_status === 'DENIED';
+    const [entries, setEntries] = useState([]);
+
+
+    let toggleEditMode = () => {
+        setIsEditing(!isEditing);
+    };
+
+
+    let handleEntryEdit = (index, updatedEntry) => {
+        const updatedEntries = [...entries];
+        updatedEntries[index] = updatedEntry;
+        setEntries(updatedEntries);
+    };
+
+    
+    let handleSubmitEdits = async (holiday_id, start_date, end_date) => {
+         
+        const response = await fetch(`API/holiday/${holiday_id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                start_date: start_date,
+                end_date: end_date,
+            }),
+        });
+        
+        if (!response.ok) {
+            console.error('Failed to update holiday with ID:', holiday_id);
+        } else {
+            console.log('Holiday updated successfully. ID:', holiday_id);
+        }
+
+        setOverlayVisible(false);
+        setIsEditing(false);
+    };
+    
+
+    let handleHolidaySelect = (holiday) => {
+        setSelectedHoliday(holiday);
+        setOverlayVisible(true);
+    };
+
+
+    let fetchHolidayData = async (holiday_id) => {
+        try {
+            const response = await fetch(`api/holiday/${holiday_id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch holiday data');
+            }
+
+            let data = await response.json();
+            return data;
+
+        } catch (error) {
+            console.error('Error fetching holiday data:', error);
+        }
+    };
+
+
+    let getSortedHolidays = () => {
+        let holidaysArray = Object.values(listHolidayData);
+
+        if (sort === 'Oldest') {
+            return holidaysArray.sort((a,b) => new Date(a.submitted) - new Date(b.submitted));
+        }
+        else if (sort === 'Latest') {
+            return holidaysArray.sort((a,b) => new Date(b.submitted) - new Date(a.submitted));
+        }
+
+        return holidaysArray;
+    };
+
+
     useEffect(() => {
-        const fetchHolidays = async () => {
+        const fetchConsultantHolidays = async () => {
             try {
-                const response = await fetch(`api/consultant/${consultantId}/holidays`, {
+                let url = `api/consultant/${consultantId}/holidays`;
+
+                if (approval_status && approval_status !== 'Select Status') {
+                    url += `?approval_status=${approval_status}`;
+                }
+
+                const response = await fetch(url, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
 
@@ -159,21 +225,29 @@ const HolidayRequestsTable = ({ token, consultantId }) => {
                     throw new Error('Failed to fetch consultant holidays');
                 }
 
-                const data = await response.json();
-                console.log(data);
+                let responseData = await response.json();
+                let holidayIDs = responseData.holidays;
+                console.log(holidayIDs);
 
-                const holidayDataPromises = data.holidays.map(holiday_id => fetchHolidayData(holiday_id));
-                const resolvedHolidayData = await Promise.all(holidayDataPromises);
-                console.log(resolvedHolidayData);
-                //setHolidayIDs(data.holidays);
-                setHolidayIDs(resolvedHolidayData)
+                const holidayDataPromises = holidayIDs.map(async holiday_id => {
+                    const holidayData = await fetchHolidayData(holiday_id);        // function call to fetch data from holidays table
+                    holidayData.start_date = new Date(holidayData.start_date);
+                    holidayData.end_date = new Date(holidayData.end_date);
+                    return holidayData;
+                });
+
+                const resolvedHolidayDataArray = await Promise.all(holidayDataPromises);
+                setListHolidayData(resolvedHolidayDataArray);
 
             } catch (error) {
                 console.error('Error fetching consultant holidays:', error);
             }
         };
 
-        fetchHolidays();
+        fetchConsultantHolidays();
+
+        /*
+        fetchConsultantHolidays();
         let holidays = []
         if(holidayIDs.length !==0){
             holidayIDs.forEach(ID => {
@@ -182,37 +256,52 @@ const HolidayRequestsTable = ({ token, consultantId }) => {
         }
         setListHolidayData(holidays);
         console.log(listHolidayData);
+        */
 
-    }, [consultantId, token, holidayIDs]);
+    }, [consultantId, token, approval_status]);
 
-    const fetchHolidayData = async (holiday_id) => {
-        try {
-            const response = await fetch(`api/consultant/holiday/${holiday_id}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+    const Entry = ({ holidayEntry, isEditable, onEdit}) => {
+        let handleStartDateChange = (e) => {
+            const newStartDate = e.target.value;
+            onEdit();
+        };
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch Holiday data');
-            }
+        let handleEndDateChange = (e) => {
+            const newEndDate =  e.target.value;
+            onEdit();
+        };
 
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error fetching holiday data:', error);
-        }
+        return (
+            <TABLE>
+                <HEADERS>
+                <TR>
+                    <TH>Date From</TH>
+                    <TH>Date To</TH>
+                </TR>
+                </HEADERS>
+                <TBODY>
+                    <TR>
+                        <TD> 
+                            {isEditable ? (
+                                <input type="date" value={holidayEntry.start_date} onChange={handleStartDateChange} />
+                            ) : (
+                                new Date(holidayEntry.start_date).toLocaleDateString()
+                            )}
+                        </TD>
+                        <TD>
+                            {isEditable ? (
+                                <input type="date" value={holidayEntry.end_date} onChange={handleEndDateChange} />
+                            ) : (
+                                new Date(holidayEntry.end_date).toLocaleDateString()
+                            )}
+                        </TD>
+                    </TR>
+                </TBODY>
+            </TABLE>
+        );
     };
 
-
-    let toggleOverlay = (holiday) => {
-        //setSelectedHoliday(holiday);
-        fetchHolidayData(holiday.id)
-        setOverlayVisible(!overlayVisible);
-    };
-
+    
     return (
         <WRAPPER>
             <OVERLAY_CONTAINER>
@@ -226,19 +315,18 @@ const HolidayRequestsTable = ({ token, consultantId }) => {
                         </TR>
                     </HEADERS>
                     <TBODY>
-                        {listHolidayData.map((holiday) => {
-                            const isRowEditable = holiday.approval_status === "DENIED";
+                        {getSortedHolidays().map((holiday) => {
                             return (
                                 <TR key={holiday.id}>
                                     <TD>
-                                        <button onClick={() => toggleOverlay(holiday)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                                            <img src={Timesheet} alt="File Icon" />
+                                        <button onClick={() => handleHolidaySelect(holiday)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                            <img src={Timesheet} alt="Holiday File" />
                                         </button>
                                     </TD>
                                     <TD>{new Date(holiday.submitted).toLocaleDateString()}</TD>
-                                    <TD>{SetStatus(holiday.approval_status)}</TD>
+                                    <TD><SetStatusButton status={holiday.approval_status} isActive={false} /></TD>
                                     <TD>
-                                        <EDIT editable={isRowEditable}>
+                                        <EDIT editable={isRowEditable} onClick={() => {toggleEditMode(); handleHolidaySelect(holiday)}}>
                                             {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
                                         </EDIT>
                                     </TD>
@@ -248,25 +336,25 @@ const HolidayRequestsTable = ({ token, consultantId }) => {
                     </TBODY>
                 </TABLE>
             </OVERLAY_CONTAINER>
-            <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => setOverlayVisible(!overlayVisible)} title={'Holiday Request'}>
-                {selectedHoliday && (
-                    <OVERLAY_CONTAINER>
-                        <TABLE>
-                            <HEADERS>
-                                <TR>
-                                    <TH>Date From</TH>
-                                    <TH>Date To</TH>
-                                </TR>
-                            </HEADERS>
-                            <TBODY>
-                                <TR>
-                                    <TD>{new Date(selectedHoliday.start_date).toLocaleDateString()}</TD>
-                                    <TD>{new Date(selectedHoliday.end_date).toLocaleDateString()}</TD>
-                                </TR>
-                            </TBODY>
-                        </TABLE>
-                    </OVERLAY_CONTAINER>
-                )}
+            <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => setOverlayVisible(false)} title={'Holiday Request'}>
+                <OVERLAY_CONTAINER>
+                    {selectedHoliday && (
+                        <Entry
+                        holidayEntry={Entry}
+                        isEditable={isEditing && isRowEditable}
+                        onEdit={handleEntryEdit}
+                        /> 
+                    )}
+                    {isEditing && (
+                        <SUBMIT_BUTTON>
+                            <SubmitButton 
+                            onClick={() => handleSubmitEdits(selectedHoliday.id, selectedHoliday.start_date, selectedHoliday.end_date)} 
+                            width={"145px"} height={"50px"} 
+                            clickable={true} 
+                            />
+                        </SUBMIT_BUTTON>
+                    )}
+                </OVERLAY_CONTAINER>
             </ModalWrapper>
         </WRAPPER>
     )
