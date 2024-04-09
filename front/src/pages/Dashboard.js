@@ -73,11 +73,11 @@ const Dashboard = () => {
         });
         if(!response.ok){
           console.error("Failed to get user details");
-          return
         }
         let user_details = await response.json()
         if(user_details.consultant_id === null)
         {
+          // TODO: display message to the user on the UI
           console.error("Current User is not a consultant");
           return
         }
