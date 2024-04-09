@@ -138,7 +138,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
     
     let handleSubmitEdits = async (holiday_id, start_date, end_date) => {
          
-        const response = await fetch(`API/holiday/${holiday_id}`, {
+        const response = await fetch(`api/holiday/${holiday_id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -181,11 +181,13 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                 throw new Error('Failed to fetch holiday data');
             }
 
-            let data = await response.json();
-            return data;
+            let responseData = await response.json();
+            console.log(responseData);
+            return responseData;
 
         } catch (error) {
             console.error('Error fetching holiday data:', error);
+            throw error;
         }
     };
 
@@ -226,6 +228,11 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                 }
 
                 let responseData = await response.json();
+
+                if (!Array.isArray(responseData.holidays)) {
+                    throw new Error('Holidays data is not an array');
+                }
+
                 let holidayIDs = responseData.holidays;
                 console.log(holidayIDs);
 
@@ -245,18 +252,6 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
         };
 
         fetchConsultantHolidays();
-
-        /*
-        fetchConsultantHolidays();
-        let holidays = []
-        if(holidayIDs.length !==0){
-            holidayIDs.forEach(ID => {
-                holidays.push(fetchHolidayData(ID));
-            });
-        }
-        setListHolidayData(holidays);
-        console.log(listHolidayData);
-        */
 
     }, [consultantId, token, approval_status]);
 
@@ -340,7 +335,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                 <OVERLAY_CONTAINER>
                     {selectedHoliday && (
                         <Entry
-                        holidayEntry={Entry}
+                        holidayEntry={selectedHoliday}
                         isEditable={isEditing && isRowEditable}
                         onEdit={handleEntryEdit}
                         /> 
