@@ -55,14 +55,13 @@ const Timesheets = () => {
                         redirect_uri: "/api",
                         scope: "timesphere:admin"
                     }});
-                console.log(token);
                 setToken(token);
             }
         }
 
         getToken();
         
-    }, [getAccessTokenSilently, isAuthenticated, JWTtoken])
+    }, [getAccessTokenSilently, isAuthenticated])
 
     return (
     <div>
@@ -75,7 +74,7 @@ const Timesheets = () => {
             token={JWTtoken}
             consultant_id={consultantID}
             sort={sortBy}
-            status={approval_status === 'Approved' ? 'APPROVED' : approval_status === 'Denied' ? 'DENIED' : approval_status === 'Select Status' ? '' :'WAITING'}
+            approval_status={approval_status === 'Approved' ? 'APPROVED' : approval_status === 'Denied' ? 'DENIED' : approval_status === 'Select Status' ? 'Select Status' : approval_status === 'Clear Filter' ? 'Select Status' :'WAITING'}
             />
 
         </TABLE_WRAPPER>
