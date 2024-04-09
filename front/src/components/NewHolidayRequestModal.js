@@ -76,6 +76,9 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
 
     let handleSubmit = async () => {
         try {
+            // Get current timestamp
+            const submittedTime = new Date().toISOString();
+
             // HTTP POST request to backend API
             const url = `api/consultant/${consultantId}/holiday`;     // create holiday request
 
@@ -86,8 +89,11 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
                     'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
+                    "submitted": submittedTime,
                     "start_date": dateFrom,
                     "end_date": dateTo,
+                    "approval_status": 2,
+
                 }),
             });
                 
@@ -121,7 +127,7 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
                         </DATE_CONTAINER>
                     </INPUT_CONTAINER>
                     <SUBMIT_BUTTON type="submit">
-                        <SubmitButton clickable={isClickable} onClick={handleSubmit} width={"145px"} height={"50px"} />
+                        <SubmitButton clickable={isClickable} width={"145px"} height={"50px"} />
                     </SUBMIT_BUTTON>
                 </HOLIDAY_CONTAINER>
             </HOLIDAY_FORM>
