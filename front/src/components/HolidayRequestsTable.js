@@ -95,6 +95,7 @@ const OVERLAY_CONTAINER = styled.div`
 `;
 
 
+
 const SUBMIT_BUTTON = styled.div`
     padding: 0;
     background-color: transparent;
@@ -106,6 +107,7 @@ const SUBMIT_BUTTON = styled.div`
         img {
             width: 20px;
         }
+
     }
 
 `;
@@ -212,6 +214,8 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
     };
 
 
+
+
     useEffect(() => {
         const fetchConsultantHolidays = async () => {
             try {
@@ -224,8 +228,8 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
 
