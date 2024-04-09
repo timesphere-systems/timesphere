@@ -96,6 +96,7 @@ const OVERLAY_CONTAINER = styled.div`
 
 
 
+
 const SUBMIT_BUTTON = styled.div`
     padding: 0;
     background-color: transparent;
@@ -228,8 +229,8 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
 
@@ -281,6 +282,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                     <TR>
                         <TD> {new Date(holidayEntry.start_date).toLocaleDateString()} </TD>
                         <TD> {new Date(holidayEntry.end_date).toLocaleDateString()} </TD> 
+
                     </TR>
                 </TBODY>
             </TABLE>
@@ -322,6 +324,7 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                                                 <img src={unEditIcon} alt="Not Editable" />
                                             </EDIT>
                                         )}
+
 
                                     </TD>
                                 </TR>
@@ -366,8 +369,6 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
 
                         </>
                     )}
-                    
-
                 </OVERLAY_CONTAINER>
             </ModalWrapper>
         </WRAPPER>
