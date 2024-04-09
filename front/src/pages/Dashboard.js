@@ -76,7 +76,7 @@ const Dashboard = () => {
           return
         }
         let user_details = await response.json()
-        if(user_details.consultant_id === undefined)
+        if(user_details.consultant_id === null)
         {
           console.error("Current User is not a consultant");
           return
@@ -283,11 +283,11 @@ const Dashboard = () => {
         <ActionButton 
         height={'100px'}
         width={'700px'}
-        clickable={true}
+        clickable={currentTimesheet !== undefined}
         icon={ClockIcon}
         text={buttonText}
         onClick= {() => {
-          if(submittable === true && currentTimesheet !== undefined){
+          if(submittable === true){
             handleClockButton();
           }
         }}/>
@@ -299,7 +299,7 @@ const Dashboard = () => {
         <SubmitButton
         height={'100px'}
         width={'250px'}
-        clickable={!startTimer}
+        clickable={!startTimer && currentTimesheet !== undefined}
         icon={CircleArrow}
         onClick={() => {
           if(submittable === true && buttonText === "Clock-In"){
