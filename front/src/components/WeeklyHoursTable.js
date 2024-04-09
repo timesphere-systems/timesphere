@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react'
+import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
 import EditIcon from '../assets/icons/Edit.svg';
 import unEditIcon from '../assets/icons/unEdit.svg';
@@ -91,6 +91,7 @@ const EDIT = styled.div`
 const OVERLAY_CONTAINER = styled.div`
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     gap: 20px;
     justify-content: flex-end;
     width: 100%;
@@ -103,6 +104,8 @@ const OVERLAY_CONTAINER = styled.div`
 const SUBMIT_BUTTON = styled.div`
     padding: 0;
     background-color: transparent;
+    display: flex;
+    justify-content: end;
 
     button {
         font-size: 18px;
@@ -122,12 +125,12 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
     const [overlayVisible, setOverlayVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editedEntries, setEditedEntries] = useState([]);
-    const isRowEditable = selectedTimesheet?.approval_status === 'DENIED';
     const [entries, setEntries] = useState([]);
+    const [isEditModeEnabled, setIsEditModeEnabled] = useState(false);
 
 
     const toggleEditMode = () => {
-        setIsEditing(!isEditing);
+        setIsEditModeEnabled(!isEditModeEnabled);
     };
     
     const handleEntryEdit = (index, updatedEntry) => {
@@ -171,6 +174,8 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
     const handleTimesheetSelect = (timesheet) => {
         setSelectedTimesheet(timesheet);
         setOverlayVisible(true);
+        setIsEditing(timesheet.approval_status === 'DENIED');
+        setIsEditModeEnabled(true);
     };
 
 
@@ -339,6 +344,7 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                     </HEADERS>
                     <TBODY>
                     {getSortedTimesheets().map((timesheet) => {
+                        const RowIsEditable = timesheet.approval_status === 'DENIED';
                         return (
                             <TR key={timesheet.id}>
                                 <TD>
@@ -350,8 +356,8 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                                 <TD>{timesheet.submitted ? new Date(timesheet.submitted).toLocaleDateString() : 'N/A'}</TD>
                                 <TD><SetStatusButton status={timesheet.approval_status} isActive={false} /></TD>
                                 <TD>
-                                    <EDIT editable={isRowEditable} onClick={() => {toggleEditMode(); handleTimesheetSelect(timesheet)}}>
-                                        {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
+                                    <EDIT editable={RowIsEditable} onClick={() => {toggleEditMode(); handleTimesheetSelect(timesheet)}}>
+                                        {RowIsEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
                                     </EDIT>
                                 </TD>
                             </TR>
@@ -360,7 +366,7 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                     </TBODY>
                 </TIMESHEET> 
             </OVERLAY_CONTAINER>
-            <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => setOverlayVisible(false)} title={'Weekly Timesheet'}>
+            <ModalWrapper isVisible={overlayVisible && isEditModeEnabled} toggleOverlay={() => {setOverlayVisible(false); setIsEditModeEnabled(false)}} title={'Weekly Timesheet'}>
                 <OVERLAY_CONTAINER>
                     {selectedTimesheet && (
                         <TIMESHEET>
@@ -379,7 +385,7 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                                         key={index}
                                         entry={entry}
                                         index={index}
-                                        isEditable={isEditing && isRowEditable}
+                                        isEditable={isEditModeEnabled && selectedTimesheet.approval_status === 'DENIED'}
                                         onEdit={handleEntryEdit}
                                     />
 ))}
