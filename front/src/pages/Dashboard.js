@@ -311,7 +311,7 @@ const Dashboard = () => {
         <DashboardTable editable={editable} submittable={submittable} token={JWTtoken} currentTimeEntries={currentTimeEntries}/>
         <TOGGLE_WRAPPER>
           <EditToggleButton onToggle={() => {
-            if(submittable === true && buttonText === "Clock-In"){
+            if(submittable === true && buttonText === "Clock-In" && currentTimesheet !== undefined){
               toggleEditMode();
             }}} checked={editable} />
         </TOGGLE_WRAPPER>
