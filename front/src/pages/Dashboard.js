@@ -120,6 +120,8 @@ const Dashboard = () => {
         const today = new Date();
         const monday = new Date(today);
         monday.setDate(monday.getDate() - monday.getDay() + 1);
+        //ISO strings are an hour behind normal time
+        monday.setTime(monday.getTime() + (60 * 60 * 1000));
         try {
             const response = await fetch(`api/consultant/${consultantID}/timesheet?start=${monday.toISOString()}`, {
                 'method': 'POST',
@@ -269,7 +271,26 @@ const Dashboard = () => {
     setCurrentTimeEntries();
   }
   const submitTimesheet = async () => {
-
+    setEditable(false);
+    try {
+      const response = await fetch(`api/timesheet/${currentTimesheet.id}/submit`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${JWTtoken}`,
+          },
+      })
+      if (!response.ok){
+        console.error("Failed to submit timesheet");
+      }
+      else{
+        const responseData = await response.json();
+        console.log('Timesheet submitted sucessfully:', responseData);
+        reloadContent();
+      }
+    } catch (error) {
+      console.error('Failed to submit timesheet:', error);
+    }
   };
   return (
     <div>
@@ -302,6 +323,7 @@ const Dashboard = () => {
         width={'250px'}
         clickable={!startTimer && currentTimesheet !== undefined}
         icon={CircleArrow}
+        submitted={!submittable}
         onClick={() => {
           if(submittable === true && buttonText === "Clock-In"){
             submitTimesheet();
