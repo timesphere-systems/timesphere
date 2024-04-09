@@ -287,7 +287,7 @@ const Dashboard = () => {
         icon={ClockIcon}
         text={buttonText}
         onClick= {() => {
-          if(submittable === true){
+          if(submittable === true && currentTimesheet !== undefined){
             handleClockButton();
           }
         }}/>
