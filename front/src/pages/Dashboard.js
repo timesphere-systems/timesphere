@@ -234,7 +234,6 @@ const Dashboard = () => {
         console.log("Cant Clock Out Yet");
         return;
       }
-      setOpenEntryTime();
     }
     setButtonText(buttonText === "Clock-In" ? "Clock-Out" : "Clock-In");
     setTimer(startTimer ? false : true);
@@ -242,7 +241,6 @@ const Dashboard = () => {
     now.setTime(now.getTime() + (60 * 60 * 1000));
     let timeToSet = now.toISOString().replace("T"," ").substring(0, 19);
     toggleTimeEntry(timeToSet, currentTimesheet.id);
-    console.log(openEntryTime);
   };
   const toggleTimeEntry = async (time, timesheet_id) => {
     try {
