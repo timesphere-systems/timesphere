@@ -197,7 +197,7 @@ const DashboardTable = ({ editable, submittable, token, currentTimeEntries}) => 
                     }
                     setTableRowHours(tableDates[index].clockIn, tableDates[index].clockOut, tableDates, index);
                     //case for adding 24 hours to days inbetween clock in and out
-                    if(openTimeEntryInterval){
+                    if(openTimeEntryInterval && tableDates[index].clockIn === "" && tableDates[index].clockOut === ""){
                         tableDates[index].hours = 24;
                     }
                 }
