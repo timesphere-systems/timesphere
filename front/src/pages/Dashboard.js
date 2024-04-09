@@ -65,7 +65,7 @@ const Dashboard = () => {
             let token = await getAccessTokenSilently(
                 {authorizationParams: {        
                     audience: "https://timesphere.systems/api",
-                    redirect_uri: "http://localhost:3000",
+                    redirect_uri: "/",
                     scope: "timesphere:admin"
                 }});
             console.log(token);
@@ -103,7 +103,7 @@ const Dashboard = () => {
       timesheet_id: 0
     };
     try {
-      const response = await fetch('http://localhost:8080/timesheet/entry', {
+      const response = await fetch('/api/timesheet/entry', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
