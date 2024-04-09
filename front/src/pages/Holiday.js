@@ -41,8 +41,19 @@ const FOOTER_WRAPPER = styled.div`
 const Holiday = () => {
     const [visible, setVisible] = useState(false);   // Store modal visibility state
     const { isAuthenticated, getAccessTokenSilently } = useAuth0();
-    const [token, setToken] = useState(null);
-    const [consultantId, setConsultantId] = useState(null);
+    const [JWTtoken, setToken] = useState(null);
+    const [consultantId, setConsultantId] = useState(1);  // for testing
+    const [sortBy, setSortBy] = useState('Latest');
+    const [approval_status, setApprovalStatus] = useState('Select Status');
+
+    
+    let handleSortChange = (selectedSort) => {
+        setSortBy(selectedSort);
+    };
+
+    let handleStatusChange = (selectedStatus) => {
+        setApprovalStatus(selectedStatus);
+    };
 
     React.useEffect(() => {
         let getToken = async () => {
@@ -51,7 +62,7 @@ const Holiday = () => {
                     {
                         authorizationParams: {
                             audience: "https://timesphere.systems/api",
-                            redirect_uri: "http://localhost:3000",
+                            redirect_uri: "/api",
                             scope: "timesphere:admin"
                         }
                     });
@@ -59,7 +70,9 @@ const Holiday = () => {
                 setToken(token);
             }
         }
+
         getToken();
+
     }, [getAccessTokenSilently, isAuthenticated]);
 
 
@@ -76,10 +89,15 @@ const Holiday = () => {
                     onClick={() => setVisible(true)} />
             </HEADING>
             <SELECTOR_CONTAINER>
-                <Selector />
+                <Selector onSortChange={handleSortChange} onStatusChange={handleStatusChange} selectedSort={sortBy} selectedStatus={approval_status} />
             </SELECTOR_CONTAINER>
             <TABLE_WRAPPER>
-                <HolidayRequestsTable token={token} consultantId={1} />
+                <HolidayRequestsTable 
+                token={JWTtoken} 
+                consultantId={consultantId} 
+                sort={sortBy} 
+                approval_status={approval_status === 'Approved' ? 'APPROVED' : approval_status === 'Denied' ? 'DENIED' : approval_status === 'Select Status' ? 'Select Status' : approval_status === 'Clear Filter' ? 'Select Status' : 'WAITING'} 
+                />
             </TABLE_WRAPPER>
             <FOOTER_WRAPPER>
                 <Footer />
