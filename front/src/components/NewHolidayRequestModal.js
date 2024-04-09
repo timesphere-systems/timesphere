@@ -74,31 +74,32 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
     
     const isClickable = dateFrom && dateTo;
 
-    let handleSubmit = () => {
-        // HTTP POST request to backend API
-        fetch(`api/consultant/${consultantId}/holiday`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                start_date: dateFrom,
-                end_date: dateTo,
-            }),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then((data) => {
-                console.log('Holiday request submitted:', data);
-            })
-            .catch((error) => {
-                console.error('Error submitting holiday request:', error);
+    let handleSubmit = async () => {
+        try {
+            // HTTP POST request to backend API
+            let url = `api/consultant/${consultantId}/holiday`;     // create holiday request
+
+            const response = await fetch (url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    "start_date": dateFrom,
+                    "end_date": dateTo,
+                }),
             });
+                
+            if (!response.ok) {
+                console.error('Failed to add new holiday with dates:', dateFrom, dateTo );
+            } else {
+                console.log('Holiday added successfully. consultant ID:', consultantId);
+            }
+            
+        } catch (error) {
+            console.error('Error adding holiday:', error);
+        }  
     };
 
     return (
