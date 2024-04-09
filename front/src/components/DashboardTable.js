@@ -139,9 +139,8 @@ const OVERLAY_TEXT = styled.p`
     font-weight: 600;
 `
 
-const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
+const DashboardTable = ({ editable, submittable, token, currentTimeEntries}) => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
-    const[currentTimeEntries, setCurrentTimeEntries] = useState();
 
     useEffect(() => {
         // code here 
@@ -149,30 +148,6 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
 
     //Use Effect for getting (or creating current week timesheet)
     useEffect(() => {
-        let fetchTimeEntryDetails = async () =>{
-            let listTimeEntryIDS = currentTimesheet.entries;
-            let timeEntries = [];
-            for (const ID of listTimeEntryIDS) {
-                try {
-                    const response = await fetch(`api/timesheet/entry/${ID}`, {
-                        'method': 'GET',
-                        'headers': {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-                    if(!response.ok){
-                        console.error("Failed to get time entry details.");
-                        return;
-                    }
-                    let data = await response.json();
-                    timeEntries.push(data);
-                } catch (error) {
-                    console.error("Failed to get time entry details: ", error);
-                }
-            }
-            setCurrentTimeEntries(timeEntries);
-        }
-
         let setTableRowHours = (clockIn, clockOut, tableDates, index) => {
             //set hours for each row of the table
             if (clockIn && clockOut) {
@@ -229,15 +204,10 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
             }
             setWeekDates([...tableDates]);
         }
-    if(token !== undefined && currentTimesheet !== undefined){
-        if(currentTimeEntries === undefined){
-            fetchTimeEntryDetails();
-        }
-        else{
+    if(token !== undefined && currentTimeEntries !== undefined){
             setTimeEntriesTable();
-        }
     }
-    }, [token, currentTimesheet, currentTimeEntries]);
+    }, [token, currentTimeEntries]);
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {

@@ -52,6 +52,7 @@ const Dashboard = () => {
   const [JWTtoken, setJWTtoken] = useState();
   const [consultantID, setConsultantID] = useState();
   const [currentTimesheet, setCurrentTimesheet] = useState();
+  const[currentTimeEntries, setCurrentTimeEntries] = useState();
   React.useEffect(() => {
     //function to get Authorization Token
     let getToken = async () => {
@@ -160,6 +161,30 @@ const Dashboard = () => {
             console.error("Failed to create current week timesheet details: ", error);
         }
     }
+
+    let fetchTimeEntryDetails = async () =>{
+      let listTimeEntryIDS = currentTimesheet.entries;
+      let timeEntries = [];
+      for (const ID of listTimeEntryIDS) {
+          try {
+              const response = await fetch(`api/timesheet/entry/${ID}`, {
+                  'method': 'GET',
+                  'headers': {
+                      'Authorization': `Bearer ${JWTtoken}`
+                  }
+              });
+              if(!response.ok){
+                  console.error("Failed to get time entry details.");
+                  return;
+              }
+              let data = await response.json();
+              timeEntries.push(data);
+          } catch (error) {
+              console.error("Failed to get time entry details: ", error);
+          }
+      }
+      setCurrentTimeEntries(timeEntries);
+    }
     if(JWTtoken === undefined){
       getToken();
     }
@@ -170,8 +195,11 @@ const Dashboard = () => {
       if(currentTimesheet === undefined){
         getCurrentWeekTimesheet();
       }
+      else if(currentTimeEntries === undefined){
+        fetchTimeEntryDetails();
+      }
     }
-  }, [isAuthenticated, JWTtoken, consultantID, currentTimesheet])
+  }, [isAuthenticated, JWTtoken, consultantID, currentTimesheet, currentTimeEntries])
   // Function which toggles the edit mode - passed to EditToggleButton component
   let toggleEditMode = () => {
     setEditable(!editable);
@@ -253,7 +281,7 @@ const Dashboard = () => {
         onClick={handleSubmit}/>
       </CLOCK_WRAPPER>
       <TABLE_WRAPPER>
-        <DashboardTable editable={editable} submittable={submittable} token={JWTtoken} currentTimesheet={currentTimesheet}/>
+        <DashboardTable editable={editable} submittable={submittable} token={JWTtoken} currentTimeEntries={currentTimeEntries}/>
         <TOGGLE_WRAPPER>
           <EditToggleButton onToggle={() => {
             if(submittable === true){
