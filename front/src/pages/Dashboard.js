@@ -227,6 +227,7 @@ const Dashboard = () => {
     }
     if(buttonText === "Clock-In"){
       setOpenEntryTime(new Date());
+      setEditable(false);
     }
     else{
       //case of avoiding errors when trying to spam click clock in and out
