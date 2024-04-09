@@ -177,19 +177,39 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
             for(const timeEntry of currentTimeEntries){
                 let clockInTime = new Date(timeEntry.start_time);
                 let clockOutTime = new Date(timeEntry.end_time);
+                let clockInString = clockInTime.toTimeString().split(' ')[0];
+                let clockOutString = clockOutTime.toTimeString().split(' ')[0];
                 let openTimeEntryInterval = false;
                 for(let i=0; i < tableDates.length; i++){
                     let dayDate = new Date(tableDates[i].date);
                     if (dayDate.getDate() === clockInTime.getDate()){
-                        tableDates[i].clockIn = clockInTime.toTimeString().split(' ')[0];
+                        tableDates[i].clockIn = clockInString;
                         openTimeEntryInterval = true;
                     }
                     if(openTimeEntryInterval){
                         tableDates[i].status = timeEntry.entry_type;
                     }
                     if (dayDate.getDate() === clockOutTime.getDate()){
-                        tableDates[i].clockOut = clockOutTime.toTimeString().split(' ')[0];
+                        tableDates[i].clockOut = clockOutString;
                         openTimeEntryInterval = false;
+                    }
+                    //set hours for each row of the table
+                    if (tableDates[i].clockIn && tableDates[i].clockOut) {
+                        const hoursWorked = calculateHours(tableDates[i].clockIn, tableDates[i].clockOut);
+                        tableDates[i].hours = hoursWorked;
+                    }
+                    else if(tableDates[i].clockIn || tableDates[i].clockOut){
+                        let hoursWorked = 0;
+                        if(tableDates[i].clockIn){
+                            hoursWorked = calculateHours(tableDates[i].clockIn, "24:00");
+                        }
+                        else{
+                            hoursWorked = calculateHours("00:00", tableDates[i].clockOut);
+                        }
+                        tableDates[i].hours = hoursWorked;
+                    }
+                    else {
+                        tableDates[i].hours = 0;
                     }
                 }
             }
@@ -241,7 +261,18 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
             if (clockIn && clockOut) {
                 const hoursWorked = calculateHours(clockIn, clockOut);
                 newWeekDates[index].hours = hoursWorked;
-            } else {
+            }
+            else if(clockIn || clockOut){
+                let hoursWorked = 0;
+                if(clockIn){
+                    hoursWorked = calculateHours(clockIn, "24:00");
+                }
+                else{
+                    hoursWorked = calculateHours("00:00", clockOut);
+                }
+                newWeekDates[index].hours = hoursWorked;
+            }
+            else {
                 newWeekDates[index].hours = 0;
             }
         }
@@ -249,7 +280,7 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
     };
 
     // Function to calculate hours worked based on clock in/out times
-    let calculateHours = (clockIn, clockOut) => {
+    let calculateHours = (clockIn, clockOut, days) => {
         const [hoursIn, minutesIn] = clockIn.split(':').map(Number);
         const [hoursOut, minutesOut] = clockOut.split(':').map(Number);
         let hours = hoursOut - hoursIn;
