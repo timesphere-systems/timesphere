@@ -1,7 +1,8 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
 import FileIcon from "../assets/icons/FileIcon.svg";
 import PeopleIcon from "../assets/icons/PeopleIcon.svg";
+import ModalWrapper from './ModalWrapper';
 import SetStatusButton from "./SetStatusButton";
 
 const BIGTABLE = styled.div`
@@ -160,192 +161,249 @@ const BUTTONBOX = styled.div`
     background: rgba(216, 216, 216, 0.00);
 `
 
-const PendingTimesheetTable = () => {
+const WRAPPER = styled.div`
+    width: 90%;
+    margin-left: 5%;
+    display: flex;
+    flex-direction: column;
+`
+
+const LITTLETABLE = styled.table`
+    margin: auto;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: 16px;
+`
+
+const HEADERS = styled.thead`
+    width: 100%;
+    color: white;
+    font-weight: bold;
+    background-color: rgba(54, 54, 54, 0.95);
+    border-top-right-radius: 9px;
+    border-top-left-radius: 9px;
+    border-collapse: collapse; 
+    overflow: hidden;
+`
+
+const TR = styled.tr`
+    display: flex;
+`
+
+const TH = styled.th`
+    padding: 10px;
+    width: 100%;
+    height: 50px;
+    border: 1px solid rgba(91, 91, 91, 1); 
+    font-size: 18px;
+    font-weight: 800;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const TD = styled.td`
+    padding: 10px;
+    width: 100%;
+    color: white;
+    border: 1px solid rgba(91, 91, 91, 1);
+    background-color: rgba(54, 54, 54, 1);
+    font-weight: 300;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const TBODY = styled.tbody`
+    min-width: 800px;
+    width: 100%;
+`
+
+const OVERLAY_CONTAINER = styled.div`
+    width: 100%;
+    position: relative;
+    margin: auto;
+    border-radius: 9px;
+    overflow: hidden;
+`;
+
+const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
+    const [timesheetData, setTimesheetData] = useState([]);
+    const [overlayVisible, setOverlayVisible] = useState(false);
+    const [userdetails, setUserDetails] = useState(null);
+    const [userID, setUserID] = useState(1);
+
+    useEffect(() => {
+        
+        const fetchTimesheets = async () => {
+            console.log("in fetch timesheets");
+            try{
+                const response = await fetch(`api/manager/${userID}/timesheets`, {
+                    'method': 'GET',
+                    'headers':{
+                        'Accept': 'application/json',
+                        'Authorization' : `Bearer ${Jtoken}`
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch timesheet data');
+                }
+
+                const data = await response.json();
+                console.log(data);
+                setTimesheetData(data);
+            } catch(error){
+                console.error('Error fetching timesheets:', error);
+            }
+        }
+        if (Jtoken!==undefined && userID!==undefined){
+            fetchTimesheets();
+        }
+    }, [userID, Jtoken]);
+
+    const fetchTimesheetData = async (timesheet_id) => {
+        try {
+            const response = await fetch(`api/timesheets/${timesheet_id}`, {
+                'method': 'GET',
+                'headers':{
+                    'Accept': 'application/json',
+                    'Authorization' : `Bearer ${Jtoken}`
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch timesheet data');
+            }
+
+            const data = await response.json();
+            console.log(data);
+            return data;
+        } catch (error) {
+            console.error('Error fetching timesheet data:', error);
+        }
+    };
+
+    const fetchConsData = async (consultant_id) => {
+        try{
+            const response = await fetch(`api/consultant/${consultant_id}`, {
+                'method': 'GET',
+                'headers':{
+                    'Accept': 'application/json',
+                    'Authorization' : `Bearer ${Jtoken}`
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch consultant data');
+            }
+
+            const data = await response.json();
+            console.log(data);
+            return data;
+        } catch (error) {
+            console.error('Error fetching consultant data:', error);
+        }
+    };
+
+    const getTimesheetData = async (timesheetID) => {
+        console.log("getting timesheet data");
+        return (fetchTimesheetData(timesheetID));
+    };
+
+    const getPeopleData = async (personID) => {
+        console.log("getting person data");
+        return (fetchConsData(personID));
+    };
+
+    const toggleOverlay = () => {
+        setOverlayVisible(!overlayVisible);
+    };
+    
+
     return (
-        <BIGTABLE>
-            <TITLEROW>
-                <TIMESHEETBOX>
-                    <TITLETEXT>Request</TITLETEXT>
-                </TIMESHEETBOX>
-                <EMPLOYEEBOX>
-                    <TITLETEXT>Employee</TITLETEXT>
-                </EMPLOYEEBOX>
-                <DATECREATEBOX>
-                    <TITLETEXT>Date Created</TITLETEXT>
-                </DATECREATEBOX>
-                <DATECREATEBOX>
-                    <TITLETEXT>Date Submitted</TITLETEXT>
-                </DATECREATEBOX>
-                <STATUSBOX>
-                    <TITLETEXT>Approve / Deny</TITLETEXT>
-                </STATUSBOX>
-            </TITLEROW>
+        <WRAPPER>
+            <OVERLAY_CONTAINER>
+                <BIGTABLE>
+                    <TITLEROW>
+                        <TIMESHEETBOX>
+                            <TITLETEXT>Request</TITLETEXT>
+                        </TIMESHEETBOX>
+                        <EMPLOYEEBOX>
+                            <TITLETEXT>Employee</TITLETEXT>
+                        </EMPLOYEEBOX>
+                        <DATECREATEBOX>
+                            <TITLETEXT>Date Created</TITLETEXT>
+                        </DATECREATEBOX>
+                        <DATECREATEBOX>
+                            <TITLETEXT>Date Submitted</TITLETEXT>
+                        </DATECREATEBOX>
+                        <STATUSBOX>
+                            <TITLETEXT>Approve / Deny</TITLETEXT>
+                        </STATUSBOX>
+                    </TITLEROW>
 
-            <NORMROW>
-                <FILEBOX>
-                    <FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC>
-                </FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Alex Johnson</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>01/01/2024</DATETEXT>
-                </DATEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Maria Rodriquez</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>01/01/2024</DATETEXT>
-                </DATEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Chris Lee</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>01/01/2024</DATETEXT>
-                </DATEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Emma Patel</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>01/01/2024</DATETEXT>
-                </DATEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Michael Smith</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>01/01/2024</DATETEXT>
-                </DATEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Olivia Garcia</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>01/01/2024</DATETEXT>
-                </DATEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Ethan Brown</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>01/01/2024</DATETEXT>
-                </DATEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Sophia Davis</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>01/01/2024</DATETEXT>
-                </DATEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Daniel Martinez</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>01/01/2024</DATETEXT>
-                </DATEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-        </BIGTABLE>
+                    {timesheetData.map((request) => {
+                        return (
+                            <NORMROW key={request}> 
+                                <FILEBOX>
+                                    <button onClick={toggleOverlay} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
+                                    <FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC>
+                                    </button>
+                                </FILEBOX>
+                                <PEOPLEBOX>
+                                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>  
+                                    <PEOPLETEXT>{(getPeopleData((getTimesheetData(request)).consultant_id).firstName).concat(" ", (getPeopleData((getTimesheetData(request)).consultant_id).lastName))}</PEOPLETEXT>
+                                </PEOPLEBOX>
+                                <DATEBOX>
+                                    <DATETEXT>{new Date((getTimesheetData(request).created).toLocaleDateString())}</DATETEXT>
+                                </DATEBOX>
+                                <DATEBOX>
+                                    <DATETEXT>{new Date((getTimesheetData(request).submitted).toLocaleDateString())}</DATETEXT>
+                                </DATEBOX>
+                                <BUTTONBOX>
+                                    <SetStatusButton status='Approved' isActive={true} />
+                                    <SetStatusButton status='Denied' isActive={true} />
+                                </BUTTONBOX>
+                            </NORMROW>
+                        );
+                    })}
+                </BIGTABLE>
+            </OVERLAY_CONTAINER>
+            <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} title={'Weekly Timesheet'}>
+            <OVERLAY_CONTAINER>
+                    <LITTLETABLE>
+                        <HEADERS>
+                                <TR>
+                                    <TH></TH>
+                                    <TH>Date</TH>
+                                    <TH>Status</TH>
+                                    <TH>Clock-In</TH>
+                                    <TH>Clock-Out</TH>
+                                    <TH>Hours</TH>
+                                </TR>
+                        </HEADERS>
+                        <TBODY>
+                            <TR>
+                                <TD></TD>
+                                <TD></TD>
+                                <TD></TD>
+                                <TD></TD>
+                                <TD></TD>
+                                <TD></TD>
+                            </TR>
+                        </TBODY>
+                    </LITTLETABLE> 
+                </OVERLAY_CONTAINER>
+        </ModalWrapper>
+    </WRAPPER>
     )
 }
 

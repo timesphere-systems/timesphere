@@ -1,9 +1,16 @@
-import React from 'react'
-import styled from 'styled-components';
+import React, {useState, useEffect} from 'react'
+import styled from 'styled-components'
 import FileIcon from "../assets/icons/FileIcon.svg";
 import PeopleIcon from "../assets/icons/PeopleIcon.svg";
 import SetStatusButton from "./SetStatusButton";
+import ModalWrapper from './ModalWrapper';
 
+const WRAPPER = styled.div`
+    width: 90%;
+    margin-left: 5%;
+    display: flex;
+    flex-direction: column;
+`
 
 const BIGTABLE = styled.div`
     display: flex;
@@ -189,162 +196,233 @@ const BUTTONBOX = styled.div`
     background: rgba(216, 216, 216, 0.00);
 `
 
-const PendingHolidayRequestsTable = () => {
+const LITTLETABLE = styled.table`
+    margin: auto;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: 16px;
+`
+
+const HEADERS = styled.thead`
+    width: 100%;
+    color: white;
+    font-weight: bold;
+    background-color: rgba(54, 54, 54, 0.95);
+    border-top-right-radius: 9px;
+    border-top-left-radius: 9px;
+    border-collapse: collapse; 
+    overflow: hidden;
+`
+
+const TR = styled.tr`
+    display: flex;
+`
+
+const TH = styled.th`
+    padding: 10px;
+    width: 100%;
+    border-bottom: 1px solid rgba(54, 54, 54, 0.95);
+    font-size: 18px;
+    font-weight: 800;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const TD = styled.td`
+    padding: 10px;
+    width: 100%;
+    color: white;
+    border-bottom: 1px solid rgba(91, 91, 91, 1);
+    background-color: rgba(54, 54, 54, 1);
+    font-weight: 300;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img{
+        width: 25px;
+        height: 25px;
+    }  
+`
+
+const TBODY = styled.tbody`
+    min-width: 800px;
+    width: 100%;
+`
+
+const OVERLAY_CONTAINER = styled.div`
+    width: 100%;
+    position: relative;
+    margin: auto;
+    border-radius: 9px;
+    overflow: hidden;
+`;
+
+const PendingHolidayRequestsTable = ( {userIDInp, token} ) => {
+    const [requestData, setRequestData] = useState([]);
+    const [overlayVisible, setOverlayVisible] = useState(false);
+    const [userID, setUserID] = useState(1);
+    const [Jtoken, setJToken] = useState(token);
+
+    useEffect(() => {
+        const fetchHolidays= async () => {
+            try{
+                console.log(userID);
+                const response = await fetch(`api/manager/${userID}/holidays`, {
+                    'method': 'GET',
+                    'headers':{
+                        'Accept': 'application/json',
+                        'Authorization' : `Bearer ${Jtoken}`
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch holiday data');
+                }
+
+                const data = await response.json();
+                console.log(data);
+                setRequestData(data);
+            } catch(error){
+                console.error('Error fetching holidays:', error);
+            }
+        }
+        if (Jtoken!==undefined && userID!==undefined){
+            fetchHolidays();
+        }
+    }, [userID, Jtoken]);
+        
+    const fetchHolidaydata = async (holiday_id) => {
+        try{
+            let url = `api/holiday/${holiday_id}`;
+            const response = await fetch(url, {
+                'method': 'GET',
+                'headers':{
+                    'Accept': 'application/json',
+                    'Authorization' : `Bearer ${Jtoken}`
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch holiday data');
+            }
+
+            const data = await response.json();
+            console.log(data);
+            return data;
+        } catch(error){
+            console.error('Error fetching holidays:', error);
+        }
+    };
+    const fetchConsData = async (consultant_id) => {
+        try{
+            const response = await fetch(`api/consultant/${consultant_id}`, {
+                'method': 'GET',
+                'headers':{
+                    'Accept': 'application/json',
+                    'Authorization' : `Bearer ${Jtoken}`
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch consultant data');
+            }
+
+            const data = await response.json();
+            console.log(data);
+            return data;
+        } catch (error) {
+            console.error('Error fetching consultant data:', error);
+        }
+    };
+
+    const getHolidayData = async (holidayID) => {
+        console.log("getting timesheet data");
+        return (fetchHolidaydata(holidayID));
+    };
+
+    const getPeopleData = async (personID) => {
+        console.log("getting person data");
+        return (fetchConsData(personID));
+    };
+
+    const toggleOverlay = () => {
+        setOverlayVisible(!overlayVisible);
+    };
+
     return (
-        <BIGTABLE>
-            <TITLEROW>
-                <REQUESTBOX>
-                    <REQUESTTEXT>Request</REQUESTTEXT>
-                </REQUESTBOX>
-                <EMPLOYEEBOX>
-                    <EMPLOYEETEXT>Employee</EMPLOYEETEXT>
-                </EMPLOYEEBOX>
-                <DATEREQBOX>
-                    <DATEREQTEXT>Dates Requested</DATEREQTEXT>
-                </DATEREQBOX>
-                <STATUSBOX>
-                    <STATUSTEXT>Approve / Deny</STATUSTEXT>
-                </STATUSBOX>
-            </TITLEROW>
+        <WRAPPER>
+            <OVERLAY_CONTAINER>
+                <BIGTABLE>
+                    <TITLEROW>
+                        <REQUESTBOX>
+                            <REQUESTTEXT>Request</REQUESTTEXT>
+                        </REQUESTBOX>
+                        <EMPLOYEEBOX>
+                            <EMPLOYEETEXT>Employee</EMPLOYEETEXT>
+                        </EMPLOYEEBOX>
+                        <DATEREQBOX>
+                            <DATEREQTEXT>Dates Requested</DATEREQTEXT>
+                        </DATEREQBOX>
+                        <STATUSBOX>
+                            <STATUSTEXT>Approve / Deny</STATUSTEXT>
+                        </STATUSBOX>
+                    </TITLEROW>
+                    
+                    {requestData.map((request) => {
+                        return (
+                            <NORMROW key={request}>  
+                                <FILEBOX>
+                                    <button onClick={toggleOverlay} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
+                                    <FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC>
+                                    </button>
+                                </FILEBOX>
+                                <PEOPLEBOX>
+                                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
+                                    <PEOPLETEXT>{getPeopleData(getHolidayData(request).consultant_id).firstname.concat(" ", getPeopleData(getHolidayData(request).consultant_id).lastName)}</PEOPLETEXT>
+                                </PEOPLEBOX>
+                                <DATEBOX>
+                                    <DATETEXT>{getHolidayData(request).start_date.toLocaleDateString('en-GB').concat(" - ", getHolidayData(request).end_date.toLocaleDateString())}</DATETEXT>
+                                </DATEBOX>
+                                <BUTTONBOX>
+                                    <SetStatusButton status='Approved' isActive={true} />
+                                    <SetStatusButton status='Denied' isActive={true} />
+                                </BUTTONBOX>
+                            </NORMROW>
+                        );
+                    })}
 
-            <NORMROW>
-                <FILEBOX>
-                    <FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC>
-                </FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Ava Nguyen</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2025 - 10/01/2025</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
+                </BIGTABLE>
+            </OVERLAY_CONTAINER>
+            <ModalWrapper isVisible={overlayVisible} toggleOverlay = {toggleOverlay} title={'Holiday Request'}>
+                <OVERLAY_CONTAINER>
+                        <LITTLETABLE>
+                            <HEADERS>
+                                    <TR>
+                                        <TH>Date From</TH>
+                                        <TH>Date To</TH>
+                                    </TR>
+                            </HEADERS>
 
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>William Wilson</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>05/01/2025 - 14/01/2025</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Isabella Anderson</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>23/08/2024 - 15/09/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Jacob Thomas</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>13/07/2024 - 23/07/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Mia Taylor</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>06/01/2025 - 16/01/2025</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Noah Hernandez</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>12/12/2024 - 16/12/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Emily Moore</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>07/02/2025 - 14/02/2025</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Liam Jackson</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>26/06/2025 - 27/06/2025</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-            <NORMROW>
-                <FILEBOX><FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC></FILEBOX>
-                <PEOPLEBOX>
-                    <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
-                    <PEOPLETEXT>Charlotte Kim</PEOPLETEXT>
-                </PEOPLEBOX>
-                <DATEBOX>
-                    <DATETEXT>07/07/2024 - 15/07/2024</DATETEXT>
-                </DATEBOX>
-                <BUTTONBOX>
-                    <SetStatusButton status='Approved' isActive={false} />
-                    <SetStatusButton status='Denied' isActive={false} />
-                </BUTTONBOX>
-            </NORMROW>
-
-        </BIGTABLE>
+                            <TBODY>
+                                <TR>
+                                    <TD></TD>
+                                    <TD></TD>
+                                </TR>
+                            </TBODY>
+                        </LITTLETABLE> 
+                    </OVERLAY_CONTAINER>
+            </ModalWrapper>
+            
+        </WRAPPER>
     )
 }
 
