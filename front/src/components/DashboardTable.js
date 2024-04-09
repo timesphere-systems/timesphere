@@ -172,45 +172,55 @@ const DashboardTable = ({ editable, submittable, token, currentTimesheet}) => {
             }
             setCurrentTimeEntries(timeEntries);
         }
+
+        let setTableRowHours = (clockIn, clockOut, tableDates, index) => {
+            //set hours for each row of the table
+            if (clockIn && clockOut) {
+                const hoursWorked = calculateHours(tableDates[index].clockIn, tableDates[index].clockOut);
+                tableDates[index].hours = hoursWorked;
+            }
+            else if(tableDates[index].clockIn || tableDates[index].clockOut){
+                let hoursWorked = 0;
+                if(tableDates[index].clockIn){
+                    hoursWorked = calculateHours(tableDates[index].clockIn, "24:00");
+                }
+                else{
+                    hoursWorked = calculateHours("00:00", tableDates[index].clockOut);
+                }
+                tableDates[index].hours = hoursWorked;
+            }
+            return;
+        }
+
         let setTimeEntriesTable = () => {
             let tableDates = weekDates;
-            for(const timeEntry of currentTimeEntries){
+            for(const timeEntry of currentTimeEntries.reverse()){
                 let clockInTime = new Date(timeEntry.start_time);
                 let clockOutTime = new Date(timeEntry.end_time);
                 let clockInString = clockInTime.toTimeString().split(' ')[0];
                 let clockOutString = clockOutTime.toTimeString().split(' ')[0];
                 let openTimeEntryInterval = false;
-                for(let i=0; i < tableDates.length; i++){
-                    let dayDate = new Date(tableDates[i].date);
+                for(let index = 0; index < tableDates.length; index++){
+                    let dayDate = new Date(tableDates[index].date);
                     if (dayDate.getDate() === clockInTime.getDate()){
-                        tableDates[i].clockIn = clockInString;
+                        tableDates[index].clockIn = clockInString;
                         openTimeEntryInterval = true;
+                        if(timeEntry.end_time === null){
+                            //make sure open time entries hours are zero
+                            tableDates[index].status = timeEntry.entry_type;
+                            tableDates[index].hours = 0;
+                            index = tableDates.length;
+                            continue;
+                        }
                     }
                     if(openTimeEntryInterval){
-                        tableDates[i].status = timeEntry.entry_type;
+                        tableDates[index].status = timeEntry.entry_type;
                     }
                     if (dayDate.getDate() === clockOutTime.getDate()){
-                        tableDates[i].clockOut = clockOutString;
+                        tableDates[index].clockOut = clockOutString;
                         openTimeEntryInterval = false;
                     }
-                    //set hours for each row of the table
-                    if (tableDates[i].clockIn && tableDates[i].clockOut) {
-                        const hoursWorked = calculateHours(tableDates[i].clockIn, tableDates[i].clockOut);
-                        tableDates[i].hours = hoursWorked;
-                    }
-                    else if(tableDates[i].clockIn || tableDates[i].clockOut){
-                        let hoursWorked = 0;
-                        if(tableDates[i].clockIn){
-                            hoursWorked = calculateHours(tableDates[i].clockIn, "24:00");
-                        }
-                        else{
-                            hoursWorked = calculateHours("00:00", tableDates[i].clockOut);
-                        }
-                        tableDates[i].hours = hoursWorked;
-                    }
-                    else {
-                        tableDates[i].hours = 0;
-                    }
+                    setTableRowHours(tableDates[index].clockIn, tableDates[index].clockOut, tableDates, index);
                 }
             }
             setWeekDates([...tableDates]);
