@@ -1,5 +1,5 @@
 """Consultant router and routes, data belonging to a particular consultant."""
-from datetime import datetime
+from datetime import datetime, date
 from typing import Annotated, cast
 from fastapi import APIRouter, status, Depends, Security
 from fastapi.responses import JSONResponse
@@ -9,8 +9,10 @@ from psycopg.errors import ForeignKeyViolation
 from psycopg.rows import class_row
 from ..dependencies import get_connection_pool
 from ..models import ApprovalStatus, HolidayTimes
-from ..auth import User, get_current_user
+from ..auth import User, get_current_user, MANAGER_USER_ROLE, FINANCE_USER_ROLE
 from . import models
+from ..timesheet.models import Timesheet
+
 
 
 # /consultant
@@ -18,6 +20,43 @@ router = APIRouter(
     prefix="/consultant",
     tags=["consultant"],
 )
+
+@router.get("/search", status_code=status.HTTP_200_OK)
+def search_consultant(search_query: str,
+                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                      current_user: Annotated[User, Security(get_current_user)]
+                      ) -> JSONResponse:
+    """Search for a Consultant
+
+    Requires for the current user to have the finance user role or manager role
+
+    Args:
+        query (str): The name or email to search for the consultant
+        pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
+    Returns:
+        JSONResponse
+    """
+    if current_user.details.user_role not in (MANAGER_USER_ROLE, FINANCE_USER_ROLE):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to search for a consultant"}
+        )
+    search_query = '%' + search_query + '%'
+    consultants = []
+    with pool.connection() as connection:
+        with connection.cursor() as cursor:
+            row = cursor.execute(
+                """SELECT consultants.id
+                   FROM users, consultants
+                   WHERE consultants.user_id = users.id
+                   AND (CONCAT(users.firstname, ' ', users.lastname) LIKE %(search_query)s
+                   OR users.email LIKE %(search_query)s)"""
+                   , {'search_query': search_query}).fetchall()
+            consultants = [consultant[0] for consultant in row]
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"consultants": consultants}
+    )
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_consultant(request: models.CreateConsultant,
@@ -310,3 +349,55 @@ def get_entries(consultant_id: int,
             rows = cursor.execute(query, parameters).fetchall()
             entries = [cast(int, row[0]) for row in rows]
         return entries
+
+@router.get("/{consultant_id}/timesheet/current", status_code=status.HTTP_200_OK,
+            response_model=None)
+def get_current_week_timesheet(consultant_id: int,
+                     pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                     current_user: Annotated[User, Security(get_current_user)]
+                     ) -> JSONResponse | Timesheet:
+    """Returns the current week timesheet to the consultant
+
+    Requires you to be the consultant themselves
+    
+    Args:
+        id (int): The consultant's ID.
+        pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
+    Returns:
+        JSONResponse
+    """
+    if consultant_id != current_user.consultant_id:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message":
+                     "You do not have permission to view this consultant's timesheets"}
+        )
+    today_date = date.today()
+    current_timesheet = None
+    with pool.connection() as connection:
+        with connection.cursor(row_factory=class_row(Timesheet)) as cursor:
+            # pylint: disable=duplicate-code
+            current_timesheet = cursor.execute("""
+                    SELECT timesheets.id as id, timesheets.created AS created,
+                        timesheets.submitted AS submitted, 
+                        timesheets.start AS start, timesheets.consultant AS consultant_id,
+                        approval_status.status_type AS approval_status, entries_list.entries as entries
+                    FROM (SELECT timesheets.id, ARRAY_REMOVE(ARRAY_AGG(time_entries.id), NULL) as entries
+                        FROM timesheets
+                        LEFT JOIN time_entries
+                        ON time_entries.timesheet = timesheets.id
+                        GROUP BY timesheets.id) as entries_list, timesheets, approval_status
+                    WHERE timesheets.id = entries_list.id
+                    AND timesheets.approval_status = approval_status.id
+                    AND timesheets.consultant = %(consultant_id)s
+                    AND timesheets.start <= %(current_date)s
+                    AND timesheets.start >= (%(current_date)s - 7)
+                    ORDER BY start DESC
+                    LIMIT 1""",
+                {'consultant_id': consultant_id, 'current_date': today_date}).fetchone()
+            if current_timesheet is None:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"message": "No current week timesheet assigned to consultant"}
+                )
+    return current_timesheet

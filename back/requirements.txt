@@ -6,3 +6,4 @@ psycopg_pool
 pyjwt
 pyjwt[crypto]
 requests
+fpdf2

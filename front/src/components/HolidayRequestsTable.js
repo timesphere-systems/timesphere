@@ -128,13 +128,13 @@ const fetchedRequestData = [
   let SetStatus = (status) => {
     switch (status) {
         case 'Approved':
-            return <SetStatusButton status='Approved' isActive='true'/>;
+            return <SetStatusButton status='Approved' isActive='false'/>;
         case 'Denied':
-            return <SetStatusButton status='Denied' isActive='true'/>;
+            return <SetStatusButton status='Denied' isActive='false'/>;
         case 'Waiting':
-            return <SetStatusButton status='Waiting' isActive='true'/>
+            return <SetStatusButton status='Waiting' isActive='false'/>
         default:
-            return <SetStatusButton status='Waiting' isActive='true'/>;
+            return <SetStatusButton status='Waiting' isActive='false'/>;
     }
 
 };

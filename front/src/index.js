@@ -17,6 +17,8 @@ root.render(
   <Auth0Provider
     domain={process.env.REACT_APP_AUTHZERO_DOMAIN}
     clientId={process.env.REACT_APP_AUTHZERO_CLIENT_ID}
+    useRefreshTokens={true}
+    cacheLocation='localstorage'
     authorizationParams={{
       redirect_uri: window.location.origin,
       audience: "https://timesphere.systems/api",

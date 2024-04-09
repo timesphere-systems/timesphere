@@ -2,6 +2,43 @@
 
 --CREATE DATABASE Timesphere_DB
 
+CREATE OR REPLACE FUNCTION check_existing_open_time_entry()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check for overlap with open-ended time entries
+    IF NEW.end_time IS NULL THEN
+        IF EXISTS (
+            SELECT 1
+            FROM time_entries
+            WHERE timesheet = NEW.timesheet
+              AND id != NEW.id
+              AND (
+                  NEW.start_time < end_time
+                  OR end_time IS NULL  -- Overlap with another open-ended entry
+              )
+        ) THEN
+            RAISE EXCEPTION 'New or updated time entry overlaps with an existing time entry.';
+        END IF;
+    ELSE
+        -- Check for overlap with any time entry, considering both start and end times
+        IF EXISTS (
+            SELECT 1
+            FROM time_entries
+            WHERE timesheet = NEW.timesheet
+              AND id != NEW.id
+              AND (
+                  NEW.start_time < COALESCE(end_time, 'infinity'::timestamp)
+                  AND NEW.end_time > start_time
+              )
+        ) THEN
+            RAISE EXCEPTION 'New or updated time entry overlaps with an existing time entry.';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 --Status for both TimeSheets and HolidayRequests
 CREATE TABLE approval_status (
   id  SERIAL PRIMARY KEY,
@@ -72,3 +109,17 @@ CREATE TABLE holidays(
   FOREIGN KEY (consultant) REFERENCES consultants(id),
   FOREIGN KEY (approval_status) REFERENCES approval_status(id)
 );
+
+CREATE TABLE issues(
+  id SERIAL PRIMARY KEY,
+  submitted DATE NOT NULL,
+  title VARCHAR(50) NOT NULL,
+  description text NOT NULL,
+  solved BOOLEAN NOT NULL,
+  user_id INT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TRIGGER trg_before_insert_or_update_time_entry
+BEFORE INSERT OR UPDATE ON time_entries
+FOR EACH ROW EXECUTE FUNCTION check_existing_open_time_entry();
