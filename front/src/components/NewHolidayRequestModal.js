@@ -68,34 +68,61 @@ const DATE_CONTAINER = styled.div`
 
 `;
 
-function NewHolidayRequestModal({overlayVisible, setOverlayVisible}) {
+function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlayVisible}) {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     
     const isClickable = dateFrom && dateTo;
 
-  return (
-    <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => setOverlayVisible(false)} title={'Holiday Request Form'}>
-        <HOLIDAY_FORM>
-            <DIVIDER />
-            <HOLIDAY_CONTAINER>
-                <INPUT_CONTAINER>
-                    <DATE_CONTAINER>
-                        <HOLIDAY_LABEL htmlFor="date-from">Date From:</HOLIDAY_LABEL>
-                        <HOLIDAY_DATE type="date" id="date-from" name="date-from" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} required />
-                    </DATE_CONTAINER>
-                    <DATE_CONTAINER>
-                        <HOLIDAY_LABEL htmlFor="date-to">Date To:</HOLIDAY_LABEL>
-                        <HOLIDAY_DATE type="date" id="date-to" name="date-to" value={dateTo} onChange={(e) => setDateTo(e.target.value)} required />
-                    </DATE_CONTAINER>
-                </INPUT_CONTAINER>
-                <SUBMIT_BUTTON type="submit">
-                    <SubmitButton clickable={isClickable} onClick={() => console.log("Submitted")} width={"145px"} height={"50px"} />
-                </SUBMIT_BUTTON>
-            </HOLIDAY_CONTAINER>
-        </HOLIDAY_FORM>
-    </ModalWrapper>
-  )
+    let handleSubmit = () => {
+        // HTTP POST request to backend API
+        fetch(`api/consultant/${consultantId}/holiday`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                start_date: dateFrom,
+                end_date: dateTo,
+            }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log('Holiday request submitted:', data);
+            })
+            .catch((error) => {
+                console.error('Error submitting holiday request:', error);
+            });
+    };
+
+    return (
+        <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => setOverlayVisible(false)} title={'Holiday Request Form'}>
+            <HOLIDAY_FORM>
+                <DIVIDER />
+                <HOLIDAY_CONTAINER>
+                    <INPUT_CONTAINER>
+                        <DATE_CONTAINER>
+                            <HOLIDAY_LABEL htmlFor="date-from">Date From:</HOLIDAY_LABEL>
+                            <HOLIDAY_DATE type="date" id="date-from" name="date-from" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} required />
+                        </DATE_CONTAINER>
+                        <DATE_CONTAINER>
+                            <HOLIDAY_LABEL htmlFor="date-to">Date To:</HOLIDAY_LABEL>
+                            <HOLIDAY_DATE type="date" id="date-to" name="date-to" value={dateTo} onChange={(e) => setDateTo(e.target.value)} required />
+                        </DATE_CONTAINER>
+                    </INPUT_CONTAINER>
+                    <SUBMIT_BUTTON type="submit">
+                        <SubmitButton clickable={isClickable} onClick={handleSubmit} width={"145px"} height={"50px"} />
+                    </SUBMIT_BUTTON>
+                </HOLIDAY_CONTAINER>
+            </HOLIDAY_FORM>
+        </ModalWrapper>
+      )
 }
 
 export default NewHolidayRequestModal
