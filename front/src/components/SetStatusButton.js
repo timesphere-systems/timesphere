@@ -20,19 +20,19 @@ const SetStatusButton = ({ status, isActive, onClick }) => {
         }
     }
     switch (status) {
-        case 'Approved':
+        case 'APPROVED':
             return(
                 <STATUSBUTTON isActive={isActive} onClick={handleClick}>
                     <img src={ApproveIcon} alt="Approved" />
                 </STATUSBUTTON>
             )
-        case 'Denied':
+        case 'DENIED':
             return(
                 <STATUSBUTTON isActive={isActive} onClick={handleClick}>
                     <img src={DenyIcon} alt="Denied" />
                 </STATUSBUTTON>
             )
-        case 'Waiting':
+        case 'WAITING':
         default:
             return(
                 <STATUSBUTTON isActive={isActive} onClick={handleClick}>
