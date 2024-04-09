@@ -31,7 +31,7 @@ const FOOTER_WRAPPER = styled.div`
 
 
 const Timesheets = () => {
-    const {getAccessTokenSilently, isAuthenticated} = useAuth0();
+    const {isAuthenticated} = useAuth0();
     const [JWTtoken, setToken] = useState(null);
     const [consultantID, setConsultantID] = useState(11);
     const [sortBy, setSortBy] = useState('Latest');
@@ -49,19 +49,15 @@ const Timesheets = () => {
     React.useEffect(() => {
         let getToken = async () => {
             if (isAuthenticated) {
-                let token = await getAccessTokenSilently(
-                    {authorizationParams: {        
-                        audience: "https://timesphere.systems/api",
-                        redirect_uri: "/api",
-                        scope: "timesphere:admin"
-                    }});
+                let token = localStorage.getItem('token');
+                console.log(token);
                 setToken(token);
             }
         }
 
         getToken();
         
-    }, [getAccessTokenSilently, isAuthenticated])
+    }, [isAuthenticated])
 
     return (
     <div>
