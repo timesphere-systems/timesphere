@@ -46,13 +46,13 @@ const Dashboard = () => {
   const [submittable, setSubmittable] = useState(true);    // Store submittable state 
   const [buttonText, setButtonText] = useState("Clock-In"); // Store clock in/out button text
   const [startTimer, setTimer] = useState(false);           // Store timer state
-  const [time, setTime] = React.useState(new Date());       // Store clock-in time
-  const [timeEntries, setTimeEntries] = useState([]);       // Store clock in and out time for backend
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const [JWTtoken, setJWTtoken] = useState();
   const [consultantID, setConsultantID] = useState();
   const [currentTimesheet, setCurrentTimesheet] = useState();
   const[currentTimeEntries, setCurrentTimeEntries] = useState();
+  const[openEntryTime, setOpenEntryTime] = useState();
+  
   React.useEffect(() => {
     //function to get Authorization Token
     let getToken = async () => {
@@ -161,7 +161,7 @@ const Dashboard = () => {
             console.error("Failed to create current week timesheet details: ", error);
         }
     }
-
+    //function for getting time entry details
     let fetchTimeEntryDetails = async () =>{
       let listTimeEntryIDS = currentTimesheet.entries;
       let timeEntries = [];
@@ -185,6 +185,17 @@ const Dashboard = () => {
       }
       setCurrentTimeEntries(timeEntries);
     }
+    let checkOpenTimeEntry = () => {
+      currentTimeEntries.forEach(timeEntry => {
+        if(timeEntry.end_time === null){
+          setOpenEntryTime(new Date(timeEntry.start_time));
+          setTimer(true);
+          setButtonText("Clock-Out");
+          return;
+        }
+      });
+    }
+
     if(JWTtoken === undefined){
       getToken();
     }
@@ -198,58 +209,68 @@ const Dashboard = () => {
       else if(currentTimeEntries === undefined){
         fetchTimeEntryDetails();
       }
+      else{
+        checkOpenTimeEntry();
+      }
     }
   }, [isAuthenticated, JWTtoken, consultantID, currentTimesheet, currentTimeEntries])
+
   // Function which toggles the edit mode - passed to EditToggleButton component
   let toggleEditMode = () => {
     setEditable(!editable);
   };
   //function to change text for clock in/out button
-  let change = () => {
+  let handleClockButton = () => {
+    let now = new Date();
+    if(currentTimesheet.id === undefined){
+      return;
+    }
+    if(buttonText === "Clock-In"){
+      setOpenEntryTime(new Date());
+    }
+    else{
+      //case of avoiding errors when trying to spam click clock in and out
+      if((openEntryTime.toDateString() === now.toDateString()) && (openEntryTime.toTimeString() === now.toTimeString())){
+        console.log("Cant Clock Out Yet");
+        return;
+      }
+      setOpenEntryTime();
+    }
     setButtonText(buttonText === "Clock-In" ? "Clock-Out" : "Clock-In");
     setTimer(startTimer ? false : true);
-    if (startTimer) {
-      setTime(new Date());
-    } else {
-      let newTime = {startTime: time, endTime: new Date()};
-      setTimeEntries([...timeEntries, newTime]);
-    }
+    //increase time by an hour since ISO string is behind 1 hour of current time
+    now.setTime(now.getTime() + (60 * 60 * 1000));
+    let timeToSet = now.toISOString().replace("T"," ").substring(0, 19);
+    toggleTimeEntry(timeToSet, currentTimesheet.id);
+    console.log(openEntryTime);
   };
-  const sendTimeEntryToBackend = async (startTime, endTime) => {
-    const token = await getAccessTokenSilently({
-      audience: "https://timesphere.systems/api",
-      scope: "timesphere:admin"
-    });
-    const requestBody = {
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
-      entry_type: "WORK",
-      timesheet_id: 0
-    };
+  const toggleTimeEntry = async (time, timesheet_id) => {
     try {
-      const response = await fetch('http://localhost:8080/timesheet/entry', {
+      const response = await fetch(`api/timesheet/${timesheet_id}/toggle?time=${time}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'accept': 'application/json',
+          'Authorization': `Bearer ${JWTtoken}`,
           },
-        body: JSON.stringify(requestBody),
       })
-      if (!response.ok) throw new Error('Network response was not ok.');
-      const responseData = await response.json();
-      console.log('Time entry created successfully:', responseData);
+      if (!response.ok){
+        console.error("Failed to toggle time entry");
+      }
+      else{
+        const responseData = await response.json();
+        console.log('Time entry created successfully:', responseData);
+        reloadContent();
+      }
     } catch (error) {
-      console.error('There was a problem with your fetch operation:', error);
+      console.error('Failed to toggle time entry:', error);
     }
   };
-  const handleSubmit = async () => {
-    console.log("Submitting timings!!");
-    if (timeEntries.length > 0 && !startTimer) {
-      const lastEntry = timeEntries[timeEntries.length - 1]; 
-      await sendTimeEntryToBackend(lastEntry.startTime, lastEntry.endTime);
-    } else {
-      console.log("No entry to submit or timer is still running.");
-    }
+  const reloadContent = () =>{
+    setCurrentTimesheet();
+    setCurrentTimeEntries();
+  }
+  const submitTimesheet = async () => {
+
   };
   return (
     <div>
@@ -267,9 +288,13 @@ const Dashboard = () => {
         clickable={true}
         icon={ClockIcon}
         text={buttonText}
-        onClick= {change}/>
+        onClick= {() => {
+          if(submittable === true){
+            handleClockButton();
+          }
+        }}/>
         {startTimer ?
-          <Timer startTime={new Date()} />
+          <Timer startTime={openEntryTime} />
           :
           <Timer />
         }
@@ -278,13 +303,17 @@ const Dashboard = () => {
         width={'250px'}
         clickable={!startTimer}
         icon={CircleArrow}
-        onClick={handleSubmit}/>
+        onClick={() => {
+          if(submittable === true && buttonText === "Clock-In"){
+            submitTimesheet();
+          }
+        }}/>
       </CLOCK_WRAPPER>
       <TABLE_WRAPPER>
         <DashboardTable editable={editable} submittable={submittable} token={JWTtoken} currentTimeEntries={currentTimeEntries}/>
         <TOGGLE_WRAPPER>
           <EditToggleButton onToggle={() => {
-            if(submittable === true){
+            if(submittable === true && buttonText === "Clock-In"){
               toggleEditMode();
             }}} checked={editable} />
         </TOGGLE_WRAPPER>
