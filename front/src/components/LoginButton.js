@@ -27,25 +27,7 @@ const LOGINBUTTON = styled.button`
 `
 
 const LoginButton = ({width, height}) => {
-    const { isAuthenticated, loginWithRedirect, logout, getAccessTokenSilently } = useAuth0();
-
-    React.useEffect(() => {
-        let getToken = async () => {
-            if (isAuthenticated) {
-                let token = await getAccessTokenSilently(
-                    {authorizationParams: {        
-                        audience: "https://timesphere.systems/api",
-                        redirect_uri: "http://localhost:3000",
-                        scope: "timesphere:admin"
-                    }});
-                console.log(token);
-                
-                if (localStorage.getItem("token") === null) localStorage.setItem("token", token)
-                else console.log("Token already exists")
-            }
-        }
-        getToken();
-      }, [getAccessTokenSilently, isAuthenticated])
+    const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
 
     let handleClick = () => {
         isAuthenticated ? logout({ 
