@@ -74,7 +74,6 @@ const TD = styled.td`
 const TBODY = styled.tbody`
     min-width: 800px;
     width: 100%;
-    margin-bottom: 10px;
 `
 
 const EDIT = styled.div`
@@ -164,12 +163,13 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                 console.log('Holiday updated successfully. ID:', selectedHoliday.id);
             }
 
-            setOverlayVisible(false);
-            setIsEditing(false);
 
         } catch (error) {
             console.error('Error updating holiday:', error);
         }
+
+        // status of holiday needs to changed to waiting instead of denied
+
     };
     
 
