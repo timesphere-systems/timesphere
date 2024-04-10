@@ -126,8 +126,6 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
     const [overlayVisible, setOverlayVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editedEntries, setEditedEntries] = useState([]);
-    const [entries, setEntries] = useState([]);
-    const [isEditModeEnabled, setIsEditModeEnabled] = useState(false);
 
 
     const toggleEditMode = () => {
@@ -136,49 +134,53 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
     
     const handleEntryEdit = (index, updatedEntry) => {
         const newEntries = editedEntries.map((entry, i) => i === index ? updatedEntry : entry);
-        console.log('Updating editedEntries with:', newEntries);
         setEditedEntries(newEntries);
     };
-    
-    useEffect(() => {
-        console.log('editedEntries updated:', editedEntries);
-    }, [editedEntries]);
-    
-    
-    
+
     const handleSubmitEdits = async () => {
-        console.log('Submitting edits for entries:', editedEntries);
+        let updatesSuccessful = true;
         for (const entry of editedEntries) {
-            console.log('entry:', entry);
-            const response = await fetch(`API/timesheet/entry/${entry.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    start_time: entry.start_time,
-                    end_time: entry.end_time,
-                    entry_type: entry.entry_type,
-                }),
-            });
-        
-            if (!response.ok) {
-                console.error('Failed to update time entry with ID:', entry.id);
-            } else {
-                console.log('Time entry updated successfully:', entry.id);
+    
+            try {
+                const response = await fetch(`/api/timesheet/entry/${entry.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        start_time: entry.start_time,
+                        end_time: entry.end_time,
+                        entry_type: entry.entry_type,
+                    }),
+                });
+    
+                if (!response.ok) {
+                    console.error('Failed to update time entry with ID:', entry.id, 'Response status:', response.status);
+                    const errorData = await response.text(); // Assuming the error details are in text format
+                    console.error('Error details:', errorData);
+                    updatesSuccessful = false;
+                } else {
+                    console.log('Time entry updated successfully:', entry.id);
+                }
+            } catch (error) {
+                console.error('Error occurred while updating time entry with ID:', entry.id, 'Error:', error);
             }
+
+        }
+
+        if (updatesSuccessful) {
+            await fetchTimesheets();
         }
     
         setOverlayVisible(false);
         setIsEditing(false);
+
     };
     
     
 
-
     const handleTimesheetSelect = (timesheet) => {
-        console.log('Selected timesheet for editing:', timesheet);
         setSelectedTimesheet(timesheet);
         setOverlayVisible(true);
         setEditedEntries(timesheet.entriesData.map(entry => ({...entry})));
@@ -239,44 +241,44 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
         }
     };
 
-    useEffect(() => {
-        const fetchTimesheets = async () => {
-            try {
-                let url = `api/consultant/${consultant_id}/timesheets`;
-                if (approval_status && approval_status !== 'Select Status') {
-                    url += `?approval_status=${approval_status}`;
-                }
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-    
-                if (!response.ok) {
-                    throw new Error('Failed to fetch timesheet data');
-                }
-    
-                let data = await response.json();
-                const timesheetDataPromises = data.timesheets.map(async timesheet_id => {
-                    const timesheet = await fetchTimesheetData(timesheet_id);
-                    const entryDataPromises = timesheet.entries.map(entry_id =>
-                        fetchTimeEntryData(entry_id)
-                    );
-                    const entriesData = await Promise.all(entryDataPromises);
-                    return { ...timesheet, entriesData };
-                });
-    
-                const resolvedTimesheetDataArray = await Promise.all(timesheetDataPromises);
-                setTimesheetsData(resolvedTimesheetDataArray);
-                setEntries(resolvedTimesheetDataArray.flatMap(timesheet => timesheet.entriesData));
-            } catch (error) {
-                console.error('Error fetching timesheets:', error);
+    const fetchTimesheets = async () => {
+        try {
+            let url = `api/consultant/${consultant_id}/timesheets`;
+            if (approval_status && approval_status !== 'Select Status') {
+                url += `?approval_status=${approval_status}`;
             }
-        };
-    
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch timesheet data');
+            }
+
+            let data = await response.json();
+            const timesheetDataPromises = data.timesheets.map(async timesheet_id => {
+                const timesheet = await fetchTimesheetData(timesheet_id);
+                const entryDataPromises = timesheet.entries.map(entry_id =>
+                    fetchTimeEntryData(entry_id)
+                );
+                const entriesData = await Promise.all(entryDataPromises);
+                return { ...timesheet, entriesData };
+            });
+
+            const resolvedTimesheetDataArray = await Promise.all(timesheetDataPromises);
+            setTimesheetsData(resolvedTimesheetDataArray);
+        } catch (error) {
+            console.error('Error fetching timesheets:', error);
+        }
+    };
+
+    useEffect(() => {
         fetchTimesheets();
+
     }, [consultant_id, token, approval_status]);
 
     const Entry = ({ entry, index, isEditable, onEdit }) => {
@@ -288,11 +290,10 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
             let newValue = e.target.value;
             if (field === 'start_time' || field === 'end_time') {
                 const datePart = entry[field].split("T")[0];
-                newValue = `${datePart}T${newValue}`;
+                newValue = `${datePart}T${newValue.length === 5 ? `${newValue}:00` : newValue}`;
             }
     
             const newEntry = { ...entry, [field]: newValue };
-            console.log(`handleChange - Field: ${field}, Value: ${newValue}`);
             onEdit(index, newEntry);
         };
         const calculateHours = () => {
@@ -305,10 +306,6 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
             return duration.toFixed(1);
         };
 
-        useEffect(() => {
-            console.log('Entries State Updated:', entries);
-        }, [entries]);
-    
         return (
             <TR>
                 <TD>{["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(entry.start_time).getDay()]}</TD>
@@ -384,7 +381,7 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                     </TBODY>
                 </TIMESHEET> 
             </OVERLAY_CONTAINER>
-            <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => {setOverlayVisible(false); setIsEditModeEnabled(false)}} title={'Weekly Timesheet'}>
+            <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => {setOverlayVisible(false)}} title={'Weekly Timesheet'}>
                 <OVERLAY_CONTAINER>
                     {selectedTimesheet && (
                         <TIMESHEET>
