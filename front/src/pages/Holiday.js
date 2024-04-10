@@ -42,7 +42,7 @@ const Holiday = () => {
     const [visible, setVisible] = useState(false);   // Store modal visibility state
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const [JWTtoken, setJWTToken] = useState();
-    const [consultantID, setConsultantID] = useState();  // add 1 for testing
+    const [consultantID, setConsultantID] = useState();  // add value for testing
     const [sortBy, setSortBy] = useState('Latest');
     const [approval_status, setApprovalStatus] = useState('Select Status');
 
