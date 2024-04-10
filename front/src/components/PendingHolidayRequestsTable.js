@@ -160,12 +160,11 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-const PendingHolidayRequestsTable = ( {userIDInp, Jtoken} ) => {
+const PendingHolidayRequestsTable = ( {userID, Jtoken} ) => {
     const [holidays, setHolidays] = useState();
     const [holidayData, setHolidayData] = useState([]);
     const [peopleData, setPeopleData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
-    const [userID, setUserID] = useState(userIDInp);
 
     useEffect(() => {
         const fetchHolidays= async () => {
@@ -248,7 +247,6 @@ const PendingHolidayRequestsTable = ( {userIDInp, Jtoken} ) => {
             setPeopleData(peopleEntries);
         };
 
-        console.log(Jtoken);
         if (Jtoken !== undefined && userID !== undefined){
             if (holidays === undefined){
                 fetchHolidays();
