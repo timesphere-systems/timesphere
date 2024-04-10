@@ -139,11 +139,12 @@ const OVERLAY_TEXT = styled.p`
     font-weight: 600;
 `
 
-const DashboardTable = ({ editable, setEditable, submittable, token, currentTimeEntries}) => {
+const DashboardTable = ({ editable, setEditable, submittable, token, currentTimeEntries, reloadContent, timesheet, tableSet, setTableSet}) => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
     const [validTimeSheet, setValidTimesheet] = useState(true);
-    const [tableSet, setTableSet] = useState(false);
     const [entryChange, setEntryChange] = useState(false);
+    const [newTimeEntries, setNewTimeEntries] = useState();
+
 
     //useEffect for loading the data onto the dashboard table
     useEffect(() => {
@@ -214,18 +215,81 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
         let entry = {'start_time': undefined, 'end_time': undefined};
         weekDates.forEach(day => {
             if(entry.start_time === undefined && day.clockIn !== ""){
-                entry.start_time = day.clockIn;
+                let timeToAdd = new Date(day.date);
+                //increase time by an hour since ISO string is behind 1 hour of current time
+                timeToAdd.setTime(timeToAdd.getTime() + (60 * 60 * 1000));
+                timeToAdd = (timeToAdd.toISOString().replace("T"," ").substring(0, 10)) + " " + day.clockIn;
+                entry.start_time = timeToAdd;
                 entry.status = day.status;
             }
             if(entry.end_time === undefined && day.clockOut !== ""){
-                entry.end_time = day.clockOut;
+                let timeToAdd = new Date(day.date);
+                //increase time by an hour since ISO string is behind 1 hour of current time
+                timeToAdd.setTime(timeToAdd.getTime() + (60 * 60 * 1000));
+                timeToAdd = (timeToAdd.toISOString().replace("T"," ").substring(0, 10)) + " " + day.clockOut;
+                entry.end_time = timeToAdd;
                 entriesList.push(entry);
                 entry = {'start_time': undefined, 'end_time': undefined};
             }
         });
         return entriesList;
     }
-
+    let deleteAllTimeEntries = async () =>{
+        for (const timeEntry of currentTimeEntries) {
+            try {
+                const response = await fetch(`api/timesheet/entry/${timeEntry.id}`, {
+                    'method': 'DELETE',
+                    'headers': {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if(!response.ok){
+                    console.error("Failed to delete time entry");
+                    return false;
+                }
+                console.log("Deleted time entry");
+            } catch (error) {
+                console.error("Failed to delete time entry: ", error);
+                return false;
+            }
+        }
+        reloadContent();
+        return true;
+    }
+    let storeNewTimeEntries = async () => {
+        let timesheetID = timesheet.id;
+        for (const timeEntry of newTimeEntries) {
+            let requestBody = {
+                "start_time": timeEntry.start_time,
+                "end_time": timeEntry.end_time,
+                "entry_type": timeEntry.status,
+                "timesheet_id": timesheetID
+            }
+            console.log(JSON.stringify(requestBody));
+            try {
+                const response = await fetch(`api/timesheet/entry`, {
+                    'method': 'POST',
+                    'headers': {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    'body': JSON.stringify(requestBody)
+                });
+                if(!response.ok){
+                    // TODO: Display to UI
+                    console.error("Failed to create time entry");
+                    return;
+                }
+                console.log("Created Timesheet")
+            } catch (error) {
+                console.error("Failed to create time entry: ", error);
+                return;
+            }
+        }
+        // TODO: Display to UI
+        console.log("Timesheet updated successfully");
+        reloadContent();
+    }
     if(token !== undefined && currentTimeEntries !== undefined && tableSet === false){
             setTimeEntriesTable();
             setTableSet(true);
@@ -233,11 +297,31 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
     if(editable === false && validTimeSheet === false){
         setEditable(!editable);
     }
-    if(editable === false && entryChange === true && validTimeSheet == true){
-        console.log(getTimeEntriesFromTable());
+    if(editable === false && entryChange === true && validTimeSheet === true && currentTimeEntries !== undefined){
+        let timeEntries = getTimeEntriesFromTable();
+        if(currentTimeEntries.length !== 0){
+            if(deleteAllTimeEntries()){
+                setNewTimeEntries(timeEntries);
+                setWeekDates(getWeekDates());
+            }
+            else{
+                //TODO: Display to UI
+                console.error("Failed to update time entries.");
+            }
+        }
+        else{
+            setNewTimeEntries(timeEntries);
+        }
         setEntryChange(false);
     }
-    }, [token, currentTimeEntries, editable, weekDates, validTimeSheet, entryChange]);
+    //this use state is only set and used when creating timesheets
+    if(newTimeEntries !== undefined && timesheet !== undefined){
+        console.log(newTimeEntries);
+        storeNewTimeEntries();
+        setNewTimeEntries(undefined);
+        setTableSet(false);
+    }
+    }, [token, currentTimeEntries, editable, weekDates, validTimeSheet, entryChange, newTimeEntries, timesheet]);
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
@@ -261,6 +345,19 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
         };
         if(checkChangedDay(newWeekDates[index].date) === false){
             return;
+        }
+        if(newWeekDates[index].clockIn === ""){
+            // TODO: make this console error a message for the ui
+            console.error("Only change status on the day of the clock in time.");
+            return;
+        }
+        if(newWeekDates[index].clockOut === ""){
+            for(let i = index + 1; i < newWeekDates.length; i++){
+                newWeekDates[i].status = value;
+                if(newWeekDates[i].clockOut !== ""){
+                    break;
+                }
+            }
         }
         setWeekDates(newWeekDates);
         setEntryChange(true);

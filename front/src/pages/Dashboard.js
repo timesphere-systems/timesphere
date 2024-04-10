@@ -52,6 +52,7 @@ const Dashboard = () => {
   const [currentTimesheet, setCurrentTimesheet] = useState();
   const[currentTimeEntries, setCurrentTimeEntries] = useState();
   const[openEntryTime, setOpenEntryTime] = useState();
+  const [tableSet, setTableSet] = useState(false);
   
   React.useEffect(() => {
     //function to get Authorization Token
@@ -274,9 +275,10 @@ const Dashboard = () => {
       console.error('Failed to toggle time entry:', error);
     }
   };
-  const reloadContent = () =>{
+  let reloadContent = () => {
     setCurrentTimesheet();
     setCurrentTimeEntries();
+    setTableSet(false);
   }
   const submitTimesheet = async () => {
     try {
@@ -336,7 +338,8 @@ const Dashboard = () => {
         }}/>
       </CLOCK_WRAPPER>
       <TABLE_WRAPPER>
-        <DashboardTable editable={editable} setEditable={setEditable} submittable={submittable} token={JWTtoken} currentTimeEntries={currentTimeEntries}/>
+        <DashboardTable editable={editable} setEditable={setEditable} submittable={submittable} setTableSet={setTableSet} tableSet={tableSet}
+          token={JWTtoken} currentTimeEntries={currentTimeEntries} reloadContent={reloadContent} timesheet={currentTimesheet}/>
         <TOGGLE_WRAPPER>
           <EditToggleButton onToggle={() => {
             if(submittable === true && buttonText === "Clock-In" && currentTimesheet !== undefined){
