@@ -153,7 +153,6 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                 body: JSON.stringify({
                     "start_date": newStartDate,
                     "end_date": newEndDate,
-                    "approval_status": 2,
                 }),
             });
             
@@ -168,8 +167,29 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
             console.error('Error updating holiday:', error);
         }
 
-        // status of holiday needs to changed to waiting instead of denied
+        // re-submit edited holiday request:
 
+        try {
+            const submitResponse = await fetch(`api/holiday/${selectedHoliday.id}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    "id": selectedHoliday.id,
+                }),
+            });
+
+            if (!submitResponse.ok) {
+                console.error('Failed to submit updated holiday with ID:', selectedHoliday.id);
+            } else {
+                console.log('Holiday update submitted successfully. ID:', selectedHoliday.id);
+            }
+
+        } catch (error) {
+            console.error('Error submitted updated holiday:', error);
+        }
     };
     
 
