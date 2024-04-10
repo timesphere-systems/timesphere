@@ -139,8 +139,11 @@ const OVERLAY_TEXT = styled.p`
     font-weight: 600;
 `
 
-const DashboardTable = ({ editable, submittable, token, currentTimeEntries}) => {
+const DashboardTable = ({ editable, setEditable, submittable, token, currentTimeEntries}) => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
+    const [validTimeSheet, setValidTimesheet] = useState(true);
+    const [tableSet, setTableSet] = useState(false);
+    const timeChanges = React.useRef();
 
     //useEffect for loading the data onto the dashboard table
     useEffect(() => {
@@ -200,10 +203,19 @@ const DashboardTable = ({ editable, submittable, token, currentTimeEntries}) => 
             }
             setWeekDates([...tableDates]);
         }
-    if(token !== undefined && currentTimeEntries !== undefined){
+    if(token !== undefined && currentTimeEntries !== undefined && tableSet === false){
             setTimeEntriesTable();
+            setTableSet(true);
     }
-    }, [token, currentTimeEntries]);
+    if(editable === false && validTimeSheet === false){
+        setEditable(!editable);
+    }
+    if(timeChanges.current !== undefined){
+        setEditable(true);
+        setWeekDates([...timeChanges.current]);
+        timeChanges.current = undefined;
+    }
+    }, [token, currentTimeEntries, editable, weekDates, timeChanges, validTimeSheet]);
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
@@ -235,11 +247,23 @@ const DashboardTable = ({ editable, submittable, token, currentTimeEntries}) => 
             ...newWeekDates[index],
             [field]: value
         };
+        let changedDate = new Date(weekDates[index].date);
+        if(changedDate >= new Date()){
+            // TODO: make this console error a message for the ui
+            console.error("Can not edit time entries of future dates")
+            return;
+        }
         if (field === 'clockIn' || field === 'clockOut') {
             const clockIn = newWeekDates[index].clockIn;
             const clockOut = newWeekDates[index].clockOut;
+
             if (clockIn && clockOut) {
                 const hoursWorked = calculateHours(clockIn, clockOut);
+                if(hoursWorked < 0){
+                    // TODO: make this console error a message for the ui
+                    console.error("Start time must be greater than end time");
+                    return;
+                }
                 newWeekDates[index].hours = hoursWorked;
             }
             else if(clockIn || clockOut){
@@ -256,7 +280,8 @@ const DashboardTable = ({ editable, submittable, token, currentTimeEntries}) => 
                 newWeekDates[index].hours = 0;
             }
         }
-        setWeekDates(newWeekDates);
+        setValidTimesheet(checkTimeEntriesTable(newWeekDates));
+
     };
 
     // Function to calculate hours worked based on clock in/out times
@@ -283,6 +308,45 @@ const DashboardTable = ({ editable, submittable, token, currentTimeEntries}) => 
         }
         return false;
     };
+    let checkTimeEntriesTable = (weekDatesArr) =>{
+        let openEntry = false;
+        for(let index = 0; index < weekDatesArr.length; index++){
+            if((weekDatesArr[index].clockIn !== "") && (weekDatesArr[index].clockOut === "")){
+                if(openEntry){
+                    // TODO: make this console error a message for the ui
+                    console.error("Can not have two open time entries");
+                    timeChanges.current = (weekDatesArr);
+                    return false;
+                }
+                    openEntry = true;
+            }
+            else if((weekDatesArr[index].clockIn === "") && (weekDatesArr[index].clockOut !== "")){
+                if(!openEntry){
+                    // TODO: make this console error a message for the ui
+                    console.error("Time Entries must have an start time");
+                    timeChanges.current = (weekDatesArr);
+                    return false;
+                }
+                openEntry = false;
+            }
+            else if((weekDatesArr[index].clockIn === "") && (weekDatesArr[index].clockOut === "")) {
+                if(openEntry){
+                    weekDatesArr[index].hours = 24;
+                }
+                else{
+                    weekDatesArr[index].hours = 0;
+                }
+            }
+            if(index === weekDatesArr.length - 1 && openEntry === true){
+                // TODO: make this console error a message for the ui
+                console.error("All edited timesheets must have an endtime value");
+                timeChanges.current = (weekDatesArr);
+                return false;
+            }
+        }
+        timeChanges.current = (weekDatesArr);
+        return true;
+    }
 
     return (
         <div style={{display:'flex', flexDirection:'column'}}>

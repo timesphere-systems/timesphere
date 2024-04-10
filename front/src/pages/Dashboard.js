@@ -72,6 +72,7 @@ const Dashboard = () => {
           },
         });
         if(!response.ok){
+          // TODO: make this console error a message for the ui
           console.error("Failed to get user details");
         }
         let user_details = await response.json()
@@ -103,6 +104,7 @@ const Dashboard = () => {
               }
           }
           else{
+            // TODO: make this console error a message for the ui
               console.error("Failed to get current week timesheet.");
               return
           }
@@ -130,6 +132,7 @@ const Dashboard = () => {
                 }
             });
             if(!response.ok){
+              // TODO: make this console error a message for the ui
                 console.error("Failed to create current week timesheet.");
                 return;
             }
@@ -150,11 +153,13 @@ const Dashboard = () => {
                 },
             });
             if(!response.ok){
+              // TODO: make this console error a message for the ui
                 console.error("Failed to get current week timesheet details.");
                 return;
             }
             let data = await response.json();
             if(data.id === undefined){
+              // TODO: make this console error a message for the ui
                 console.error("Failed to get current week timesheet details.");
                 return;
             }
@@ -176,6 +181,7 @@ const Dashboard = () => {
                   }
               });
               if(!response.ok){
+                // TODO: make this console error a message for the ui
                   console.error("Failed to get time entry details.");
                   return;
               }
@@ -229,12 +235,12 @@ const Dashboard = () => {
     }
     if(buttonText === "Clock-In"){
       setOpenEntryTime(new Date());
-      setEditable(false);
     }
     else{
       //case of avoiding errors when trying to spam click clock in and out
       if((openEntryTime.toDateString() === now.toDateString()) && (openEntryTime.toTimeString() === now.toTimeString())){
-        console.log("Cant Clock Out Yet");
+        // TODO: make this console error a message for the ui
+        console.error("Cant Clock Out Yet");
         return;
       }
     }
@@ -255,10 +261,12 @@ const Dashboard = () => {
           },
       })
       if (!response.ok){
+        // TODO: make this console error a message for the ui
         console.error("Failed to toggle time entry");
       }
       else{
         const responseData = await response.json();
+        // TODO: make this console error a message for the ui
         console.log('Time entry created successfully:', responseData);
         reloadContent();
       }
@@ -271,7 +279,6 @@ const Dashboard = () => {
     setCurrentTimeEntries();
   }
   const submitTimesheet = async () => {
-    setEditable(false);
     try {
       const response = await fetch(`api/timesheet/${currentTimesheet.id}/submit`, {
         method: 'POST',
@@ -281,10 +288,12 @@ const Dashboard = () => {
           },
       })
       if (!response.ok){
+        // TODO: make this console error a message for the ui
         console.error("Failed to submit timesheet");
       }
       else{
         const responseData = await response.json();
+        // TODO: make this console error a message for the ui
         console.log('Timesheet submitted sucessfully:', responseData);
         reloadContent();
       }
@@ -305,7 +314,7 @@ const Dashboard = () => {
         <ActionButton 
         height={'100px'}
         width={'700px'}
-        clickable={currentTimesheet !== undefined && submittable === true}
+        clickable={currentTimesheet !== undefined && submittable === true && editable === false}
         icon={ClockIcon}
         text={buttonText}
         onClick= {handleClockButton}/>
@@ -317,7 +326,7 @@ const Dashboard = () => {
         <SubmitButton
         height={'100px'}
         width={'250px'}
-        clickable={!startTimer && currentTimesheet !== undefined}
+        clickable={!startTimer && currentTimesheet !== undefined && editable === false}
         icon={CircleArrow}
         submitted={!submittable}
         onClick={() => {
@@ -327,7 +336,7 @@ const Dashboard = () => {
         }}/>
       </CLOCK_WRAPPER>
       <TABLE_WRAPPER>
-        <DashboardTable editable={editable} submittable={submittable} token={JWTtoken} currentTimeEntries={currentTimeEntries}/>
+        <DashboardTable editable={editable} setEditable={setEditable} submittable={submittable} token={JWTtoken} currentTimeEntries={currentTimeEntries}/>
         <TOGGLE_WRAPPER>
           <EditToggleButton onToggle={() => {
             if(submittable === true && buttonText === "Clock-In" && currentTimesheet !== undefined){
