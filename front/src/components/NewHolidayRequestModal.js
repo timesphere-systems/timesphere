@@ -3,7 +3,7 @@ import ModalWrapper from './ModalWrapper'
 import SubmitButton from './SubmitButton'
 import styled from 'styled-components'
 
-const HOLIDAY_FORM = styled.form`
+const HOLIDAY_FORM = styled.div`
 
 `;
 
@@ -68,6 +68,7 @@ const DATE_CONTAINER = styled.div`
 
 `;
 
+
 function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlayVisible}) {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
@@ -75,12 +76,12 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
     const isClickable = dateFrom && dateTo;
 
     let handleSubmit = async () => {
-        try {
-            // Get current timestamp
-            const submittedTime = new Date().toISOString();
+        
+        console.log('handleSubmit function invoked');
 
-            // HTTP POST request to backend API
-            const url = `api/consultant/${consultantId}/holiday`;     // create holiday request
+        try {
+            // first POST request to create holiday 
+            const url = `api/consultant/${consultantId}/holiday`;     
 
             const response = await fetch (url, {
                 method: 'POST',
@@ -89,27 +90,49 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
                     'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    "submitted": submittedTime,
                     "start_date": dateFrom,
                     "end_date": dateTo,
-                    "approval_status": 2,
-
                 }),
             });
                 
             if (!response.ok) {
-                console.error('Failed to add new holiday with dates:', dateFrom);
-            } else {
-                console.log('Holiday added successfully. consultant ID:', consultantId);
+                console.error('Failed to add new holiday for consultant:', consultantId);
+                return;
+            } 
 
-                setDateFrom('');
-                setDateTo('');
+            const responseData = await response.json();
+            console.log(responseData)
+            const holidayId = responseData.id
+            console.log('Holiday successfully added. ID:', holidayId);
+
+            // second POST request to submit holiday
+            const submitResponse = await fetch(`api/holiday/${holidayId}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    "id": holidayId,
+                }),
+            });
+
+            if (!submitResponse.ok) {
+                console.error('Failed to submit holiday with ID:', holidayId);
+                return;
             }
+
+            console.log('Holiday submitted successfully:', holidayId);
+
+            // clear form fields after successfull submission
+            setDateFrom('');
+            setDateTo('');
             
         } catch (error) {
-            console.error('Error adding holiday:', error);
+            console.error('Error adding or submitting holiday:', error);
         }  
     };
+
 
     return (
         <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => setOverlayVisible(false)} title={'Holiday Request Form'}>
@@ -126,7 +149,7 @@ function NewHolidayRequestModal({token, consultantId, overlayVisible, setOverlay
                             <HOLIDAY_DATE type="date" id="date-to" name="date-to" value={dateTo} onChange={(e) => setDateTo(e.target.value)} required />
                         </DATE_CONTAINER>
                     </INPUT_CONTAINER>
-                    <SUBMIT_BUTTON type="submit">
+                    <SUBMIT_BUTTON>
                         <SubmitButton clickable={isClickable} onClick={handleSubmit} width={"145px"} height={"50px"} />
                     </SUBMIT_BUTTON>
                 </HOLIDAY_CONTAINER>
