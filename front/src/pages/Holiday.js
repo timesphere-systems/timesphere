@@ -40,9 +40,9 @@ const FOOTER_WRAPPER = styled.div`
 
 const Holiday = () => {
     const [visible, setVisible] = useState(false);   // Store modal visibility state
-    const { isAuthenticated, getAccessTokenSilently } = useAuth0();
-    const [JWTtoken, setToken] = useState(null);
-    const [consultantId, setConsultantId] = useState(1);  // for testing
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const [JWTtoken, setJWTToken] = useState();
+    const [consultantID, setConsultantID] = useState();  // add 1 for testing
     const [sortBy, setSortBy] = useState('Latest');
     const [approval_status, setApprovalStatus] = useState('Select Status');
 
@@ -58,25 +58,54 @@ const Holiday = () => {
 
 
     React.useEffect(() => {
+        // function to get Authorization Token
         let getToken = async () => {
             if (isAuthenticated) {
-                let token = await getAccessTokenSilently(
-                    {
-                        authorizationParams: {
-                            audience: "https://timesphere.systems/api",
-                            redirect_uri: "/api",
-                            scope: "timesphere:admin"
-                        }
-                    });
-                console.log(token);
-                setToken(token);
+                let token = localStorage.getItem("token");
+                setJWTToken(token);
             }
         }
 
-        getToken();
+        // fucntion to get consultantID from JWT
+        let getConsultantID = async () => {
+            try {
+                const response = await fetch('api/user', {
+                    'method': 'GET',
+                    'headers': {
+                        'Accept':'application/json',
+                        'Authorization': `Bearer ${JWTtoken}`
+                    },
+                });
 
+                if (!response.ok) {
+                    // TODO: make this console error a message for the ui
+                    console.error("Failed to get user details");
+                }
 
-    }, [getAccessTokenSilently, isAuthenticated]);
+                let user_details = await response.json();
+
+                if (user_details.consultant_id === null) {
+                    // TODO: display message to the user on ui
+                    console.error("Current User is not a consultant");
+                    return
+                }
+
+                setConsultantID(user_details.consultant_id);
+
+            } catch (error) {
+                console.error("Error fetching user details: ", error);
+            }
+        }
+        
+        if (JWTtoken === undefined) {
+            getToken();
+        }
+        else if (consultantID === undefined) {
+            getConsultantID();
+        }
+
+        
+    }, [ isAuthenticated, JWTtoken, consultantID]);
 
 
     return (
@@ -97,7 +126,7 @@ const Holiday = () => {
             <TABLE_WRAPPER>
                 <HolidayRequestsTable 
                 token={JWTtoken} 
-                consultantId={consultantId} 
+                consultantId={consultantID} 
                 sort={sortBy} 
                 approval_status={approval_status === 'Approved' ? 'APPROVED' : approval_status === 'Denied' ? 'DENIED' : approval_status === 'Select Status' ? 'Select Status' : approval_status === 'Clear Filter' ? 'Select Status' : 'WAITING'} 
                 />
@@ -105,7 +134,7 @@ const Holiday = () => {
             <FOOTER_WRAPPER>
                 <Footer />
             </FOOTER_WRAPPER>
-            <NewHolidayRequestModal token={JWTtoken} consultantId={consultantId} overlayVisible={visible} setOverlayVisible={setVisible} />
+            <NewHolidayRequestModal token={JWTtoken} consultantId={consultantID} overlayVisible={visible} setOverlayVisible={setVisible} />
         </div>
     )
 }
