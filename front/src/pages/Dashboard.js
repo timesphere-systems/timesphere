@@ -305,14 +305,10 @@ const Dashboard = () => {
         <ActionButton 
         height={'100px'}
         width={'700px'}
-        clickable={currentTimesheet !== undefined}
+        clickable={currentTimesheet !== undefined && submittable === true}
         icon={ClockIcon}
         text={buttonText}
-        onClick= {() => {
-          if(submittable === true){
-            handleClockButton();
-          }
-        }}/>
+        onClick= {handleClockButton}/>
         {startTimer ?
           <Timer startTime={openEntryTime} />
           :
