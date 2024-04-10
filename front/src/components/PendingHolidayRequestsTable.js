@@ -287,11 +287,14 @@ const PendingHolidayRequestsTable = ( {userID, Jtoken} ) => {
                 },
             })
             if (!response.ok){
+                //TODO: message to display to the UI
                 console.error("Failed to submit holiday.");
             }
             else{
                 const responseData = await response.json();
+                //TODO: message to display to the UI
                 console.log('Holiday updated successfully:', responseData);
+                setHolidays(undefined);
             }
         } catch (error) {
             console.error('Failed submit holiday:', error);
