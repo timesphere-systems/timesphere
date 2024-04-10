@@ -97,6 +97,7 @@ const OVERLAY_CONTAINER = styled.div`
 
 
 
+
 const SUBMIT_BUTTON = styled.div`
     padding: 0;
     background-color: transparent;
@@ -108,6 +109,7 @@ const SUBMIT_BUTTON = styled.div`
         img {
             width: 20px;
         }
+
 
     }
 
