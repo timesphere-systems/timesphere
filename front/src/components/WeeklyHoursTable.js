@@ -1,3 +1,4 @@
+/* WeeklyHoursTable.js */
 import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
 import EditIcon from '../assets/icons/Edit.svg';
@@ -130,18 +131,23 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
 
 
     const toggleEditMode = () => {
-        setIsEditModeEnabled(!isEditModeEnabled);
+        setIsEditing(!isEditing);
     };
     
     const handleEntryEdit = (index, updatedEntry) => {
-        const updatedEntries = [...entries];
-        updatedEntries[index] = updatedEntry;
-        setEntries(updatedEntries);
-    };    
+        const newEntries = editedEntries.map((entry, i) => i === index ? updatedEntry : entry);
+        console.log('Updating editedEntries with:', newEntries);
+        setEditedEntries(newEntries);
+    };
+    
+    useEffect(() => {
+        console.log('editedEntries updated:', editedEntries);
+    }, [editedEntries]);
     
     
     
     const handleSubmitEdits = async () => {
+        console.log('Submitting edits for entries:', editedEntries);
         for (const entry of editedEntries) {
             console.log('entry:', entry);
             const response = await fetch(`API/timesheet/entry/${entry.id}`, {
@@ -172,10 +178,10 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
 
 
     const handleTimesheetSelect = (timesheet) => {
+        console.log('Selected timesheet for editing:', timesheet);
         setSelectedTimesheet(timesheet);
         setOverlayVisible(true);
-        setIsEditing(timesheet.approval_status === 'DENIED');
-        setIsEditModeEnabled(true);
+        setEditedEntries(timesheet.entriesData.map(entry => ({...entry})));
     };
 
 
@@ -274,50 +280,57 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
     }, [consultant_id, token, approval_status]);
 
     const Entry = ({ entry, index, isEditable, onEdit }) => {
-        const handleEntryTypeChange = (e) => {
-            const newType = e.target.value;
-            onEdit(index, { ...entry, entry_type: newType });
-        };
+        const handleChange = (e, field) => {
+            if ((field === 'start_time' || field === 'end_time') && (entry.entry_type === 'SICK' || entry.entry_type === 'HOLIDAY')) {
+                return;
+            }
     
-        const handleStartTimeChange = (e) => {
-            const newStartTime = e.target.value;
-            onEdit(index, { ...entry, start_time: `${entry.start_time.split("T")[0]}T${newStartTime}` });
-        };
+            let newValue = e.target.value;
+            if (field === 'start_time' || field === 'end_time') {
+                const datePart = entry[field].split("T")[0];
+                newValue = `${datePart}T${newValue}`;
+            }
     
-        const handleEndTimeChange = (e) => {
-            const newEndTime = e.target.value;
-            onEdit(index, { ...entry, end_time: `${entry.end_time.split("T")[0]}T${newEndTime}` });
+            const newEntry = { ...entry, [field]: newValue };
+            console.log(`handleChange - Field: ${field}, Value: ${newValue}`);
+            onEdit(index, newEntry);
         };
-    
         const calculateHours = () => {
-            const startTimeDate = new Date(entry.start_time);
-            const endTimeDate = new Date(entry.end_time);
-            const differenceInHours = (endTimeDate - startTimeDate) / (1000 * 60 * 60);
-            return differenceInHours.toFixed(1);
+            if (entry.entry_type === 'SICK' || entry.entry_type === 'HOLIDAY') {
+                return 0;
+            }
+            const startTime = new Date(entry.start_time);
+            const endTime = new Date(entry.end_time);
+            const duration = (endTime - startTime) / 3600000; 
+            return duration.toFixed(1);
         };
+
+        useEffect(() => {
+            console.log('Entries State Updated:', entries);
+        }, [entries]);
     
         return (
             <TR>
                 <TD>{["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(entry.start_time).getDay()]}</TD>
                 <TD>
                     {isEditable ? (
-                        <select value={entry.entry_type} onChange={handleEntryTypeChange}>
+                        <select value={entry.entry_type} onChange={(e) => handleChange(e, 'entry_type')}>
                             <option value="WORK">Work</option>
                             <option value="SICK">Sick</option>
                             <option value="HOLIDAY">Holiday</option>
                         </select>
-                    ) : entry.entry_type}
+                    ) : (entry.entry_type)}
                 </TD>
                 <TD>
                     {isEditable ? (
-                        <input type="time" value={entry.start_time.split("T")[1]} onChange={handleStartTimeChange} />
+                        <input type="time" value={entry.start_time.split("T")[1]} onChange={(e) => handleChange(e, 'start_time')}  />
                     ) : (
                         new Date(entry.start_time).toLocaleTimeString()
                     )}
                 </TD>
                 <TD>
                     {isEditable ? (
-                        <input type="time" value={entry.end_time.split("T")[1]} onChange={handleEndTimeChange} />
+                        <input type="time" value={entry.end_time.split("T")[1]} onChange={(e) => handleChange(e, 'end_time')} />
                     ) : (
                         new Date(entry.end_time).toLocaleTimeString()
                     )}
@@ -327,8 +340,6 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
         );
     };
     
-    
-
     return (
         <WRAPPER>
             <OVERLAY_CONTAINER>
@@ -349,16 +360,23 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                             <TR key={timesheet.id}>
                                 <TD>
                                     <button onClick={() => handleTimesheetSelect(timesheet)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                                    <img src={Timesheet} alt="Timesheet Icon"/>
+                                        <img src={Timesheet} alt="Timesheet Icon"/>
                                     </button>
                                 </TD>
                                 <TD>{new Date(timesheet.created).toLocaleDateString()}</TD>
                                 <TD>{timesheet.submitted ? new Date(timesheet.submitted).toLocaleDateString() : 'N/A'}</TD>
                                 <TD><SetStatusButton status={timesheet.approval_status} isActive={false} /></TD>
                                 <TD>
-                                    <EDIT editable={RowIsEditable} onClick={() => {toggleEditMode(); handleTimesheetSelect(timesheet)}}>
-                                        {RowIsEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
-                                    </EDIT>
+                                    {RowIsEditable ? (
+                                        <EDIT editable={RowIsEditable} onClick={() => {toggleEditMode(); handleTimesheetSelect(timesheet)}}>
+                                            <img src={EditIcon} alt="Edit" />
+                                        </EDIT>
+                                        ) : (
+                                        <EDIT editable={false}>
+                                            <img src={unEditIcon} alt="Not Editable" />
+                                        </EDIT>
+                                        )
+                                        }
                                 </TD>
                             </TR>
                         );
@@ -366,7 +384,7 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                     </TBODY>
                 </TIMESHEET> 
             </OVERLAY_CONTAINER>
-            <ModalWrapper isVisible={overlayVisible && isEditModeEnabled} toggleOverlay={() => {setOverlayVisible(false); setIsEditModeEnabled(false)}} title={'Weekly Timesheet'}>
+            <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => {setOverlayVisible(false); setIsEditModeEnabled(false)}} title={'Weekly Timesheet'}>
                 <OVERLAY_CONTAINER>
                     {selectedTimesheet && (
                         <TIMESHEET>
@@ -380,19 +398,13 @@ const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
                                 </TR>
                             </HEADERS>
                             <TBODY>
-                                {selectedTimesheet.entriesData.map((entry, index) => (
-                                    <Entry
-                                        key={index}
-                                        entry={entry}
-                                        index={index}
-                                        isEditable={isEditModeEnabled && selectedTimesheet.approval_status === 'DENIED'}
-                                        onEdit={handleEntryEdit}
-                                    />
-))}
+                                {editedEntries.map((entry, index) => (
+                                    <Entry key={entry.id} entry={entry} index={index} isEditable={isEditing && selectedTimesheet.approval_status === 'DENIED'} onEdit={handleEntryEdit} />
+                                ))}
                             </TBODY>
                         </TIMESHEET>
                     )}
-                    {isEditing && (
+                    {isEditing && selectedTimesheet.approval_status === 'DENIED' && (
                         <SUBMIT_BUTTON>
                             <SubmitButton onClick={handleSubmitEdits} width={"145px"} height={"50px"} clickable={true}/>
                         </SUBMIT_BUTTON>
