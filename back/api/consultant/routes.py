@@ -187,7 +187,7 @@ def create_holiday_request(consultant_id: int, request: HolidayTimes,
         try:
             row = connection.execute("""
                 INSERT INTO holidays (created, start_date, end_date, consultant, approval_status)
-                VALUES (%s, %s, %s, %s, 1) RETURNING id""",
+                VALUES (%s, %s, %s, %s, 2) RETURNING id""",
                 (current_time, request.start_date, request.end_date, consultant_id)).fetchone()
             if row is None:
                 raise ValueError("Failed to create holiday")
