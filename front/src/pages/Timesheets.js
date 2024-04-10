@@ -32,8 +32,8 @@ const FOOTER_WRAPPER = styled.div`
 
 const Timesheets = () => {
     const {isAuthenticated} = useAuth0();
-    const [JWTtoken, setToken] = useState(null);
-    const [consultantID, setConsultantID] = useState(11);
+    const [JWTtoken, setJWTToken] = useState(null);
+    const [consultantID, setConsultantID] = useState();
     const [sortBy, setSortBy] = useState('Latest');
     const [approval_status, setApprovalStatus] = useState('Select Status');
 
@@ -46,18 +46,44 @@ const Timesheets = () => {
         setApprovalStatus(selectedStatus);
     };
 
+
     React.useEffect(() => {
         let getToken = async () => {
             if (isAuthenticated) {
-                let token = localStorage.getItem('token');
-                console.log(token);
-                setToken(token);
+                let token = localStorage.getItem("token");
+                setJWTToken(token);
             }
         }
 
-        getToken();
-        
-    }, [isAuthenticated])
+        let getConsultantID = async () => {
+            try {
+                const response = await fetch('api/user', {
+                    'method': 'GET',
+                    'headers': {
+                        'Accept':'application/json',
+                        'Authorization': `Bearer ${JWTtoken}`
+                    },
+                });
+                if (!response.ok) {
+                    console.error("Failed to get user details");
+                }
+                let user_details = await response.json();
+                if (user_details.consultant_id === null) {
+                    console.error("Current User is not a consultant");
+                    return
+                }
+                setConsultantID(user_details.consultant_id);
+            } catch (error) {
+                console.error("Error fetching user details: ", error);
+            }
+        }
+        if (JWTtoken === undefined) {
+            getToken();
+        }
+        else if (consultantID === undefined) {
+            getConsultantID();
+        } 
+    }, [ isAuthenticated, JWTtoken, consultantID]);
 
     return (
     <div>
