@@ -143,7 +143,7 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
     const [weekDates, setWeekDates] = useState(getWeekDates());
     const [validTimeSheet, setValidTimesheet] = useState(true);
     const [tableSet, setTableSet] = useState(false);
-    const timeChanges = React.useRef();
+    const [entryChange, setEntryChange] = useState(false);
 
     //useEffect for loading the data onto the dashboard table
     useEffect(() => {
@@ -171,8 +171,13 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
             for(const timeEntry of currentTimeEntries){
                 let clockInTime = new Date(timeEntry.start_time);
                 let clockOutTime = new Date(timeEntry.end_time);
-                let clockInString = clockInTime.toTimeString().split(' ')[0];
-                let clockOutString = clockOutTime.toTimeString().split(' ')[0];
+                //ISO strings are behind by one hour
+                let tempClockIn = new Date();
+                let tempClockOut = new Date();
+                tempClockIn.setTime(clockInTime.getTime() +  (60 * 60 * 1000));
+                tempClockOut.setTime(clockOutTime.getTime() +  (60 * 60 * 1000));
+                let clockInString = tempClockIn.toISOString().substring(11,16);
+                let clockOutString = tempClockOut.toISOString().substring(11,16);
                 let openTimeEntryInterval = false;
                 for(let index = 0; index < tableDates.length; index++){
                     let dayDate = new Date(tableDates[index].date);
@@ -203,6 +208,24 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
             }
             setWeekDates([...tableDates]);
         }
+
+    let getTimeEntriesFromTable = () => {
+        let entriesList = [];
+        let entry = {'start_time': undefined, 'end_time': undefined};
+        weekDates.forEach(day => {
+            if(entry.start_time === undefined && day.clockIn !== ""){
+                entry.start_time = day.clockIn;
+                entry.status = day.status;
+            }
+            if(entry.end_time === undefined && day.clockOut !== ""){
+                entry.end_time = day.clockOut;
+                entriesList.push(entry);
+                entry = {'start_time': undefined, 'end_time': undefined};
+            }
+        });
+        return entriesList;
+    }
+
     if(token !== undefined && currentTimeEntries !== undefined && tableSet === false){
             setTimeEntriesTable();
             setTableSet(true);
@@ -210,12 +233,11 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
     if(editable === false && validTimeSheet === false){
         setEditable(!editable);
     }
-    if(timeChanges.current !== undefined){
-        setEditable(true);
-        setWeekDates([...timeChanges.current]);
-        timeChanges.current = undefined;
+    if(editable === false && entryChange === true && validTimeSheet == true){
+        console.log(getTimeEntriesFromTable());
+        setEntryChange(false);
     }
-    }, [token, currentTimeEntries, editable, weekDates, timeChanges, validTimeSheet]);
+    }, [token, currentTimeEntries, editable, weekDates, validTimeSheet, entryChange]);
 
     // Function to generate the current week dates to display on table rows
     function getWeekDates() {
@@ -237,8 +259,23 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
             ...newWeekDates[index],
             status: value
         };
+        if(checkChangedDay(newWeekDates[index].date) === false){
+            return;
+        }
         setWeekDates(newWeekDates);
+        setEntryChange(true);
     };
+
+    let checkChangedDay = (date) => {
+
+        let changedDate = new Date(date);
+        if(changedDate >= new Date()){
+            // TODO: make this console error a message for the ui
+            console.error("Can not edit time entries of future dates");
+            return false;
+        }
+        return true;
+    }
 
     // Function to handle time change (clock in/out) for a specific date
     let handleTimeChange = (index, field, value) => {
@@ -247,10 +284,7 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
             ...newWeekDates[index],
             [field]: value
         };
-        let changedDate = new Date(weekDates[index].date);
-        if(changedDate >= new Date()){
-            // TODO: make this console error a message for the ui
-            console.error("Can not edit time entries of future dates")
+        if(checkChangedDay(newWeekDates[index].date) === false){
             return;
         }
         if (field === 'clockIn' || field === 'clockOut') {
@@ -310,13 +344,14 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
     };
     let checkTimeEntriesTable = (weekDatesArr) =>{
         let openEntry = false;
+        let valid = true;
         for(let index = 0; index < weekDatesArr.length; index++){
             if((weekDatesArr[index].clockIn !== "") && (weekDatesArr[index].clockOut === "")){
                 if(openEntry){
                     // TODO: make this console error a message for the ui
                     console.error("Can not have two open time entries");
-                    timeChanges.current = (weekDatesArr);
-                    return false;
+                    valid = false;
+                    break;
                 }
                     openEntry = true;
             }
@@ -324,8 +359,8 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
                 if(!openEntry){
                     // TODO: make this console error a message for the ui
                     console.error("Time Entries must have an start time");
-                    timeChanges.current = (weekDatesArr);
-                    return false;
+                    valid = false;
+                    break;
                 }
                 openEntry = false;
             }
@@ -340,12 +375,13 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
             if(index === weekDatesArr.length - 1 && openEntry === true){
                 // TODO: make this console error a message for the ui
                 console.error("All edited timesheets must have an endtime value");
-                timeChanges.current = (weekDatesArr);
-                return false;
+                valid = false;
+                break;
             }
         }
-        timeChanges.current = (weekDatesArr);
-        return true;
+        setWeekDates([...weekDatesArr]);
+        setEntryChange(true);
+        return valid;
     }
 
     return (
@@ -378,7 +414,7 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
                                         <TIME
                                             type="time"
                                             value={row.clockIn}
-                                            onChange={(e) => handleTimeChange(index, 'clockIn', e.target.value)}
+                                            onChange={(e) => setTimeout(handleTimeChange(index, 'clockIn', e.target.value), 1000)}
                                             disabled={!editable}
                                         />
                                     </TD>
@@ -386,7 +422,7 @@ const DashboardTable = ({ editable, setEditable, submittable, token, currentTime
                                         <TIME
                                             type="time"
                                             value={row.clockOut}
-                                            onChange={(e) => handleTimeChange(index, 'clockOut', e.target.value)}
+                                            onChange={(e) => setTimeout(handleTimeChange(index, 'clockOut', e.target.value), 1000)}
                                             disabled={!editable}
                                         />
                                     </TD>
