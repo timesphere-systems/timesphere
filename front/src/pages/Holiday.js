@@ -40,8 +40,8 @@ const FOOTER_WRAPPER = styled.div`
 
 const Holiday = () => {
     const [visible, setVisible] = useState(false);   // Store modal visibility state
-    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-    const [JWTtoken, setJWTToken] = useState();
+    const { isAuthenticated } = useAuth0();
+    const [JWTtoken, setJWTToken] = useState(null);
     const [consultantID, setConsultantID] = useState();  
     const [sortBy, setSortBy] = useState('Latest');
     const [approval_status, setApprovalStatus] = useState('Select Status');
@@ -69,7 +69,7 @@ const Holiday = () => {
         // fucntion to get consultantID from JWT
         let getConsultantID = async () => {
             try {
-                const response = await fetch('api/user', {
+                const response = await fetch('/api/user', {
                     'method': 'GET',
                     'headers': {
                         'Accept':'application/json',
