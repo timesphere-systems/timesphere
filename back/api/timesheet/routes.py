@@ -348,3 +348,28 @@ def update_time_entry(time_entry_id: int, request: models.UpdateTimeEntry,
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"message": "Failed to update time entry, invalid ID"}
     )
+
+@router.delete("/entry/{time_entry_id}", status_code=status.HTTP_200_OK)
+def delete_time_entry(time_entry_id: int,
+                      pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                      current_user: Annotated[User, Security(get_current_user)]
+                      ) -> JSONResponse:
+    """Delete Time Entry
+    Args: 
+        time_entry_id (int): The time_entry's ID.
+    """
+
+    if not (current_user.is_time_entry_owner(time_entry_id)
+    or current_user.is_manager_of_time_entry(time_entry_id)):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You do not have permission to edit this time entry"}
+        )
+    with pool.connection() as connection:
+        _ = connection.execute(
+            "DELETE FROM time_entries WHERE id = %s", (time_entry_id,)
+        )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "Successfully deleted time entry"}
+    )
