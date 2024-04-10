@@ -142,11 +142,7 @@ const OVERLAY_TEXT = styled.p`
 const DashboardTable = ({ editable, submittable, token, currentTimeEntries}) => {
     const [weekDates, setWeekDates] = useState(getWeekDates());
 
-    useEffect(() => {
-        // code here 
-    }, [submittable]);
-
-    //Use Effect for getting (or creating current week timesheet)
+    //useEffect for loading the data onto the dashboard table
     useEffect(() => {
         let setTableRowHours = (clockIn, clockOut, tableDates, index) => {
             //set hours for each row of the table
