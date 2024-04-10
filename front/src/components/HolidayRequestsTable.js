@@ -74,6 +74,7 @@ const TD = styled.td`
 const TBODY = styled.tbody`
     min-width: 800px;
     width: 100%;
+    margin-bottom: 10px;
 `
 
 const EDIT = styled.div`
@@ -339,8 +340,28 @@ const HolidayRequestsTable = ({ token, consultantId, sort, approval_status }) =>
                         <>
                             {selectedHoliday.approval_status === 'DENIED' ? (
                                 <div>
-                                    <input type='date' value={newStartDate} onChange={(e) => setNewStartDate(e.target.value)} />
-                                    <input type='date' value={newEndDate} onChange={(e) => setNewEndDate(e.target.value)} />
+                                    <TABLE>
+                                        <HEADERS>
+                                            <TR>
+                                                <TH>Date From</TH>
+                                                <TH>Date To</TH>
+                                            </TR>
+                                        </HEADERS>
+                                        <TBODY>
+                                            <TR>
+                                                <TD> 
+                                                    {new Date(selectedHoliday.start_date).toLocaleDateString()}
+                                                </TD>
+                                                <TD>
+                                                    {new Date(selectedHoliday.end_date).toLocaleDateString()}
+                                                </TD> 
+                                            </TR>
+                                            <TR>
+                                                <TD><input type='date' value={newStartDate} onChange={(e) => setNewStartDate(e.target.value)} style={{padding:'10px'}}/></TD>
+                                                <TD><input type='date' value={newEndDate} onChange={(e) => setNewEndDate(e.target.value)} style={{padding:'10px'}}/></TD>
+                                            </TR>
+                                        </TBODY>
+                                    </TABLE>
                                     <SUBMIT_BUTTON>
                                         <SubmitButton 
                                             onClick={handleSubmitEdits} 

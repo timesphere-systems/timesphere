@@ -42,7 +42,7 @@ const Holiday = () => {
     const [visible, setVisible] = useState(false);   // Store modal visibility state
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const [JWTtoken, setJWTToken] = useState();
-    const [consultantID, setConsultantID] = useState();  // add value for testing
+    const [consultantID, setConsultantID] = useState(1);  // add value for testing
     const [sortBy, setSortBy] = useState('Latest');
     const [approval_status, setApprovalStatus] = useState('Select Status');
 
@@ -97,15 +97,10 @@ const Holiday = () => {
             }
         }
         
-        if (JWTtoken === undefined) {
-            getToken();
-        }
-        else if (consultantID === undefined) {
-            getConsultantID();
-        }
-
+        getToken();
+        getConsultantID();
         
-    }, [ isAuthenticated, JWTtoken, consultantID]);
+    }, [ isAuthenticated, JWTtoken, setJWTToken, consultantID, setConsultantID]);
 
 
     return (
