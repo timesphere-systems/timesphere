@@ -57,7 +57,7 @@ const Timesheets = () => {
 
         let getConsultantID = async () => {
             try {
-                const response = await fetch('api/user', {
+                const response = await fetch('/api/user', {
                     'method': 'GET',
                     'headers': {
                         'Accept':'application/json',
@@ -77,13 +77,9 @@ const Timesheets = () => {
                 console.error("Error fetching user details: ", error);
             }
         }
-        if (JWTtoken === undefined) {
-            getToken();
-        }
-        else if (consultantID === undefined) {
-            getConsultantID();
-        } 
-    }, [ isAuthenticated, JWTtoken, consultantID]);
+        getToken();
+        getConsultantID();
+    }, [ isAuthenticated, JWTtoken, setJWTToken, consultantID, setConsultantID]);
 
     return (
     <div>
