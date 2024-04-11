@@ -89,11 +89,11 @@ const App = () => {
 
         {userRole === 2 &&
             <Routes>
-                <Route path="/" element={<Navigate to="/manager" replace={true} />} />
-                <Route path='/manager' element={<Layout userType={2}/>}>
+                {/* <Route path="/" element={<Navigate to="/manager" replace={true} />} /> */}
+                <Route path='/' element={<Layout userType={2}/>}>
                     <Route index element={<Homepage userType={2}/>} />
-                    <Route path='/manager/timesheets' element={<TimesheetsManager />} />
-                    <Route path='/manager/holiday' element={<HolidayManager />} />
+                    <Route path='/timesheets' element={<TimesheetsManager />} />
+                    <Route path='/holiday' element={<HolidayManager />} />
                     <Route path="*" element={<PageNotFound />} />
                 </Route>
             </Routes>
@@ -101,10 +101,10 @@ const App = () => {
 
         {userRole === 3 &&
             <Routes>
-                <Route path="/" element={<Navigate to="/finance" replace={true} />} />
-                <Route path='/finance' element={<Layout userType={3}/>}>
+                {/* <Route path="/" element={<Navigate to="/finance" replace={true} />} /> */}
+                <Route path='/' element={<Layout userType={3}/>}>
                     <Route index element={<Homepage userType={3}/>} />
-                    <Route path='/finance/workreport' element={<WorkreportFinance />} />
+                    <Route path='/workreport' element={<WorkreportFinance />} />
                     <Route path="*" element={<PageNotFound />} />
                 </Route>
             </Routes>

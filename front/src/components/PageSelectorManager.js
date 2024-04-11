@@ -52,8 +52,8 @@ const PageSelectorManager = () => {
     const location = useLocation();
 
     const getActiveLoc = () => {
-        if(location.pathname === '/manager/timesheets') return 0;
-        else if(location.pathname === '/manager/holiday') return 1;
+        if(location.pathname === '/timesheets') return 0;
+        else if(location.pathname === '/holiday') return 1;
         else return -1;
     }
 
@@ -61,13 +61,13 @@ const PageSelectorManager = () => {
 
     return (
     <WRAPPER>
-        <LINK to={"/manager/timesheets"}>
+        <LINK to={"/timesheets"}>
             <LINK_CONTENT>
                 <img src={ClockIcon} alt="clock icon" />
                 <p>Timesheets</p>
             </LINK_CONTENT>
         </LINK>
-        <LINK to={"/manager/holiday"}>
+        <LINK to={"/holiday"}>
             <LINK_CONTENT>
                 <img src={SuitcaseIcon} alt="suitcase icon" />
                 <p>Holiday</p>

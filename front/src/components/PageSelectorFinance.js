@@ -60,7 +60,7 @@ const PageSelectorFinance = () => {
 
     return (
     <WRAPPER>
-        <LINK to={"/finance/workreport"}>
+        <LINK to={"/workreport"}>
             <LINK_CONTENT>
                 <img src={DashboardIcon} alt="dashboard icon" />
                 <p>Dashboard</p>
