@@ -12,7 +12,6 @@ import EditToggleButton from '../components/EditToggleButton';
 import ClockIcon from '../assets/icons/ClockIcon.svg';
 import CircleArrow from '../assets/icons/CircleArrowIcon.svg';
 import Footer from '../components/Footer';
-
 // Styles
 const G_WRAPPER = styled.div`
   margin-top: 3rem;
@@ -48,8 +47,6 @@ const Dashboard = () => {
   const [buttonText, setButtonText] = useState("Clock-In"); // Store clock in/out button text
   const [startTimer, setTimer] = useState(false);           // Store timer state
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-
-  const[userID, setUserID] = useState();
   const [JWTtoken, setJWTtoken] = useState();
   const [consultantID, setConsultantID] = useState();
   const [currentTimesheet, setCurrentTimesheet] = useState();
@@ -207,15 +204,25 @@ const Dashboard = () => {
         }
       });
     }
-    
+
     if(JWTtoken === undefined){
       getToken();
     }
-    if(userID === undefined){
+    else if(consultantID === undefined){
       getConsultantID();
     }
-
-  }, [getAccessTokenSilently, isAuthenticated, JWTtoken, userID])
+    else{
+      if(currentTimesheet === undefined){
+        getCurrentWeekTimesheet();
+      }
+      else if(currentTimeEntries === undefined){
+        fetchTimeEntryDetails();
+      }
+      else{
+        checkOpenTimeEntry();
+      }
+    }
+  }, [isAuthenticated, JWTtoken, consultantID, currentTimesheet, currentTimeEntries])
 
   // Function which toggles the edit mode - passed to EditToggleButton component
   let toggleEditMode = () => {
@@ -298,7 +305,6 @@ const Dashboard = () => {
   };
   return (
     <div>
-      
       <G_WRAPPER>
         {isAuthenticated ?
           <Greeting name={user.given_name}/>
@@ -344,7 +350,7 @@ const Dashboard = () => {
       <FOOTER_WRAPPER>
         <Footer />
       </FOOTER_WRAPPER>
-
+      
     </div>
   )
 }
