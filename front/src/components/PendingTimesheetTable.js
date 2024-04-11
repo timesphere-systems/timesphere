@@ -372,8 +372,8 @@ const PendingTimesheetTable = ( {userID, Jtoken} ) => {
                                         <DATETEXT>{new Date(row.submitted).toLocaleDateString()}</DATETEXT>
                                     </TITLEBOX>
                                     <TITLEBOX>
-                                        <SetStatusButton status='Approved' isActive={true} onClick={ () => handleApproval(row.id, "APPROVED")} />
-                                        <SetStatusButton status='Denied' isActive={true} onClick={ () => handleApproval(row.id, "DENIED")} />
+                                        <SetStatusButton status='APPROVED' isActive={true} onClick={ () => handleApproval(row.id, "APPROVED")} />
+                                        <SetStatusButton status='DENIED' isActive={true} onClick={ () => handleApproval(row.id, "DENIED")} />
                                     </TITLEBOX>
                                 </NORMROW>
                             )})
