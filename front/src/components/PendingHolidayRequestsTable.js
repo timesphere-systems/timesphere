@@ -90,68 +90,6 @@ const DATETEXT = styled.p`
     line-height: normal;
 `
 
-const LITTLETABLE = styled.table`
-    margin: auto;
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border-collapse: collapse;
-    overflow: hidden;
-    border-radius: 16px;
-`
-
-const HEADERS = styled.thead`
-    width: 100%;
-    color: white;
-    font-weight: bold;
-    background-color: rgba(54, 54, 54, 0.95);
-    border-top-right-radius: 9px;
-    border-top-left-radius: 9px;
-    border-collapse: collapse; 
-    overflow: hidden;
-`
-
-const TR = styled.tr`
-    display: flex;
-`
-
-const TH = styled.th`
-    padding: 10px;
-    width: 100%;
-    border-bottom: 1px solid rgba(54, 54, 54, 0.95);
-    font-size: 18px;
-    font-weight: 800;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const TD = styled.td`
-    padding: 10px;
-    width: 100%;
-    color: white;
-    border-bottom: 1px solid rgba(91, 91, 91, 1);
-    background-color: rgba(54, 54, 54, 1);
-    font-weight: 300;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    img{
-        width: 25px;
-        height: 25px;
-    }  
-`
-
-const TBODY = styled.tbody`
-    min-width: 800px;
-    width: 100%;
-`
-
 const OVERLAY_CONTAINER = styled.div`
     width: 100%;
     position: relative;
@@ -160,11 +98,70 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
+const HOLIDAY_DISPLAY = styled.div`
+
+`;
+
+const DIVIDER = styled.hr`
+    border: 1px solid lightgray;
+    margin-top: 0;
+    margin-bottom: 20px;
+
+`;
+
+const HOLIDAY_LABEL = styled.label`
+    font-weight: 400;
+`;
+
+const HOLIDAY_DATE = styled.input`
+    border: 1.5px solid #5f5883;
+    border-radius: 9px;
+    padding: 10px;
+    font: inherit;
+    font-size: 14px;
+
+`;
+
+const INPUT_CONTAINER = styled.div`
+    display: flex;
+    gap: 20px;
+
+`;
+
+const PERSON_CONTAINER = styled.div`
+    display: flex;
+    width: 300px;
+    padding: 10px;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    align-self: stretch;
+    padding: 0%;
+
+`;
+
+const HOLIDAY_CONTAINER = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-end;
+    margin-bottom: 30px;
+
+`;
+
+const DATE_CONTAINER = styled.div`
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+`;
+
 const PendingHolidayRequestsTable = ( {userID, Jtoken} ) => {
     const [holidays, setHolidays] = useState();
     const [holidayData, setHolidayData] = useState([]);
     const [peopleData, setPeopleData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
+    const [selectedHoliday, setSelectedHoliday] = useState(null);
 
     useEffect(() => {
         const fetchHolidays= async () => {
@@ -255,7 +252,8 @@ const PendingHolidayRequestsTable = ( {userID, Jtoken} ) => {
 
     }, [userID, Jtoken, holidays, holidayData, peopleData]);
 
-    const fileClick  = (startDate) => {
+    const fileClick  = (holiday) => {
+        setSelectedHoliday(holiday);
         toggleOverlay();
     };
 
@@ -324,7 +322,7 @@ const PendingHolidayRequestsTable = ( {userID, Jtoken} ) => {
                         return (
                             <NORMROW key={row.id}>  
                                 <TITLEBOX>
-                                    <button onClick={ () => fileClick(row.start)} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
+                                    <button onClick={ () => fileClick(row)} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
                                     <FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC>
                                     </button>
                                 </TITLEBOX>
@@ -346,19 +344,30 @@ const PendingHolidayRequestsTable = ( {userID, Jtoken} ) => {
             </OVERLAY_CONTAINER>
             <ModalWrapper isVisible={overlayVisible} toggleOverlay = {toggleOverlay} title={'Holiday Request'}>
                 <OVERLAY_CONTAINER>
-                        <LITTLETABLE>
-                            <HEADERS>
-                                    <TR>
-                                        <TH>Status</TH>
-                                    </TR>
-                            </HEADERS>
+                {selectedHoliday && (
+                        <HOLIDAY_DISPLAY>
+                        <DIVIDER />
+                        <HOLIDAY_CONTAINER>
+                            <PERSON_CONTAINER>
+                                <PEOPLEPIC><img src={PeopleIcon} alt="People icon"/></PEOPLEPIC>
+                                <PEOPLETEXT>{names(selectedHoliday.consultant_id)}</PEOPLETEXT>
+                            </PERSON_CONTAINER>
+                            <INPUT_CONTAINER>
+                                <DATE_CONTAINER>
+                                    <HOLIDAY_LABEL htmlFor="date-from">Date From:</HOLIDAY_LABEL>
+                                    <HOLIDAY_DATE type="text" id="date-from" name="date-from" value={new Date(selectedHoliday.start_date).toLocaleDateString()} readOnly/>
+                                </DATE_CONTAINER>
+                                <DATE_CONTAINER>
+                                    <HOLIDAY_LABEL htmlFor="date-to">Date To:</HOLIDAY_LABEL>
+                                    <HOLIDAY_DATE type="text" id="date-to" name="date-to" value={new Date(selectedHoliday.end_date).toLocaleDateString()} readOnly/>
+                                </DATE_CONTAINER>
+                            </INPUT_CONTAINER>
+                        </HOLIDAY_CONTAINER>
+                    </HOLIDAY_DISPLAY>
 
-                            <TBODY>
-                                <TR>
-                                    <TD>WAITING</TD>
-                                </TR>
-                            </TBODY>
-                        </LITTLETABLE> 
+                    )
+                }
+
                     </OVERLAY_CONTAINER>
             </ModalWrapper>
             
