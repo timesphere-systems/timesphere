@@ -391,4 +391,4 @@ const PendingTimesheetTable = ( {userID, Jtoken} ) => {
     )
 }
 
-export default PendingTimesheetTable;
+export default PendingTimesheetTable
