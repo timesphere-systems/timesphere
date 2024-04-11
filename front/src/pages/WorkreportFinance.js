@@ -79,10 +79,10 @@ const WorkreportFinance = () => {
                 console.error("Failed to get user details");
               }
               let user_details = await response.json()
-              if(user_details.user_role !== 2)
+              if(user_details.user_role !== 3)
               {
                 // TODO: display message to the user on the UI
-                console.error("User is not a manager");
+                console.error("User is not finance department");
                 return
               }
               setUserID(user_details.user_id);
