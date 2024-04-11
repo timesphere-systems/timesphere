@@ -1,6 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useState } from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
+import { jwtDecode } from "jwt-decode";
+import styled from 'styled-components';
 import ExitIcon from '../assets/icons/ExitIcon.svg';
 import EmailIcon from '../assets/icons/EmailIcon.svg';
 import TimezoneIcon from '../assets/icons/TimezoneIcon.svg';
@@ -70,8 +71,19 @@ const ICON = styled.img`
 `
 
 const ProfileSidebar = ({profileImg, firstname, lastname, email, isVisible, hideSidebar}) => {
-    const timezone = React.useState("GMT"); // timezone hard coded
+    const timezone = React.useState("BST"); // timezone hard coded
     const { isAuthenticated, user } = useAuth0();
+    const [token, setToken] = useState();
+    const [tokenEmail, setTokenEmail] = useState();
+
+    React.useEffect(() => {
+        if(token === undefined) {
+            setToken(localStorage.getItem("token"));
+        } else {
+            let payload = jwtDecode(token);
+            setTokenEmail(payload['timesphere/email']);
+        }
+    }, [token, setToken, localStorage])
 
     return (
       <div>
@@ -89,7 +101,7 @@ const ProfileSidebar = ({profileImg, firstname, lastname, email, isVisible, hide
                 </div>
                 <div>
                     <INFO_HEADER><ICON src={EmailIcon} alt=""/>Email Address</INFO_HEADER>
-                    <INFO>{user.email}</INFO>
+                    <INFO>{tokenEmail}</INFO>
                 </div>
                 <div>
                     <INFO_HEADER><ICON src={TimezoneIcon} alt=""/>Timezone</INFO_HEADER>

@@ -61,7 +61,7 @@ let getDate = () => {
     return fulldate
 }
 
-const Homepage = () => {
+const Homepage = ({ userType }) => {
     let { isAuthenticated, user } = useAuth0();
     let nav = useNavigate(); 
     let fulldate = getDate();
@@ -114,15 +114,18 @@ const Homepage = () => {
             <TIME>{time.toLocaleTimeString()}</TIME>
             <WELCOME_MSG>Welcome</WELCOME_MSG>
             <DATE>{fulldate}</DATE>
-            <BUTTON_WRAPPER>
-                <ActionButton 
-                clickable={true}
-                height={"60px"}
-                width={"320px"}
-                icon={ArrowRightIcon}
-                text={"Go to Dashboard"}
-                onClick={() => {nav('/dashboard')}}/>
-            </BUTTON_WRAPPER>
+            
+            {userType == 1 &&
+                <BUTTON_WRAPPER>
+                    <ActionButton 
+                    clickable={true}
+                    height={"60px"}
+                    width={"320px"}
+                    icon={ArrowRightIcon}
+                    text={"Go to Dashboard"}
+                    onClick={() => {nav('/dashboard')}}/>
+                </BUTTON_WRAPPER>
+            }
         </GREETING>
         :
         <GREETING
