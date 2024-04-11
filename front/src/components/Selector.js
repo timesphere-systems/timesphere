@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import ApproveIcon from '../assets/icons/Approve.svg';
 import WaitingIcon from '../assets/icons/Waiting.svg';
 import DenyIcon from '../assets/icons/Deny.svg';
+import Bin from '../assets/icons/Bin.svg';
 
 const SelectorWrapper = styled.div`
     display: flex;
@@ -45,7 +46,7 @@ const DropdownButton = styled.div`
         fill: grey;
         gap: 10pt;
 
-        svg path {
+        svg path {S
             color: grey;
         }
     }
@@ -90,9 +91,9 @@ const Label = styled.p`
     padding-top: 9pt;
 `;
 
-function Selector() {
-    const [sortBySelectedItem, setSortBySelectedItem] = useState('Latest');
-    const [statusSelectedItem, setStatusSelectedItem] = useState('Select Status');
+function Selector({onSortChange, onStatusChange, selectedSort, selectedStatus}) {
+    const [sortBySelectedItem, setSortBySelectedItem] = useState(selectedSort);
+    const [statusSelectedItem, setStatusSelectedItem] = useState(selectedStatus);
     const [sortByMenuOpen, setSortByMenuOpen] = useState(false);
     const [statusMenuOpen, setStatusMenuOpen] = useState(false);
 
@@ -113,24 +114,27 @@ function Selector() {
 
     const handleSortByItemClick = (item) => {
         setSortBySelectedItem(item);
+        onSortChange(item);
         closeMenus();
     };
 
     const handleStatusItemClick = (item) => {
         setStatusSelectedItem(item);
+        onStatusChange(item);
         closeMenus();
     };
 
     const statusIcons = {
         'Approved': ApproveIcon,
         'Waiting Approval': WaitingIcon,
-        'Denied': DenyIcon
+        'Denied': DenyIcon,
+        'Clear Filter': Bin
     };
 
     return (
         <SelectorWrapper>
-            <DropdownMenuComponent label='Sort By:' items={['Latest', 'Oldest']} selectedItem={sortBySelectedItem} handleItemClick={handleSortByItemClick} menuOpen={sortByMenuOpen} toggleMenu={toggleSortByMenu} />
-            <DropdownMenuComponent label='Status:' items={['Approved', 'Waiting Approval', 'Denied']} selectedItem={statusSelectedItem} handleItemClick={handleStatusItemClick} menuOpen={statusMenuOpen} toggleMenu={toggleStatusMenu} icons={statusIcons} />
+            <DropdownMenuComponent label='Sort By:' items={['Latest', 'Oldest', 'Clear Sort']} selectedItem={sortBySelectedItem} handleItemClick={handleSortByItemClick} menuOpen={sortByMenuOpen} toggleMenu={toggleSortByMenu} />
+            <DropdownMenuComponent label='Status:' items={['Approved', 'Waiting Approval', 'Denied', 'Clear Filter']} selectedItem={statusSelectedItem} handleItemClick={handleStatusItemClick} menuOpen={statusMenuOpen} toggleMenu={toggleStatusMenu} icons={statusIcons} />
         </SelectorWrapper>
     );
 }
@@ -143,7 +147,7 @@ function DropdownMenuComponent({ label, items, selectedItem, handleItemClick, me
                 <DropdownButton onClick={toggleMenu}>
                     <span id='selected-item'>
                         {icons && icons[selectedItem] && <img src={icons[selectedItem]} alt={selectedItem} />} {/* Render icon if available */}
-                        {selectedItem === 'Select Status' ? 'Select Status' : selectedItem}
+                        {selectedItem === 'Select Status' ? 'Select Status' : selectedItem === 'Clear Filter' ? 'Select Status' : selectedItem}
                     </span>
                     <span id='down-arrow'><RiArrowDropDownLine /></span>
                 </DropdownButton>
@@ -151,7 +155,7 @@ function DropdownMenuComponent({ label, items, selectedItem, handleItemClick, me
                 <DropdownMenu menuOpen={menuOpen}>
                     {items.map((item) => (
                         <MenuItem key={item} className={selectedItem === item ? 'active' : ''} onClick={() => handleItemClick(item)}>
-                            {icons && icons[item] && <img src={icons[item]} alt={item} />} {/* Render icon if available */}
+                            {icons && icons[item] && <img src={icons[item]} alt={item} style={{width: 'auto', height: '27px'}}/>} {/* Render icon if available */}
                             {item}
                         </MenuItem>
                     ))}
