@@ -75,37 +75,11 @@ const Navbar = ({ userType }) => {
     return (
         <>
         <NAV>
-            {userType === 1 &&
-                <Link to={"/"} style={{textDecoration: 'none', color: 'inherit'}}>
-                    <LOGO>
-                        <img src={Logo} alt="logo" />
-                    </LOGO>
-                </Link>
-            }
-
-            {userType === 2 && 
-                <Link to={"/manager"} style={{textDecoration: 'none', color: 'inherit'}}>
-                    <LOGO>
-                        <img src={Logo} alt="logo" />
-                    </LOGO>
-                </Link>
-            }
-
-            {userType === 3 && 
-                <Link to={"/finance"} style={{textDecoration: 'none', color: 'inherit'}}>
-                    <LOGO>
-                        <img src={Logo} alt="logo" />
-                    </LOGO>
-                </Link>
-            }
-
-            {userType === 0 && 
-                <Link to={"/"} style={{textDecoration: 'none', color: 'inherit'}}>
-                    <LOGO>
-                        <img src={Logo} alt="logo" />
-                    </LOGO>
-                </Link>
-            }
+            <Link to={"/"} style={{textDecoration: 'none', color: 'inherit'}}>
+                <LOGO>
+                    <img src={Logo} alt="logo" />
+                </LOGO>
+            </Link>
 
             <SELECTOR_CONTAINER>
                 {userType === 1 &&

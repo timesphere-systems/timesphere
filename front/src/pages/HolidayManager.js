@@ -100,13 +100,6 @@ const HolidayManager = () => {
         <div>
             <HEADING>
                 <p>Holiday Requests</p>
-                <ActionButton
-                    width={"130px"}
-                    height={"65px"}
-                    clickable={true}
-                    text={"New"}
-                    icon={PlusIcon}
-                    onClick={() => setVisible(true)} />
             </HEADING>
             <SELECTOR_CONTAINER>
                 <Selector onSortChange={handleSortChange} onStatusChange={handleStatusChange} selectedSort={sortBy} selectedStatus={approval_status} />
