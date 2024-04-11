@@ -325,7 +325,6 @@ const Dashboard = () => {
   };
   return (
     <div>
-      {/*
       <G_WRAPPER>
         {isAuthenticated ?
           <Greeting name={user.given_name}/>
@@ -359,8 +358,7 @@ const Dashboard = () => {
         }}/>
       </CLOCK_WRAPPER>
       <TABLE_WRAPPER>
-        <DashboardTable editable={editable} setEditable={setEditable} submittable={submittable} setTableSet={setTableSet} tableSet={tableSet}
-          token={JWTtoken} currentTimeEntries={currentTimeEntries} reloadContent={reloadContent} timesheet={currentTimesheet}/>
+        <PendingTimesheetTable Jtoken={JWTtoken} userID={userID}/>
         <TOGGLE_WRAPPER>
           <EditToggleButton onToggle={() => {
             if(submittable === true && buttonText === "Clock-In" && currentTimesheet !== undefined){
@@ -371,10 +369,8 @@ const Dashboard = () => {
       <FOOTER_WRAPPER>
         <Footer />
       </FOOTER_WRAPPER>
-      */}
     
     
-    <PendingTimesheetTable Jtoken={JWTtoken} userID={userID}/>
 
 
     </div>
