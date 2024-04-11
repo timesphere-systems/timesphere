@@ -78,12 +78,18 @@ const ProfileSidebar = ({profileImg, firstname, lastname, email, isVisible, hide
 
     React.useEffect(() => {
         if(token === undefined) {
-            setToken(localStorage.getItem("token"));
+            let token = localStorage.getItem("token");
+            if (token === null) {
+                console.log("Token is null");
+            } else {
+                setToken(token);
+            }
         } else {
             let payload = jwtDecode(token);
             setTokenEmail(payload['timesphere/email']);
         }
     }, [token, setToken, localStorage])
+
 
     return (
       <div>
