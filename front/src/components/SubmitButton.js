@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import styled from 'styled-components'
 
 import SubmitIcon from '../assets/icons/Submit.svg';
@@ -31,7 +31,7 @@ const SUBMITBUTTON = styled.button`
         justify-content: center;
     }
 `
-const SubmitButton = ({onClick, width, height, clickable}) => {
+const SubmitButton = ({onClick, width, height, clickable, submitted}) => {
 
     const [isSubmitted, setIsSubmitted] = useState(false);
     
@@ -45,6 +45,9 @@ const SubmitButton = ({onClick, width, height, clickable}) => {
             setIsSubmitted(true);
         }
     }
+    useEffect(() =>{
+        setIsSubmitted(submitted);
+    }, [submitted])
     return (
         <SUBMITBUTTON
             width={width}

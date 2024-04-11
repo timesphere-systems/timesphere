@@ -16,3 +16,10 @@ class User(BaseModel):
     lastname: str
     email: str
     user_role: int
+
+class UserUpdate(BaseModel):
+    """Model for updating a user."""
+    firstname: str | None = None
+    lastname: str | None = None
+    email: str | None = None
+    user_role: int | None = None

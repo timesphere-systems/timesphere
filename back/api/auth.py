@@ -236,16 +236,11 @@ class TokenData(BaseModel):
     scopes: list[str] = []
     username: str = ""
 
-# In a larger scale application we'd use something like cachetools
-user_cache: dict[str, User] = {}
 settings = get_settings()
 token_auth_scheme = HTTPBearer()
 
 async def get_user_from_username(token_payload: TokenPayload, pool: ConnectionPool) -> User:
     """Get the user ID from the username."""
-    if token_payload.sub in user_cache:
-        return user_cache[token_payload.sub]
-
     # Sometimes we get both names, other times they're joined
     first_name = token_payload.timesphere_first_name
     last_name = token_payload.timesphere_last_name
@@ -286,7 +281,6 @@ async def get_user_from_username(token_payload: TokenPayload, pool: ConnectionPo
             raise ValueError("Failed to get user ID from username")
 
         user = User(user, pool)
-        user_cache[token_payload.sub] = user
         return user
 
 async def get_current_user(

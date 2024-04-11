@@ -4,6 +4,7 @@ from fastapi import APIRouter, status, Depends, Security
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from psycopg.errors import ForeignKeyViolation
+from psycopg.sql import SQL, Identifier, Composed
 from ..dependencies import get_connection_pool
 from ..auth import User, get_current_user, CONSULTANT_USER_ROLE
 from . import models
@@ -67,4 +68,53 @@ def get_user_details(current_user: Annotated[User, Security(get_current_user)]
         status_code=status.HTTP_200_OK,
         content=user_details
     )
-  
+
+@router.put("/{user_id}", status_code=status.HTTP_200_OK)
+def update_user(user_details: models.UserUpdate,
+                user_id: int,
+                pool: Annotated[ConnectionPool, Depends(get_connection_pool)],
+                _current_user: Annotated[User, Security(get_current_user,
+                                                        scopes=["timesphere:admin"])]
+                ) -> JSONResponse:
+    """Update the details of a user.
+
+    Requires user to be authenticated and have the "timesphere:admin" scope.
+
+    Args:
+        user_details (UserUpdate): The user's details.
+        user_id (int): The ID of the user to update.
+        pool (Annotated[ConnectionPool, Depends(get_connection_pool)]): The connection pool.
+    Returns:
+        JSONResponse
+    """
+    # Collect fields that are not None
+    fields_to_update = {
+        k: v for k, v in user_details.model_dump().items() # pyright: ignore[reportAny]
+            if v is not None
+    }
+
+    if not fields_to_update:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": "No fields to update"}
+        )
+
+    # Constructing the SQL query
+    sql_fields: list[Composed] = [SQL("{} = %({})s")
+        .format(Identifier(k), SQL(k))  # pyright: ignore[reportArgumentType]
+          for k in fields_to_update.keys()]
+    query = SQL("UPDATE users SET {fields} WHERE id = %(id)s") \
+        .format(fields=SQL(", ").join(sql_fields))
+
+    params = {**fields_to_update, "id": user_id}
+    print(f"Query: {query}, Params: {params}")
+
+    with pool.connection() as connection:
+        cursor = connection.cursor()
+        _ = cursor.execute(query, params)
+        connection.commit()
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "User details updated successfully."}
+    )
