@@ -12,11 +12,11 @@ const NAVBAR_CONT = styled.div`
     margin-top: 1rem;
 `
 
-const Layout = () => {
+const Layout = ({ userType }) => {
   return (
     <>
         <NAVBAR_CONT>
-            <Navbar />
+            <Navbar userType={userType}/>
         </NAVBAR_CONT>
         <Outlet />
     </>

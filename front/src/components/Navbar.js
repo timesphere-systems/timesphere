@@ -7,6 +7,8 @@ import Logo from '../assets/icons/Logo.svg'
 import Notifications from './Notifications'
 import PageSelector from './PageSelector'
 import ProfileSidebar from './ProfileSidebar'
+import PageSelectorManager from './PageSelectorManager';
+import PageSelectorFinance from './PageSelectorFinance';
 
 const NAV = styled.nav`
     display: flex;
@@ -62,7 +64,7 @@ const PFP = styled.img`
 `
 
 
-const Navbar = () => {
+const Navbar = ({ userType }) => {
     const [isVisible, setIsVisible] = useState(false);
     const { isAuthenticated, user } = useAuth0();
 
@@ -73,14 +75,52 @@ const Navbar = () => {
     return (
         <>
         <NAV>
-            <Link to={"/"} style={{textDecoration: 'none', color: 'inherit'}}>
-                <LOGO>
-                    <img src={Logo} alt="logo" />
-                </LOGO>
-            </Link>
+            {userType === 1 &&
+                <Link to={"/"} style={{textDecoration: 'none', color: 'inherit'}}>
+                    <LOGO>
+                        <img src={Logo} alt="logo" />
+                    </LOGO>
+                </Link>
+            }
+
+            {userType === 2 && 
+                <Link to={"/manager"} style={{textDecoration: 'none', color: 'inherit'}}>
+                    <LOGO>
+                        <img src={Logo} alt="logo" />
+                    </LOGO>
+                </Link>
+            }
+
+            {userType === 3 && 
+                <Link to={"/finance"} style={{textDecoration: 'none', color: 'inherit'}}>
+                    <LOGO>
+                        <img src={Logo} alt="logo" />
+                    </LOGO>
+                </Link>
+            }
+
+            {userType === 0 && 
+                <Link to={"/"} style={{textDecoration: 'none', color: 'inherit'}}>
+                    <LOGO>
+                        <img src={Logo} alt="logo" />
+                    </LOGO>
+                </Link>
+            }
 
             <SELECTOR_CONTAINER>
-                <PageSelector />
+                {userType === 1 &&
+                    <PageSelector />
+                }
+
+                {userType === 2 && 
+                    <PageSelectorManager />
+                }
+
+                {userType === 3 && 
+                    <PageSelectorFinance />
+                }
+
+                {userType === 0 && null}
             </SELECTOR_CONTAINER>
 
             <R_CONTAINER>
@@ -89,7 +129,7 @@ const Navbar = () => {
                 {isAuthenticated ? 
                     <PFP src={user.picture} onClick={hideSidebar}/>
                     :
-                    <PFP src={"https://clasebcn.com/wp-content/uploads/2020/04/harold-thumb.jpg"} onClick={hideSidebar}/>
+                    <PFP src={"https://www.svgrepo.com/show/452030/avatar-default.svg"} onClick={hideSidebar}/>
                 }
             </R_CONTAINER>
         </NAV>
