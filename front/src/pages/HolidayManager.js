@@ -66,39 +66,33 @@ const HolidayManager = () => {
             }
         }
 
-        // fucntion to get userID from JWT
-        let getUserId = async () => {
+        let getUserDetails = async () => {
             try {
-                const response = await fetch('/api/user', {
-                    'method': 'GET',
-                    'headers': {
-                        'Accept':'application/json',
-                        'Authorization': `Bearer ${JWTtoken}`
-                    },
-                });
-
-                if (!response.ok) {
-                    // TODO: make this console error a message for the ui
-                    console.error("Failed to get user details");
-                }
-
-                let user_details = await response.json();
-
-                if (user_details.consultant_id === null) {
-                    // TODO: display message to the user on ui
-                    console.error("Current User is not a consultant");
-                    return
-                }
-
-                setUserID(user_details.consultant_id);
-
+              const response = await fetch('api/user', {
+                'method': 'GET',
+                'headers': {
+                  'Accept': 'application/json',
+                  'Authorization': `Bearer ${JWTtoken}`
+                },
+              });
+              if(!response.ok){
+                // TODO: make this console error a message for the ui
+                console.error("Failed to get user details");
+              }
+              let user_details = await response.json()
+              if(user_details.user_role !== 2)
+              {
+                // TODO: display message to the user on the UI
+                console.error("User is not a manager");
+                return
+              }
+              setUserID(user_details.user_id);
             } catch (error) {
-                console.error("Error fetching user details: ", error);
+              console.error("Error fetching user details: ", error);
             }
-        }
-        
-        getToken();
-        getUserId();
+          }
+          getToken();
+          getUserDetails();
         
     }, [ isAuthenticated, JWTtoken, setJWTToken, userID, setUserID]);
 
