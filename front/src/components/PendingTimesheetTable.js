@@ -4,6 +4,7 @@ import FileIcon from "../assets/icons/FileIcon.svg";
 import PeopleIcon from "../assets/icons/PeopleIcon.svg";
 import ModalWrapper from './ModalWrapper';
 import SetStatusButton from "./SetStatusButton";
+import DashboardTable from './DashboardTable';
 
 const BIGTABLE = styled.div`
     display: flex;
@@ -160,12 +161,14 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
+
+const PendingTimesheetTable = ( {userID, Jtoken} ) => {
     const [timesheets, setTimesheets] = useState();
     const [timesheetData, setTimesheetData] = useState([]);
     const [peopleData, setPeopleData] = useState([]);
     const [overlayVisible, setOverlayVisible] = useState(false);
-    const [userID, setUserID] = useState(userIDInp);
+    const[currentTimeEntries, setCurrentTimeEntries] = useState();
+    const [tableSet, setTableSet] = useState();
 
     useEffect(() => {
         
@@ -247,7 +250,6 @@ const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
             console.log(peopleEntries);
             setPeopleData(peopleEntries);
         };
-
         console.log(Jtoken);
         if (Jtoken !== undefined && userID !== undefined){
             if (timesheets === undefined){
@@ -256,8 +258,41 @@ const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
         }
     }, [userID, Jtoken, timesheets, timesheetData, peopleData]);
 
-    const toggleOverlay = () => {
+    let fetchTimeEntryDetails = async (currentTimesheet) =>{
+        let listTimeEntryIDS = currentTimesheet.entries;
+        let timeEntries = [];
+        for (const ID of listTimeEntryIDS) {
+            try {
+                const response = await fetch(`api/timesheet/entry/${ID}`, {
+                    'method': 'GET',
+                    'headers': {
+                        'Authorization': `Bearer ${Jtoken}`
+                    }
+                });
+                if(!response.ok){
+                  // TODO: make this console error a message for the ui
+                    console.error("Failed to get time entry details.");
+                    return;
+                }
+                let data = await response.json();
+                timeEntries.push(data);
+            } catch (error) {
+                console.error("Failed to get time entry details: ", error);
+            }
+        }
+        setCurrentTimeEntries(timeEntries);
+      }
+
+    const toggleOverlay = (timesheet) => {
         setOverlayVisible(!overlayVisible);
+        if(overlayVisible !== false){
+            setCurrentTimeEntries(undefined);
+        }
+        else{
+            fetchTimeEntryDetails(timesheet);
+            setTableSet(false);
+            console.log(currentTimeEntries);
+        }
     };
 
     const names = (consul) => {
@@ -289,6 +324,7 @@ const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
             else{
                 const responseData = await response.json();
                 console.log('Timesheet updated successfully:', responseData);
+                setTimesheets(undefined);
             }
         } catch (error) {
             console.error('Failed to toggle time entry:', error);
@@ -321,7 +357,7 @@ const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
                             return(
                                 <NORMROW key={row.id}> 
                                     <TITLEBOX>
-                                        <button onClick={toggleOverlay} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
+                                        <button onClick={() => toggleOverlay(row)} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
                                         <FILEPIC><img src={FileIcon} alt="File icon"/></FILEPIC>
                                         </button>
                                     </TITLEBOX>
@@ -346,21 +382,10 @@ const PendingTimesheetTable = ( {userIDInp, Jtoken} ) => {
             </OVERLAY_CONTAINER>
             <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} title={'Weekly Timesheet'} >
             <OVERLAY_CONTAINER>
-                    <LITTLETABLE>
-                        <HEADERS>
-                                <TR>
-                                    <TH></TH>
-                                    <TH>Status</TH>
-                                </TR>
-                        </HEADERS>
-                        <TBODY>
-                            <TR>
-                                <TD>Status:</TD>
-                                <TD>WAITING</TD>
-                            </TR>
-                        </TBODY>
-                    </LITTLETABLE> 
-                </OVERLAY_CONTAINER>
+                {currentTimeEntries && (
+                    <DashboardTable editable={false} token={Jtoken} tableSet={tableSet} setTableSet={setTableSet} currentTimeEntries={currentTimeEntries}/>
+                )}
+            </OVERLAY_CONTAINER>
         </ModalWrapper>
     </WRAPPER>
     )

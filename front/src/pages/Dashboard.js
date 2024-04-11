@@ -15,6 +15,8 @@ import ClockIcon from '../assets/icons/ClockIcon.svg';
 import CircleArrow from '../assets/icons/CircleArrowIcon.svg';
 import Footer from '../components/Footer';
 
+import PendingHolidayRequestsTable from '../components/PendingHolidayRequestsTable';
+import PendingTimesheetTable from '../components/PendingTimesheetTable';
 // Styles
 
 const G_WRAPPER = styled.div`
@@ -58,21 +60,49 @@ const Dashboard = () => {
   const [time, setTime] = React.useState(new Date());       // Store clock-in time
   const [timeEntries, setTimeEntries] = useState([]);       // Store clock in and out time for backend
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+  const[userID, setUserID] = useState();
+  const [JWTtoken, setJWTtoken] = useState();
 
   React.useEffect(() => {
     let getToken = async () => {
         if (isAuthenticated) {
-            let token = await getAccessTokenSilently(
-                {authorizationParams: {        
-                    audience: "https://timesphere.systems/api",
-                    redirect_uri: "http://localhost:3000",
-                    scope: "timesphere:admin"
-                }});
-            console.log(token);
+          let token = localStorage.getItem("token");
+          setJWTtoken(token);
         }
     }
-    getToken();
-  }, [getAccessTokenSilently, isAuthenticated])
+
+    let getUserDetails = async () => {
+      try {
+        const response = await fetch('api/user', {
+          'method': 'GET',
+          'headers': {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${JWTtoken}`
+          },
+        });
+        if(!response.ok){
+          // TODO: make this console error a message for the ui
+          console.error("Failed to get user details");
+        }
+        let user_details = await response.json()
+        if(user_details.user_role !== 2)
+        {
+          // TODO: display message to the user on the UI
+          console.error("User is not a manager");
+          return
+        }
+        setUserID(user_details.user_id);
+      } catch (error) {
+        console.error("Error fetching user details: ", error);
+      }
+    }
+    if(JWTtoken === undefined){
+      getToken();
+    }
+    else if(userID === undefined){
+      getUserDetails();
+    }
+  }, [getAccessTokenSilently, isAuthenticated, JWTtoken, userID])
 
   // Function which toggles the edit mode - passed to EditToggleButton component
   let toggleEditMode = () => {
@@ -131,6 +161,7 @@ const Dashboard = () => {
 
   return (
     <div>
+      {/*
       <G_WRAPPER>
         {isAuthenticated ?
           <Greeting name={user.given_name}/>
@@ -170,7 +201,12 @@ const Dashboard = () => {
       <FOOTER_WRAPPER>
         <Footer />
       </FOOTER_WRAPPER>
-      
+      */}
+    
+    
+    <PendingTimesheetTable Jtoken={JWTtoken} userID={userID}/>
+
+
     </div>
   )
 }
