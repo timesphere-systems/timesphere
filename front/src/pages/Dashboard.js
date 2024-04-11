@@ -13,9 +13,6 @@ import ClockIcon from '../assets/icons/ClockIcon.svg';
 import CircleArrow from '../assets/icons/CircleArrowIcon.svg';
 import Footer from '../components/Footer';
 
-import PendingHolidayRequestsTable from '../components/PendingHolidayRequestsTable';
-import PendingTimesheetTable from '../components/PendingTimesheetTable';
-
 // Styles
 const G_WRAPPER = styled.div`
   margin-top: 3rem;
@@ -211,37 +208,38 @@ const Dashboard = () => {
       });
     }
 
-    let getUserDetails = async () => {
-      try {
-        const response = await fetch('api/user', {
-          'method': 'GET',
-          'headers': {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${JWTtoken}`
-          },
-        });
-        if(!response.ok){
-          // TODO: make this console error a message for the ui
-          console.error("Failed to get user details");
-        }
-        let user_details = await response.json()
-        if(user_details.user_role !== 2)
-        {
-          // TODO: display message to the user on the UI
-          console.error("User is not a manager");
-          return
-        }
-        setUserID(user_details.user_id);
-      } catch (error) {
-        console.error("Error fetching user details: ", error);
-      }
-    }
+    // let getUserDetails = async () => {
+    //   try {
+    //     const response = await fetch('api/user', {
+    //       'method': 'GET',
+    //       'headers': {
+    //         'Accept': 'application/json',
+    //         'Authorization': `Bearer ${JWTtoken}`
+    //       },
+    //     });
+    //     if(!response.ok){
+    //       // TODO: make this console error a message for the ui
+    //       console.error("Failed to get user details");
+    //     }
+    //     let user_details = await response.json()
+    //     if(user_details.user_role !== 2)
+    //     {
+    //       // TODO: display message to the user on the UI
+    //       console.error("User is not a manager");
+    //       return
+    //     }
+    //     setUserID(user_details.user_id);
+    //   } catch (error) {
+    //     console.error("Error fetching user details: ", error);
+    //   }
+    // }
     if(JWTtoken === undefined){
       getToken();
     }
-    else if(userID === undefined){
-      getUserDetails();
+    if(userID === undefined){
+      getConsultantID();
     }
+
   }, [getAccessTokenSilently, isAuthenticated, JWTtoken, userID])
 
   // Function which toggles the edit mode - passed to EditToggleButton component
@@ -325,6 +323,7 @@ const Dashboard = () => {
   };
   return (
     <div>
+      
       <G_WRAPPER>
         {isAuthenticated ?
           <Greeting name={user.given_name}/>
@@ -358,7 +357,8 @@ const Dashboard = () => {
         }}/>
       </CLOCK_WRAPPER>
       <TABLE_WRAPPER>
-        <PendingTimesheetTable Jtoken={JWTtoken} userID={userID}/>
+        <DashboardTable editable={editable} setEditable={setEditable} submittable={submittable} setTableSet={setTableSet} tableSet={tableSet}
+          token={JWTtoken} currentTimeEntries={currentTimeEntries} reloadContent={reloadContent} timesheet={currentTimesheet}/>
         <TOGGLE_WRAPPER>
           <EditToggleButton onToggle={() => {
             if(submittable === true && buttonText === "Clock-In" && currentTimesheet !== undefined){
@@ -369,9 +369,6 @@ const Dashboard = () => {
       <FOOTER_WRAPPER>
         <Footer />
       </FOOTER_WRAPPER>
-    
-    
-
 
     </div>
   )
