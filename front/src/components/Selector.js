@@ -46,7 +46,7 @@ const DropdownButton = styled.div`
         fill: grey;
         gap: 10pt;
 
-        svg path {
+        svg path {S
             color: grey;
         }
     }

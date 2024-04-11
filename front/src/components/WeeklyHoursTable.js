@@ -1,11 +1,12 @@
-import React from 'react'
+/* WeeklyHoursTable.js */
+import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
-import { useState } from 'react'
 import EditIcon from '../assets/icons/Edit.svg';
 import unEditIcon from '../assets/icons/unEdit.svg';
 import Timesheet from '../assets/icons/Timesheet.svg';
 import ModalWrapper from './ModalWrapper';
 import SetStatusButton from './SetStatusButton';
+import SubmitButton from './SubmitButton';
 
 
 const WRAPPER = styled.div`
@@ -89,6 +90,11 @@ const EDIT = styled.div`
 `;
 
 const OVERLAY_CONTAINER = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 20px;
+    justify-content: flex-end;
     width: 100%;
     position: relative;
     margin: auto;
@@ -96,67 +102,278 @@ const OVERLAY_CONTAINER = styled.div`
     overflow: hidden;
 `;
 
-const fetchedTimesheetData = [
-    {
-      id: 1,
-      dateCreated: new Date('2023-03-01'),
-      dateSubmitted: new Date('2023-03-05'),
-      status: 'Approved',
-    },
-    {
-      id: 2,
-      dateCreated: new Date('2023-03-08'),
-      dateSubmitted: new Date('2023-03-12'),
-      status: 'Denied',
-    },
-    {
-      id: 3,
-      dateCreated: new Date('2023-03-15'),
-      dateSubmitted: new Date('2023-03-20'),
-      status: 'Waiting',
-    },
-    // more entries...
-];
-  
+const SUBMIT_BUTTON = styled.div`
+    padding: 0;
+    background-color: transparent;
+    display: flex;
+    justify-content: end;
 
-const WeeklyHoursTable = () => {
-    const [timesheetData, setTimesheetData] = useState(fetchedTimesheetData);
+    button {
+        font-size: 18px;
+        border-radius: 9px;
+
+        img {
+            width: 20px;
+        }
+    
+    }
+
+`;
+
+const WeeklyHoursTable = ({token, consultant_id, sort, approval_status}) => {
+    const [timesheetsData, setTimesheetsData] = useState([{}]);
+    const [selectedTimesheet, setSelectedTimesheet] = useState(null);
     const [overlayVisible, setOverlayVisible] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedEntries, setEditedEntries] = useState([]);
 
-    const toggleOverlay = () => {
-        setOverlayVisible(!overlayVisible);
+
+    const toggleEditMode = () => {
+        setIsEditing(!isEditing);
+    };
+    
+    const handleEntryEdit = (index, updatedEntry) => {
+        const newEntries = editedEntries.map((entry, i) => i === index ? updatedEntry : entry);
+        setEditedEntries(newEntries);
     };
 
+    const handleSubmitEdits = async () => {
+        let updatesSuccessful = true;
+        for (const entry of editedEntries) {
+    
+            try {
+                const response = await fetch(`/api/timesheet/entry/${entry.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        start_time: entry.start_time,
+                        end_time: entry.end_time,
+                        entry_type: entry.entry_type,
+                    }),
+                });
+    
+                if (!response.ok) {
+                    console.error('Failed to update time entry with ID:', entry.id, 'Response status:', response.status);
+                    const errorData = await response.text(); // Assuming the error details are in text format
+                    console.error('Error details:', errorData);
+                    updatesSuccessful = false;
+                } else {
+                    console.log('Time entry updated successfully:', entry.id);
+                }
+            } catch (error) {
+                console.error('Error occurred while updating time entry with ID:', entry.id, 'Error:', error);
+            }
+
+        }
+
+        if (updatesSuccessful) {
+            await fetchTimesheets();
+        }
+    
+        setOverlayVisible(false);
+        setIsEditing(false);
+
+    };
+    
+    
+
+    const handleTimesheetSelect = (timesheet) => {
+        setSelectedTimesheet(timesheet);
+        setOverlayVisible(true);
+        setEditedEntries(timesheet.entriesData.map(entry => ({...entry})));
+    };
+
+
+    const fetchTimesheetData = async (timesheet_id) => {
+        try {
+            const response = await fetch(`api/timesheet/${timesheet_id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch timesheet data');
+            }
+
+            let data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching timesheet data:', error);
+        }
+    };
+
+    const getSortedTimesheets = () => {
+        let timesheetsArray = Object.values(timesheetsData);
+
+        if (sort === 'Oldest') {
+            return timesheetsArray.sort((a,b) => new Date(a.submitted) - new Date(b.submitted));
+        }
+        else if (sort === 'Latest') {
+            return timesheetsArray.sort((a,b) => new Date(b.submitted) - new Date(a.submitted));
+        }
+        return timesheetsArray;
+    }
+
+    const fetchTimeEntryData = async (time_entry_id) => {
+        try {
+            const response = await fetch(`api/timesheet/entry/${time_entry_id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch time entry data');
+            }
+
+            let data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching time entry data:', error);
+        }
+    };
+
+    const fetchTimesheets = async () => {
+        try {
+            let url = `api/consultant/${consultant_id}/timesheets`;
+            if (approval_status && approval_status !== 'Select Status') {
+                url += `?approval_status=${approval_status}`;
+            }
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch timesheet data');
+            }
+
+            let data = await response.json();
+            const timesheetDataPromises = data.timesheets.map(async timesheet_id => {
+                const timesheet = await fetchTimesheetData(timesheet_id);
+                const entryDataPromises = timesheet.entries.map(entry_id =>
+                    fetchTimeEntryData(entry_id)
+                );
+                const entriesData = await Promise.all(entryDataPromises);
+                return { ...timesheet, entriesData };
+            });
+
+            const resolvedTimesheetDataArray = await Promise.all(timesheetDataPromises);
+            setTimesheetsData(resolvedTimesheetDataArray);
+        } catch (error) {
+            console.error('Error fetching timesheets:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchTimesheets();
+
+    }, [consultant_id, token, approval_status]);
+
+    const Entry = ({ entry, index, isEditable, onEdit }) => {
+        const handleChange = (e, field) => {
+            if ((field === 'start_time' || field === 'end_time') && (entry.entry_type === 'SICK' || entry.entry_type === 'HOLIDAY')) {
+                return;
+            }
+    
+            let newValue = e.target.value;
+            if (field === 'start_time' || field === 'end_time') {
+                const datePart = entry[field].split("T")[0];
+                newValue = `${datePart}T${newValue.length === 5 ? `${newValue}:00` : newValue}`;
+            }
+    
+            const newEntry = { ...entry, [field]: newValue };
+            onEdit(index, newEntry);
+        };
+        const calculateHours = () => {
+            if (entry.entry_type === 'SICK' || entry.entry_type === 'HOLIDAY') {
+                return 0;
+            }
+            const startTime = new Date(entry.start_time);
+            const endTime = new Date(entry.end_time);
+            const duration = (endTime - startTime) / 3600000; 
+            return duration.toFixed(1);
+        };
+
+        return (
+            <TR>
+                <TD>{["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(entry.start_time).getDay()]}</TD>
+                <TD>
+                    {isEditable ? (
+                        <select value={entry.entry_type} onChange={(e) => handleChange(e, 'entry_type')}>
+                            <option value="WORK">Work</option>
+                            <option value="SICK">Sick</option>
+                            <option value="HOLIDAY">Holiday</option>
+                        </select>
+                    ) : (entry.entry_type)}
+                </TD>
+                <TD>
+                    {isEditable ? (
+                        <input type="time" value={entry.start_time.split("T")[1]} onChange={(e) => handleChange(e, 'start_time')}  />
+                    ) : (
+                        new Date(entry.start_time).toLocaleTimeString()
+                    )}
+                </TD>
+                <TD>
+                    {isEditable ? (
+                        <input type="time" value={entry.end_time.split("T")[1]} onChange={(e) => handleChange(e, 'end_time')} />
+                    ) : (
+                        new Date(entry.end_time).toLocaleTimeString()
+                    )}
+                </TD>
+                <TD>{calculateHours()}</TD>
+            </TR>
+        );
+    };
+    
     return (
         <WRAPPER>
             <OVERLAY_CONTAINER>
                 <TIMESHEET>
                     <HEADERS>
-                            <TR>
-                                <TH>Timesheet</TH>
-                                <TH>Date Created</TH>
-                                <TH>Date Submitted</TH>
-                                <TH>Status</TH>
-                                <TH>Edit</TH>
-                            </TR>
+                        <TR>
+                            <TH>Timesheet</TH>
+                            <TH>Date Created</TH>
+                            <TH>Date Submitted</TH>
+                            <TH>Status</TH>
+                            <TH>Edit</TH>
+                        </TR>
                     </HEADERS>
                     <TBODY>
-                    {timesheetData.map((timesheet) => {
-                        const isRowEditable = timesheet.status === 'Denied';
-                        return (                        
+                    {getSortedTimesheets().map((timesheet) => {
+                        const RowIsEditable = timesheet.approval_status === 'DENIED';
+                        return (
                             <TR key={timesheet.id}>
                                 <TD>
-                                    <button onClick={toggleOverlay} style={{background: 'none', border: 'none', cursor: 'pointer'}}>
-                                    <img src={Timesheet} alt="Timesheet Icon"/>
+                                    <button onClick={() => handleTimesheetSelect(timesheet)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                        <img src={Timesheet} alt="Timesheet Icon"/>
                                     </button>
                                 </TD>
-                                <TD>{timesheet.dateCreated.toLocaleDateString()}</TD>
-                                <TD>{timesheet.dateSubmitted.toLocaleDateString()}</TD>
-                                <TD><SetStatusButton status={timesheet.status} isActive={false} /></TD>
+                                <TD>{new Date(timesheet.created).toLocaleDateString()}</TD>
+                                <TD>{timesheet.submitted ? new Date(timesheet.submitted).toLocaleDateString() : 'N/A'}</TD>
+                                <TD><SetStatusButton status={timesheet.approval_status} isActive={false} /></TD>
                                 <TD>
-                                    <EDIT editable={isRowEditable}>
-                                        {isRowEditable ? <img src={EditIcon} alt="Edit" /> : <img src={unEditIcon} alt="Not editable" />}
-                                    </EDIT>
+                                    {RowIsEditable ? (
+                                        <EDIT editable={RowIsEditable} onClick={() => {toggleEditMode(); handleTimesheetSelect(timesheet)}}>
+                                            <img src={EditIcon} alt="Edit" />
+                                        </EDIT>
+                                        ) : (
+                                        <EDIT editable={false}>
+                                            <img src={unEditIcon} alt="Not Editable" />
+                                        </EDIT>
+                                        )
+                                        }
                                 </TD>
                             </TR>
                         );
@@ -164,32 +381,34 @@ const WeeklyHoursTable = () => {
                     </TBODY>
                 </TIMESHEET> 
             </OVERLAY_CONTAINER>
-            <ModalWrapper isVisible={overlayVisible} toggleOverlay={toggleOverlay} title={'Weekly Timesheet'}>
+            <ModalWrapper isVisible={overlayVisible} toggleOverlay={() => {setOverlayVisible(false)}} title={'Weekly Timesheet'}>
                 <OVERLAY_CONTAINER>
+                    {selectedTimesheet && (
                         <TIMESHEET>
                             <HEADERS>
-                                    <TR>
-                                        <TH></TH>
-                                        <TH>Date</TH>
-                                        <TH>Status</TH>
-                                        <TH>Clock-In</TH>
-                                        <TH>Clock-Out</TH>
-                                        <TH>Hours</TH>
-                                    </TR>
+                                <TR>
+                                    <TH>Day</TH>
+                                    <TH>Status</TH>
+                                    <TH>Clock-In</TH>
+                                    <TH>Clock-Out</TH>
+                                    <TH>Hours</TH>
+                                </TR>
                             </HEADERS>
                             <TBODY>
-                                <TR>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                    <TD></TD>
-                                </TR>
+                                {editedEntries.map((entry, index) => (
+                                    <Entry key={entry.id} entry={entry} index={index} isEditable={isEditing && selectedTimesheet.approval_status === 'DENIED'} onEdit={handleEntryEdit} />
+                                ))}
                             </TBODY>
-                        </TIMESHEET> 
-                    </OVERLAY_CONTAINER>
+                        </TIMESHEET>
+                    )}
+                    {isEditing && selectedTimesheet.approval_status === 'DENIED' && (
+                        <SUBMIT_BUTTON>
+                            <SubmitButton onClick={handleSubmitEdits} width={"145px"} height={"50px"} clickable={true}/>
+                        </SUBMIT_BUTTON>
+                    )}
+                </OVERLAY_CONTAINER>
             </ModalWrapper>
+
         </WRAPPER>
     )
 }
