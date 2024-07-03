@@ -31,8 +31,6 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT}
       AUTHZERO_DOMAIN: ${AUTHZERO_DOMAIN}
       AUTHZERO_AUDIENCE: ${AUTHZERO_AUDIENCE}
-    ports:
-      - "${BACK_PORT}:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -42,8 +40,6 @@ services:
       BACKEND_URL: http://back:${BACK_PORT}
       REACT_APP_AUTHZERO_DOMAIN: ${AUTHZERO_DOMAIN}
       REACT_APP_AUTHZERO_CLIENT_ID: ${AUTHZERO_CLIENT_ID}
-    ports:
-      - "${FRONT_PORT}:3000"
     depends_on:
       - back
   nginx:
