@@ -9,8 +9,6 @@ services:
       POSTGRES_APP_USER: ${POSTGRES_APP_USER}
       POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD}
       POSTGRES_APP_DB: ${POSTGRES_APP_DB}
-    ports:
-      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./database/schema:/docker-entrypoint-initdb.d/schema
