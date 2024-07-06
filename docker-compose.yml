@@ -1,4 +1,5 @@
-version: '3.8'
+# port: 80
+
 services:
   db:
     image: postgres:latest
@@ -9,12 +10,10 @@ services:
       POSTGRES_APP_USER: ${POSTGRES_APP_USER}
       POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD}
       POSTGRES_APP_DB: ${POSTGRES_APP_DB}
-    ports:
-      - "${POSTGRES_PORT}:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
       - ./database/schema:/docker-entrypoint-initdb.d/schema
       - ./database/scripts/setup.sh:/docker-entrypoint-initdb.d/setup.sh
+      - postgresql-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DEFAULT_DB}"]
       interval: 10s
@@ -31,19 +30,15 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT}
       AUTHZERO_DOMAIN: ${AUTHZERO_DOMAIN}
       AUTHZERO_AUDIENCE: ${AUTHZERO_AUDIENCE}
-    ports:
-      - "${BACK_PORT}:8080"
     depends_on:
       db:
         condition: service_healthy
   front:
     image: timesphere-frontend:latest
     environment:
-      BACKEND_URL: http://back:${BACK_PORT}
+      BACKEND_URL: ${BACKEND_URL-/api}
       REACT_APP_AUTHZERO_DOMAIN: ${AUTHZERO_DOMAIN}
       REACT_APP_AUTHZERO_CLIENT_ID: ${AUTHZERO_CLIENT_ID}
-    ports:
-      - "${FRONT_PORT}:3000"
     depends_on:
       - back
   nginx:
@@ -51,10 +46,8 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       #- ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - "${NGINX_PORT}:80"
     depends_on:
       - back
       - front
-volumes:
-  postgres-data:
+    environment:
+      - SERVICE_FQDN_NGINX_80
