@@ -52,11 +52,11 @@ To test with auth (generate a JWT):
 - In the OAuth2/OIDC tab, scroll down and add scopes, select Oauth2/OIDC login and login as such
 - Retrieve JWT, click authorize in the fastAPI docs, and paste the JWT in the token field
 
-`docker-compose up`
+`docker-compose -f docker-compose.local.yaml up`
 
-This starts the container stack, and by default you should be able to access the app at [localhost](http://localhost). Press Ctrl+C to stop the containers, and `docker-compose down` to remove them.
+This starts the container stack, and by default you should be able to access the app at [localhost](http://localhost). Press Ctrl+C to stop the containers, and `docker-compose -f docker-compose.local.yaml down` to remove them.
 
-If you need to reset the database, run `docker-compose down` and then `docker volume rm timesphere_postgres-data`. This will remove the database and all data.
+If you need to reset the database, run `docker-compose -f docker-compose.local.yaml down` and then `docker volume rm timesphere_postgres-data`. This will remove the database and all data.
 
 ## General
 
