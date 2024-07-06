@@ -36,7 +36,7 @@ services:
   front:
     image: timesphere-frontend:latest
     environment:
-      BACKEND_URL: http://back:${BACK_PORT}
+      BACKEND_URL: ${BACKEND_URL-/api}
       REACT_APP_AUTHZERO_DOMAIN: ${AUTHZERO_DOMAIN}
       REACT_APP_AUTHZERO_CLIENT_ID: ${AUTHZERO_CLIENT_ID}
     depends_on:
