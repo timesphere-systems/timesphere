@@ -49,4 +49,4 @@ services:
       - back
       - front
     environment:
-      SERVICE_FQDN_NGINX_80
+      - SERVICE_FQDN_NGINX_80
