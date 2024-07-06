@@ -1,4 +1,5 @@
-version: '3.8'
+# port: 80
+
 services:
   db:
     image: postgres:latest
@@ -47,3 +48,5 @@ services:
     depends_on:
       - back
       - front
+    environment:
+      SERVICE_FQDN_NGINX_80
